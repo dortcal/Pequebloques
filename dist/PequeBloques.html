@@ -503,6 +503,12 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 /* paleta: deslizar en vertical con el dedo hace scroll; arrastrar hacia el lado coge el bloque */
 #pal .block{touch-action:pan-y}
 
+/* escenario ampliado a toda la ventana (iPhone y navegadores sin pantalla completa de elementos) */
+#stagebox.pfull{position:fixed;inset:0;z-index:9000;border-radius:0;box-shadow:none;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:max(6px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+#stagebox.pfull #stagebar{width:100%;margin-bottom:6px;flex:none}
+#stagebox.pfull #stagewrap{width:min(100%,calc((100dvh - 66px) * 1.333));max-height:none;margin:0 auto;border:0;border-radius:6px}
+#stagebox.pfull #btnGrid,#stagebox.pfull #btnStageSize{display:none}
+
 </style>
 </head>
 <body>
@@ -2218,6 +2224,24 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     ['Boing', () => synth(0.5, (t, p) => Math.sin(2 * Math.PI * (200 + 400 * Math.abs(Math.sin(p * 9)) * (1 - p)) * t) * env(t, 0.25) * 0.7)],
     ['Campana', () => synth(1.1, (t) => (Math.sin(2 * Math.PI * 880 * t) + 0.5 * Math.sin(2 * Math.PI * 1760 * t) + 0.25 * Math.sin(2 * Math.PI * 2640 * t)) * env(t, 0.3) * 0.4)],
     ['Tambor', () => synth(0.4, (t) => (Math.sin(2 * Math.PI * (120 - t * 160) * t) * 0.9 + (Math.random() * 2 - 1) * 0.3 * Math.exp(-t / 0.02)) * env(t, 0.1))],
+    ['Música ritmo', () => {
+      /* melodía original, 120 pulsos por minuto, 16 pulsos (8 s) en bucle: do mayor pentatónica + bajo y percusión */
+      const N = { C3: 130.81, D3: 146.83, F2: 87.31, G2: 98, A2: 110, C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880, C6: 1046.5 };
+      const mel = ['E5 E5 G5 E5 A5 G5 E5 -', 'D5 D5 E5 D5 G5 E5 D5 -', 'E5 E5 G5 E5 A5 G5 E5 C6', 'D5 E5 G5 E5 D5 C5 C5 -'].join(' ').split(' ');
+      const bass = ['C3', 'G2', 'A2', 'F2'];
+      return synth(8, (t) => {
+        const e = Math.floor(t / 0.25), te = t - e * 0.25, bar = Math.floor(e / 8), b = Math.floor(t / 0.5), tb = t - b * 0.5;
+        let v = 0;
+        const m = mel[e];
+        if (m !== '-') { const f = N[m]; v += (Math.sin(2 * Math.PI * f * te) + 0.35 * Math.sin(4 * Math.PI * f * te) + 0.15 * Math.sin(6 * Math.PI * f * te)) * Math.min(1, te / 0.006) * Math.exp(-te / 0.16) * 0.22; }
+        const bf = N[bass[bar]] * (e % 2 ? 2 : 1);
+        v += (Math.sin(2 * Math.PI * bf * te) + 0.25 * Math.sin(4 * Math.PI * bf * te)) * Math.min(1, te / 0.004) * Math.exp(-te / 0.2) * (e % 2 ? 0.1 : 0.2);
+        v += Math.sin(2 * Math.PI * (50 + 110 * Math.exp(-tb / 0.03)) * tb) * Math.exp(-tb / 0.12) * 0.55;           // bombo en cada pulso
+        if (b % 2 === 1) v += (Math.random() * 2 - 1) * Math.exp(-tb / 0.05) * 0.2;                                 // caja en los pulsos pares
+        if (e % 2 === 1) v += (Math.random() * 2 - 1) * Math.exp(-te / 0.012) * 0.07;                              // charles a contratiempo
+        return v * 0.9;
+      });
+    }],
     ['Ta-chán', () => {
       const notes = [[523.25, 0, 0.14], [659.25, 0.14, 0.14], [783.99, 0.28, 0.14], [1046.5, 0.42, 0.6]];
       return synth(1.1, (t) => { let v = 0; notes.forEach((n) => { if (t >= n[1]) { const tt = t - n[1]; v += Math.sin(2 * Math.PI * n[0] * tt) * env(tt, n[2] + 0.1) * 0.35; } }); return v; });
@@ -5025,7 +5049,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     /* ---------- juego de ritmo con el robot ---------- */
     {
       id: 'ritmo-robot', title: 'El baile del robot: ¡sigue el ritmo!', kind: 'juego', nopad: true, stars: 2, bg: 'ritmo', sprite: 'flecha',
-      desc: 'Las flechas bajan al compás del tambor. Pulsa la misma flecha (o tócala) cuando llegue al círculo y haz bailar al robot.',
+      desc: 'Las flechas bajan al compás de una música pegadiza. Pulsa la misma flecha (o tócala) cuando llegue al círculo y haz bailar al robot.',
       challenge: 'Mira de qué color es la flecha que baja y pulsa esa flecha del teclado, del mando en pantalla o toca la propia flecha cuando esté en el círculo.',
       openSprite: 'Robot',
       build() {
@@ -5052,17 +5076,20 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
           };
         };
         return make({
-          backdrops: ['ritmo'], messages: ['flecha', 'baila', 'fin'],
+          backdrops: ['ritmo'], messages: ['flecha', 'baila', 'musica', 'pulso', 'fin'],
           vars: [['Puntos', 0, true], ['carril', 0, false], ['activo1', 0, false], ['activo2', 0, false], ['activo3', 0, false], ['activo4', 0, false]],
           stage: [[F(), S.backdrop('ritmo')]],
           sprites: [
             {
-              id: 'robot', x: -185, y: -20, size: 80, sounds: ['Pop', 'Tambor', 'Ta-chán'], scripts: [
+              id: 'robot', x: -185, y: -20, size: 80, sounds: ['Pop', 'Ta-chán', 'Música ritmo'], scripts: [
                 [F(), S.voice('TENOR'), S.show(), S.xy(-185, -20), S.costume('Robot 1'), S.setv('Puntos', 0), S.setv('carril', 0), S.wait(0.5)]
                   .concat(S.talk('¡Hola! Soy el robot bailarín. Cuando una flecha llegue al círculo, pulsa esa misma flecha. ¡A bailar!'), [
                     S.wait(0.5),
-                    S.rep(36, [S.setv('carril', S.rnd(1, 4)), S.send('flecha'), S.sound('Tambor'), S.wait(0.5)]),
+                    S.send('musica'),
+                    S.rep(36, [S.setv('carril', S.rnd(1, 4)), S.send('flecha'), S.send('pulso'), S.wait(0.5)]),
                     S.wait(2.5), S.send('fin')]),
+                [S.recv('musica'), S.forever([S.soundWait('Música ritmo')])],
+                [S.recv('pulso'), S.rep(1, [S.goto(-185, -26), S.wait(0.08), S.goto(-185, -20)])],
                 [S.recv('baila'), S.next(), S.rep(2, [S.goto(-185, -4), S.wait(0.08), S.goto(-185, -20), S.wait(0.08)])],
                 [S.recv('fin'), S.voice('TENOR'), S.costume('Robot 2'), S.sound('Ta-chán'),
                   S.ifelse(S.gt(S.v('Puntos'), 23),
@@ -6259,10 +6286,16 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     $('#btnGrid').addEventListener('click', (e) => { RT.grid = !RT.grid; e.currentTarget.setAttribute('aria-pressed', String(RT.grid)); RT.dirty = true; });
     $('#btnStageSize').addEventListener('click', (e) => { const r = $('#right'); r.classList.toggle('small'); e.currentTarget.setAttribute('aria-pressed', String(r.classList.contains('small'))); });
     $('#btnFull').addEventListener('click', () => {
-      const el = $('#stagebox');
-      if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen().catch(() => ui.toast('No se puede poner en pantalla completa.'));
-      else ui.toast('Este navegador no permite pantalla completa.');
+      const el = $('#stagebox'), btn = $('#btnFull');
+      const setP = (on) => { el.classList.toggle('pfull', on); btn.setAttribute('aria-pressed', String(on)); RT.dirty = true; };
+      if (el.classList.contains('pfull')) { setP(false); return; }
+      if (document.fullscreenElement === el) { document.exitFullscreen(); return; }
+      /* iPhone no permite pantalla completa de un elemento: se amplía el escenario a toda la ventana */
+      const req = el.requestFullscreen ? () => el.requestFullscreen({ navigationUI: 'hide' })
+        : el.webkitRequestFullscreen ? () => { el.webkitRequestFullscreen(); return Promise.resolve(); } : null;
+      if (req) req().catch(() => setP(true)); else setP(true);
     });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#stagebox').classList.contains('pfull')) { $('#stagebox').classList.remove('pfull'); $('#btnFull').setAttribute('aria-pressed', 'false'); RT.dirty = true; } });
     $('#btnUndo').addEventListener('click', ED.undo);
     $('#btnRedo').addEventListener('click', ED.redo);
     $('#btnClean').addEventListener('click', ED.cleanUp);

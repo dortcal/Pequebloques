@@ -1026,10 +1026,16 @@
     $('#btnGrid').addEventListener('click', (e) => { RT.grid = !RT.grid; e.currentTarget.setAttribute('aria-pressed', String(RT.grid)); RT.dirty = true; });
     $('#btnStageSize').addEventListener('click', (e) => { const r = $('#right'); r.classList.toggle('small'); e.currentTarget.setAttribute('aria-pressed', String(r.classList.contains('small'))); });
     $('#btnFull').addEventListener('click', () => {
-      const el = $('#stagebox');
-      if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen().catch(() => ui.toast('No se puede poner en pantalla completa.'));
-      else ui.toast('Este navegador no permite pantalla completa.');
+      const el = $('#stagebox'), btn = $('#btnFull');
+      const setP = (on) => { el.classList.toggle('pfull', on); btn.setAttribute('aria-pressed', String(on)); RT.dirty = true; };
+      if (el.classList.contains('pfull')) { setP(false); return; }
+      if (document.fullscreenElement === el) { document.exitFullscreen(); return; }
+      /* iPhone no permite pantalla completa de un elemento: se amplía el escenario a toda la ventana */
+      const req = el.requestFullscreen ? () => el.requestFullscreen({ navigationUI: 'hide' })
+        : el.webkitRequestFullscreen ? () => { el.webkitRequestFullscreen(); return Promise.resolve(); } : null;
+      if (req) req().catch(() => setP(true)); else setP(true);
     });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#stagebox').classList.contains('pfull')) { $('#stagebox').classList.remove('pfull'); $('#btnFull').setAttribute('aria-pressed', 'false'); RT.dirty = true; } });
     $('#btnUndo').addEventListener('click', ED.undo);
     $('#btnRedo').addEventListener('click', ED.redo);
     $('#btnClean').addEventListener('click', ED.cleanUp);

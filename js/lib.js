@@ -624,6 +624,24 @@
     ['Boing', () => synth(0.5, (t, p) => Math.sin(2 * Math.PI * (200 + 400 * Math.abs(Math.sin(p * 9)) * (1 - p)) * t) * env(t, 0.25) * 0.7)],
     ['Campana', () => synth(1.1, (t) => (Math.sin(2 * Math.PI * 880 * t) + 0.5 * Math.sin(2 * Math.PI * 1760 * t) + 0.25 * Math.sin(2 * Math.PI * 2640 * t)) * env(t, 0.3) * 0.4)],
     ['Tambor', () => synth(0.4, (t) => (Math.sin(2 * Math.PI * (120 - t * 160) * t) * 0.9 + (Math.random() * 2 - 1) * 0.3 * Math.exp(-t / 0.02)) * env(t, 0.1))],
+    ['Música ritmo', () => {
+      /* melodía original, 120 pulsos por minuto, 16 pulsos (8 s) en bucle: do mayor pentatónica + bajo y percusión */
+      const N = { C3: 130.81, D3: 146.83, F2: 87.31, G2: 98, A2: 110, C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880, C6: 1046.5 };
+      const mel = ['E5 E5 G5 E5 A5 G5 E5 -', 'D5 D5 E5 D5 G5 E5 D5 -', 'E5 E5 G5 E5 A5 G5 E5 C6', 'D5 E5 G5 E5 D5 C5 C5 -'].join(' ').split(' ');
+      const bass = ['C3', 'G2', 'A2', 'F2'];
+      return synth(8, (t) => {
+        const e = Math.floor(t / 0.25), te = t - e * 0.25, bar = Math.floor(e / 8), b = Math.floor(t / 0.5), tb = t - b * 0.5;
+        let v = 0;
+        const m = mel[e];
+        if (m !== '-') { const f = N[m]; v += (Math.sin(2 * Math.PI * f * te) + 0.35 * Math.sin(4 * Math.PI * f * te) + 0.15 * Math.sin(6 * Math.PI * f * te)) * Math.min(1, te / 0.006) * Math.exp(-te / 0.16) * 0.22; }
+        const bf = N[bass[bar]] * (e % 2 ? 2 : 1);
+        v += (Math.sin(2 * Math.PI * bf * te) + 0.25 * Math.sin(4 * Math.PI * bf * te)) * Math.min(1, te / 0.004) * Math.exp(-te / 0.2) * (e % 2 ? 0.1 : 0.2);
+        v += Math.sin(2 * Math.PI * (50 + 110 * Math.exp(-tb / 0.03)) * tb) * Math.exp(-tb / 0.12) * 0.55;           // bombo en cada pulso
+        if (b % 2 === 1) v += (Math.random() * 2 - 1) * Math.exp(-tb / 0.05) * 0.2;                                 // caja en los pulsos pares
+        if (e % 2 === 1) v += (Math.random() * 2 - 1) * Math.exp(-te / 0.012) * 0.07;                              // charles a contratiempo
+        return v * 0.9;
+      });
+    }],
     ['Ta-chán', () => {
       const notes = [[523.25, 0, 0.14], [659.25, 0.14, 0.14], [783.99, 0.28, 0.14], [1046.5, 0.42, 0.6]];
       return synth(1.1, (t) => { let v = 0; notes.forEach((n) => { if (t >= n[1]) { const tt = t - n[1]; v += Math.sin(2 * Math.PI * n[0] * tt) * env(tt, n[2] + 0.1) * 0.35; } }); return v; });

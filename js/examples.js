@@ -1113,7 +1113,7 @@
     /* ---------- juego de ritmo con el robot ---------- */
     {
       id: 'ritmo-robot', title: 'El baile del robot: ¡sigue el ritmo!', kind: 'juego', nopad: true, stars: 2, bg: 'ritmo', sprite: 'flecha',
-      desc: 'Las flechas bajan al compás del tambor. Pulsa la misma flecha (o tócala) cuando llegue al círculo y haz bailar al robot.',
+      desc: 'Las flechas bajan al compás de una música pegadiza. Pulsa la misma flecha (o tócala) cuando llegue al círculo y haz bailar al robot.',
       challenge: 'Mira de qué color es la flecha que baja y pulsa esa flecha del teclado, del mando en pantalla o toca la propia flecha cuando esté en el círculo.',
       openSprite: 'Robot',
       build() {
@@ -1140,17 +1140,20 @@
           };
         };
         return make({
-          backdrops: ['ritmo'], messages: ['flecha', 'baila', 'fin'],
+          backdrops: ['ritmo'], messages: ['flecha', 'baila', 'musica', 'pulso', 'fin'],
           vars: [['Puntos', 0, true], ['carril', 0, false], ['activo1', 0, false], ['activo2', 0, false], ['activo3', 0, false], ['activo4', 0, false]],
           stage: [[F(), S.backdrop('ritmo')]],
           sprites: [
             {
-              id: 'robot', x: -185, y: -20, size: 80, sounds: ['Pop', 'Tambor', 'Ta-chán'], scripts: [
+              id: 'robot', x: -185, y: -20, size: 80, sounds: ['Pop', 'Ta-chán', 'Música ritmo'], scripts: [
                 [F(), S.voice('TENOR'), S.show(), S.xy(-185, -20), S.costume('Robot 1'), S.setv('Puntos', 0), S.setv('carril', 0), S.wait(0.5)]
                   .concat(S.talk('¡Hola! Soy el robot bailarín. Cuando una flecha llegue al círculo, pulsa esa misma flecha. ¡A bailar!'), [
                     S.wait(0.5),
-                    S.rep(36, [S.setv('carril', S.rnd(1, 4)), S.send('flecha'), S.sound('Tambor'), S.wait(0.5)]),
+                    S.send('musica'),
+                    S.rep(36, [S.setv('carril', S.rnd(1, 4)), S.send('flecha'), S.send('pulso'), S.wait(0.5)]),
                     S.wait(2.5), S.send('fin')]),
+                [S.recv('musica'), S.forever([S.soundWait('Música ritmo')])],
+                [S.recv('pulso'), S.rep(1, [S.goto(-185, -26), S.wait(0.08), S.goto(-185, -20)])],
                 [S.recv('baila'), S.next(), S.rep(2, [S.goto(-185, -4), S.wait(0.08), S.goto(-185, -20), S.wait(0.08)])],
                 [S.recv('fin'), S.voice('TENOR'), S.costume('Robot 2'), S.sound('Ta-chán'),
                   S.ifelse(S.gt(S.v('Puntos'), 23),

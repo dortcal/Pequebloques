@@ -829,7 +829,7 @@
         const sp = PQ.spriteLibById(x.sprite) || PQ.SPRITE_LIB[0];
         const bgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(bd.svg);
         const spUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(sp.costumes[0][1]);
-        c.innerHTML = '<div class="pic" style="background-image:url(\'' + bgUrl + '\')"><span class="kind ' + x.kind + '">' + (x.voices ? 'Cuento con voces' : ({ tut: 'Tutorial', cuento: 'Cuento', reto: 'Reto' })[x.kind]) + '</span><img alt="" src="' + spUrl + '" style="position:absolute;right:12px;bottom:-6px;width:86px"></div><div class="body"><h3></h3><p></p><div class="stars" aria-label="Dificultad"></div></div>';
+        c.innerHTML = '<div class="pic" style="background-image:url(\'' + bgUrl + '\')"><span class="kind ' + x.kind + '">' + (x.voices ? 'Cuento con voces' : ({ tut: 'Tutorial', cuento: 'Cuento', reto: 'Reto', juego: 'Juego' })[x.kind]) + '</span><img alt="" src="' + spUrl + '" style="position:absolute;right:12px;bottom:-6px;width:86px"></div><div class="body"><h3></h3><p></p><div class="stars" aria-label="Dificultad"></div></div>';
         $('h3', c).textContent = x.title; $('p', c).textContent = x.desc;
         $('.stars', c).textContent = '★'.repeat(x.stars) + '☆'.repeat(3 - x.stars);
         c.addEventListener('click', () => {
@@ -839,7 +839,7 @@
         grid.appendChild(c);
       });
     }
-    [['all', 'Todo'], ['tut', 'Tutoriales'], ['cuento', 'Cuentos'], ['reto', 'Retos']].forEach((f) => {
+    [['all', 'Todo'], ['tut', 'Tutoriales'], ['cuento', 'Cuentos'], ['reto', 'Retos'], ['juego', 'Juegos']].forEach((f) => {
       const b = h('button', filter === f[0] ? 'on' : '', f[1]); b.type = 'button';
       b.addEventListener('click', () => { filter = f[0]; $$('button', tabs).forEach((x) => x.classList.toggle('on', x === b)); draw(); });
       tabs.appendChild(b);

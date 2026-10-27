@@ -74,6 +74,12 @@
     times: (a, b) => R('operator_multiply', { NUM1: a, NUM2: b }),
     join: (a, b) => R('operator_join', { STRING1: a, STRING2: b }),
     xpos: () => mk('motion_xposition'),
+    keyp: (k) => mk('sensing_keypressed', { KEY_OPTION: k }),
+    /* movimiento continuo mientras se mantiene la tecla (también con el mando en pantalla) */
+    walk: (speed, gate) => {
+      const one = (k, dx, dy) => { const m = S.iff(gate ? S.and(gate(), S.keyp(k)) : S.keyp(k), [dx ? S.dx(dx) : S.dy(dy)]); return m; };
+      return [one('left arrow', -speed, 0), one('right arrow', speed, 0), one('up arrow', 0, speed), one('down arrow', 0, -speed)];
+    },
     touch: (n) => mk('sensing_touchingobject', { TOUCHINGOBJECTMENU: n })
   };
   const script = (x, y, blocks) => ({ x, y, blocks });
@@ -499,7 +505,6 @@
       build() {
         const L = S.talk;
         const paso = (n) => S.eq(S.v('paso'), n);
-        const move = (k, dx, dy) => [S.key(k), S.iff(S.gt(S.v('paso'), 6), [dx ? S.dx(dx) : S.dy(dy)])];
         return make({
           backdrops: ['aula', 'noche', 'espacio', 'luna'],
           messages: ['m1', 'm2', 'm3', 'noche', 'despegue', 'espacio', 'luna', 'l2', 'l3', 'final', 'f2'],
@@ -542,7 +547,7 @@
                 [S.recv('despegue'), S.hide()],
                 [S.recv('luna'), S.wait(2.2), S.xy(-75, -105), S.show()],
                 [S.recv('l3'), S.voice('TENOR')].concat(L('Bip. Con las flechas puedes moverme. ¡Llévame hasta la bandera!'), [S.setv('paso', 7)]),
-                move('left arrow', -15, 0), move('right arrow', 15, 0), move('up arrow', 0, 15), move('down arrow', 0, -15),
+                [F(), S.forever(S.walk(4, () => S.gt(S.v('paso'), 6)))],
                 [S.recv('final'), S.voice('TENOR'), S.sound('Ta-chán'), S.setv('paso', 8)].concat(L('¡Bip, bip! ¡Misión cumplida!'), [S.send('f2')])
               ]
             },
@@ -590,7 +595,6 @@
       build() {
         const L = S.talk;
         const libre = () => S.eq(S.v('ocupado'), 0);
-        const mover = (k, dx, dy) => [S.key(k), S.iff(S.gt(S.v('paso'), 0), [dx ? S.dx(dx) : S.dy(dy)])];
         /* cada alimento: espera a que Lucía lo toque, suma, avisa al cartel y desaparece */
         const comida = (id, name, x, y, msg, sano) => ({
           id, name, x, y, size: 55, sounds: ['Pop'], scripts: [
@@ -611,7 +615,7 @@
               id: 'lucia', name: 'Lucía', x: 0, y: -145, size: 70, sounds: ['Pop'], scripts: [
                 [F(), S.voice('ALTO'), S.show(), S.size(70), S.xy(0, -145), S.setv('paso', 0), S.setv('Comida sana', 0), S.setv('ocupado', 0)]
                   .concat(L('¡Hola! Estoy en el mercado. Muéveme con las flechas del teclado y toca la comida para conocerla.'), [S.setv('paso', 1)]),
-                mover('left arrow', -18, 0), mover('right arrow', 18, 0), mover('up arrow', 0, 18), mover('down arrow', 0, -18),
+                [F(), S.forever(S.walk(4, () => S.gt(S.v('paso'), 0)))],
                 [S.recv('entrar'), S.xy(-170, -110), S.size(55)],
                 [S.recv('fin'), S.voice('ALTO'), S.sound('Ta-chán'), S.rep(3, [S.dy(16), S.wait(0.1), S.dy(-16), S.wait(0.1)])]
                   .concat(L('¡Lo he conseguido! Ahora sé cómo comer sano.'), [S.stopAll()]),
@@ -662,7 +666,7 @@
     },
     /* ---------- juegos de movimiento ---------- */
     {
-      id: 'penalti', title: '¡Penalti!', kind: 'reto', stars: 2, bg: 'estadio', sprite: 'balon',
+      id: 'penalti', title: '¡Penalti!', kind: 'juego', stars: 2, bg: 'estadio', sprite: 'balon',
       desc: 'Elige hacia dónde chutar con las flechas y pulsa espacio. ¡El portero se tira al azar!',
       challenge: 'Mueve la mira con las flechas izquierda y derecha y pulsa la tecla espacio para chutar. Tienes 5 tiros. ¿Cuántos goles marcas?',
       openSprite: 'Portero',
@@ -716,7 +720,7 @@
       }
     },
     {
-      id: 'atrapa-platanos', title: 'Atrapa los plátanos', kind: 'reto', stars: 1, bg: 'campo', sprite: 'lagarto',
+      id: 'atrapa-platanos', title: 'Atrapa los plátanos', kind: 'juego', stars: 1, bg: 'campo', sprite: 'lagarto',
       desc: 'Mueve al lagarto con las flechas y come 10 plátanos. Cada vez aparece uno en un sitio nuevo.',
       challenge: 'Mueve al lagarto con las flechas y atrapa los plátanos. ¿Puedes cambiar el número de plátanos para ganar o la velocidad?',
       openSprite: 'Lagarto',
@@ -728,10 +732,7 @@
             {
               id: 'lagarto', x: -140, y: -110, size: 75, sounds: ['Pop'], scripts: [
                 [F(), S.xy(-140, -110), S.voice('SQUEAK'), S.setv('Plátanos', 0)],
-                [S.key('right arrow'), S.dx(20), S.dir(90), S.next()],
-                [S.key('left arrow'), S.dx(-20), S.next()],
-                [S.key('up arrow'), S.dy(20), S.next()],
-                [S.key('down arrow'), S.dy(-20), S.next()],
+                [F(), S.forever(S.walk(5))],
                 [S.recv('fin'), S.voice('SQUEAK'), S.sound('Pop')].concat(S.talk('¡Qué rico! Me he comido diez plátanos.'), [S.stopAll()]),
                 [S.click(), S.voice('SQUEAK')].concat(S.talk('Muéveme con las flechas.'))
               ]

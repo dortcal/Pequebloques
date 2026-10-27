@@ -53,3 +53,7 @@ Regenerar la versión de un solo archivo: `python3 tools/build-single.py`.
 ## Créditos y nota legal
 
 Diseño y dirección: **David OZC**. Scratch es un proyecto de la Fundación Scratch y del Lifelong Kindergarten Group del MIT Media Lab; PequeBloques es una herramienta independiente, sin relación ni respaldo de ellos, que solo usa el formato de archivo .sb3. Los personajes, fondos y sonidos son originales de esta herramienta.
+
+## Licencia
+
+© 2026 David OZC. Uso gratuito en centros educativos. Licencia **CC BY-NC-ND 4.0** (Reconocimiento – NoComercial – SinObraDerivada): se puede compartir sin cambios y citando al autor; no se permite modificarla, venderla ni presentarla como propia sin su permiso. Ver `LICENSE`.

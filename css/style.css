@@ -385,3 +385,10 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
 .block.sel{outline:4px solid #FFD91A;outline-offset:2px;border-radius:10px}
 
 .story .kind.juego{color:#c2185b}
+
+/* aviso de derechos */
+#legal{flex:none;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:3px 12px 5px;font-size:11.5px;line-height:1.25;color:var(--ink);background:rgba(255,255,255,.65);border-top:1px solid rgba(58,44,79,.15);text-align:center}
+#legal .ccl{display:inline-flex}
+#legal .ccb{height:20px;width:auto;display:block}
+#legal .lg{opacity:.85;max-width:62em}
+@media (max-height:620px),(max-width:700px){#legal .lg{display:none}}

@@ -1,4 +1,4 @@
-/* PequeBloques — diseñado por David OZC
+/* PequeBloques — diseñado por David OZC · © 2026 David OZC · CC BY-NC-ND 4.0 (https://creativecommons.org/licenses/by-nc-nd/4.0/deed.es)
  * app.js: aplicación (pestañas, personajes, disfraces, sonidos, pintar, grabar, abrir/guardar .sb3)
  */
 (function (g) {
@@ -865,6 +865,7 @@
     const b = h('div', 'about');
     b.innerHTML =
       '<div class="by">Diseñado por <b>David OZC</b> · para el alumnado de Infantil y primer ciclo de Primaria.</div>' +
+      '<h3>Licencia y derechos</h3><p>© 2026 David OZC. Uso <b>gratuito</b> en centros educativos. Obra bajo licencia <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.es" target="_blank" rel="noopener">Creative Commons BY-NC-ND 4.0</a>: puedes compartirla <b>sin cambios</b>, citando al autor y sin fines comerciales. No se permite modificarla, venderla ni presentarla como propia sin el permiso del autor. Los proyectos que crea el alumnado son suyos.</p>' +
       '<h3>Cómo se usa</h3><ul>' +
       '<li><b>Arrastra</b> los bloques de la izquierda hasta la zona de programar y <b>engánchalos</b> unos debajo de otros.</li>' +
       '<li><b>Toca un bloque</b> (o un programa entero) para ver qué hace.</li>' +

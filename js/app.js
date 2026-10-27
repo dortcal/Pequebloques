@@ -952,6 +952,22 @@
       ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((ev) => el.addEventListener(ev, up));
     });
   }
+  /* tabletas y móviles: al primer toque, pantalla completa y bloqueo en horizontal (si el navegador lo permite) */
+  function wireFullscreenOnTouch() {
+    if (!(g.matchMedia && g.matchMedia('(pointer: coarse)').matches)) return;
+    const de = document.documentElement;
+    if (!de.requestFullscreen || !document.fullscreenEnabled) return;
+    let done = false;
+    const go = (e) => {
+      if (done) return;
+      if (e.target && e.target.closest && e.target.closest('#btnFull')) { done = true; return; }
+      done = true;
+      de.requestFullscreen({ navigationUI: 'hide' }).then(() => {
+        if (g.screen && g.screen.orientation && g.screen.orientation.lock) g.screen.orientation.lock('landscape').catch(() => {});
+      }).catch(() => {});
+    };
+    document.addEventListener('pointerup', go, { capture: true });
+  }
   function wireKeys() {
     window.addEventListener('keydown', (e) => {
       if (modalStack.length) return;
@@ -968,7 +984,7 @@
     });
     window.addEventListener('keyup', (e) => { const k = keyName(e); if (k) RT.keys[k] = false; });
     window.addEventListener('blur', () => { RT.keys = {}; });
-    wirePad();
+    wirePad(); wireFullscreenOnTouch();
   }
 
   /* ============================ conexión de botones ============================ */

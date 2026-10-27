@@ -392,3 +392,48 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
 #legal .ccb{height:20px;width:auto;display:block}
 #legal .lg{opacity:.85;max-width:62em}
 @media (max-height:620px),(max-width:700px){#legal .lg{display:none}}
+
+/* ---------- tabletas y móviles: pantalla completa y siempre en horizontal ---------- */
+body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+@supports (height:100dvh){html,body{height:100dvh}}
+#rotate{display:none}
+@media (orientation:portrait) and (pointer:coarse){
+  #rotate{display:flex;position:fixed;inset:0;z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;color:#fff;background:linear-gradient(160deg,#6A4DE0,#B45CE0);font-family:var(--font)}
+  #rotate svg{width:min(52vw,240px);height:auto}
+  #rotate p{margin:0;font-size:clamp(22px,6vw,34px);font-weight:900}
+  #rotate small{font-size:clamp(14px,3.6vw,20px);opacity:.9}
+  #rotate .ph{transform-origin:60px 54px;animation:rotph 2.6s ease-in-out infinite}
+  #rotate .ar{animation:rotar 2.6s ease-in-out infinite}
+}
+@keyframes rotph{0%,15%{transform:rotate(0)}55%,100%{transform:rotate(-90deg)}}
+@keyframes rotar{0%,15%{opacity:0}35%,85%{opacity:1}100%{opacity:0}}
+@media (orientation:landscape) and (max-height:600px){
+  body{overflow:hidden;height:100%;min-height:0}
+  @supports (height:100dvh){body{height:100dvh}}
+  #menubar{padding:3px 8px;gap:6px;min-height:0}
+  #menubar .bname{display:none}
+  #menubar .logo{width:30px;height:30px}
+  .mbtn{min-height:34px;padding:0 9px}
+  .titlebox input{min-height:34px;padding:4px 10px;font-size:14px;width:min(150px,20vw)}
+  .credit{padding:2px 8px}.credit b{font-size:13px}
+  #app{display:grid;grid-template-columns:minmax(0,1fr) clamp(210px,34vw,420px);flex:1;min-height:0;height:auto;padding:4px;gap:6px}
+  #right{order:0;overflow:auto;gap:4px}
+  #left{min-height:0}
+  #stagewrap{max-height:none;width:min(100%,calc((100dvh - 150px) * 1.333))}
+  #cats{width:54px}
+  #pal{min-width:150px}
+  #legal{padding:1px 8px;font-size:10.5px}
+  #legal .lg{display:none}
+  #legal .ccb{height:16px}
+  .mbtn.save span{display:none}
+  .titlebox input{width:min(120px,16vw)}
+  #btnZoomOut,#btnZoomIn{display:none}
+  #guide{left:6px;bottom:6px;width:calc(100% - 12px);padding:6px 8px;border-width:3px;gap:8px;border-radius:16px}
+  #guide .mascot{width:40px;height:40px}
+  #guide p{font-size:13.5px;margin:0 0 4px;line-height:1.25}
+  #guide .gs{font-size:10px}
+  #guide .gb .btn,#guide .btn.big{min-height:32px;font-size:13px;padding:4px 10px}
+  #banner{padding:5px 8px;max-height:92px;overflow:auto;gap:6px}
+  #banner,#banner p,#banner span{font-size:12.5px;line-height:1.25}
+}
+@media (orientation:landscape) and (max-height:600px) and (max-width:760px){.credit{display:none}}

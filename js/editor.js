@@ -222,6 +222,7 @@
       if (sp.lvl > S.level) return false;
       if (cat === 'data' && !(S.project.vars || []).length) return false;
       if (S.target && S.target.isStage && (sp.sprite || sp.spriteOnly)) return false;
+      if (S.target && !S.target.isStage && sp.stageOnly) return false;
       return true;
     });
   }
@@ -331,6 +332,7 @@
     const wsin = $('#wsin');
     if (!wsin || !S.target) return;
     wsin.innerHTML = '';
+    setTimeout(markSel, 0);
     S.target.scripts.forEach((s) => {
       const d = h('div', 'script');
       d.style.left = s.x + 'px'; d.style.top = s.y + 'px';
@@ -463,6 +465,50 @@
   const kindOf = (b) => B[b.op].kind;
   const isEnd = (b) => { const sp = B[b.op]; return sp.kind === 'cap' || sp.noNext; };
 
+  /* ---------- selección y borrado con el teclado ---------- */
+  let selB = null;
+  function markSel() {
+    document.querySelectorAll('#wsin .block').forEach((el) => el.classList.toggle('sel', !!selB && el._b === selB));
+  }
+  function findLoc(b) {
+    let found = null;
+    const inBlock = (blk) => {
+      if (found) return;
+      Object.keys(blk.in || {}).forEach((n) => { const r = blk.in[n]; if (found || !r) return; if (r === b) found = { type: 'in', owner: blk, name: n }; else inBlock(r); });
+      if (!found && blk.cond) { if (blk.cond === b) found = { type: 'cond', owner: blk }; else inBlock(blk.cond); }
+    };
+    const inArr = (arr, script) => {
+      for (let i = 0; i < arr.length && !found; i++) {
+        const blk = arr[i];
+        if (blk === b) { found = { type: 'stack', arr, idx: i, script }; return; }
+        inBlock(blk); if (found) return;
+        if (blk.sub) inArr(blk.sub, script);
+        if (!found && blk.sub2) inArr(blk.sub2, script);
+      }
+    };
+    S.target.scripts.forEach((s) => { if (!found) inArr(s.blocks, s); });
+    return found;
+  }
+  function deleteSelected(whole) {
+    if (!selB) return false;
+    const loc = findLoc(selB);
+    if (!loc) { selB = null; return false; }
+    ED.pushUndo();
+    if (loc.type === 'stack') {
+      if (whole) S.target.scripts.splice(S.target.scripts.indexOf(loc.script), 1);
+      else {
+        loc.arr.splice(loc.idx, 1);
+        if (loc.script.blocks.length === 0) S.target.scripts.splice(S.target.scripts.indexOf(loc.script), 1);
+      }
+    } else if (loc.type === 'in') slotSet(loc.owner, loc.name, null);
+    else loc.owner.cond = null;
+    selB = null;
+    ED.renderWorkspace(); ED.changed();
+    if (PQ.ui && PQ.ui.toast) PQ.ui.toast(whole ? 'Conjunto de bloques borrado.' : 'Bloque borrado.');
+    return true;
+  }
+  ED.deleteSelected = deleteSelected;
+
   function onDown(e, fromPal) {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     if (e.target.closest('.fld,.sel,input,select,option,.keypad')) return;
@@ -504,8 +550,10 @@
         }
         flash(be);
       } else if (isR) {
+        selB = be._b; markSel();
         ED.showValue(be, be._b);
       } else if (be._loc && be._loc.script && PQ.RT) {
+        selB = be._b; markSel();
         PQ.RT.runScript(S.target, be._loc.script);
         ED.markRunning();
       }
@@ -671,7 +719,7 @@
 
   ED.init = function () {
     const ws = $('#ws'), pal = $('#pal');
-    ws.addEventListener('pointerdown', (e) => onDown(e, false));
+    ws.addEventListener('pointerdown', (e) => { if (!e.target.closest('.block')) { selB = null; markSel(); } onDown(e, false); });
     pal.addEventListener('pointerdown', (e) => onDown(e, true));
     pal.addEventListener('scroll', updateCatActive);
     pal.addEventListener('contextmenu', (e) => {
@@ -686,6 +734,7 @@
         const items = [];
         if (loc.type === 'stack') {
           items.push(['Duplicar', () => dupArr(loc.arr, loc.idx, loc.script)]);
+          items.push(['Borrar todo el conjunto', () => { selB = loc.arr[loc.idx]; deleteSelected(true); }]);
           items.push(['Borrar este bloque', () => {
             ED.pushUndo(); loc.arr.splice(loc.idx, 1);
             if (loc.script && loc.script.blocks.length === 0) S.target.scripts.splice(S.target.scripts.indexOf(loc.script), 1);
@@ -702,6 +751,10 @@
       }
     });
     document.addEventListener('keydown', (e) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selB && !kp && !e.target.closest('input,textarea,select,[contenteditable]') && !document.querySelector('.modal-back,.modal')) {
+        if (deleteSelected(e.shiftKey || e.ctrlKey || e.metaKey)) e.preventDefault();
+        return;
+      }
       if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !e.target.closest('input,textarea,select')) { e.preventDefault(); ED.undo(); }
       if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z')) && !e.target.closest('input,textarea,select')) { e.preventDefault(); ED.redo(); }
     });

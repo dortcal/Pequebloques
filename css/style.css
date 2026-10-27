@@ -382,3 +382,4 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
 #pad .pk.on{background:#5b3bd0;color:#fff;transform:translateY(2px);box-shadow:none}
 #pad .up{grid-area:up}#pad .left{grid-area:left}#pad .down{grid-area:down}#pad .right{grid-area:right}
 #pad .space{width:clamp(84px,22vw,130px);height:clamp(36px,8.5vw,52px);letter-spacing:.06em}
+.block.sel{outline:4px solid #FFD91A;outline-offset:2px;border-radius:10px}

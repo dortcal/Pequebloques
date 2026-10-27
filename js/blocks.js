@@ -45,6 +45,7 @@
   def('event_whenflagclicked', 'events', 'hat', 'flag', 'al hacer clic en %FLAG', {}, 1);
   def('event_whenkeypressed', 'events', 'hat', 'key', 'al presionar %KEY_OPTION',
     { KEY_OPTION: { k: 'field', t: 'menu', menu: 'key', d: 'space' } }, 1);
+  def('event_whenstageclicked', 'events', 'hat', 'tap', 'al hacer clic en el escenario', {}, 1, { stageOnly: true });
   def('event_whenthisspriteclicked', 'events', 'hat', 'tap', 'al hacer clic en este objeto', {}, 1, { spriteOnly: true });
   def('event_whenbroadcastreceived', 'events', 'hat', 'mail', 'al recibir %BROADCAST_OPTION',
     { BROADCAST_OPTION: { k: 'bfield', t: 'menu', menu: 'msg', d: '' } }, 1);

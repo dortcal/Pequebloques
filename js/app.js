@@ -889,7 +889,7 @@
   }
   function wireStage() {
     const cv = $('#stage');
-    let dr = null;
+    let dr = null, sc = false;
     cv.addEventListener('pointermove', (e) => {
       const p = stagePos(e); RT.mouse.x = p.x; RT.mouse.y = p.y;
       if (dr) {
@@ -904,11 +904,13 @@
         cv.setPointerCapture(e.pointerId);
         dr = { sprite: s, ox: p.x - s.x, oy: p.y - s.y, sx: e.clientX, sy: e.clientY, moved: false };
         if (S.target !== s) PQ.selectTarget(s);
-      } else if (!S.target.isStage) { /* clic en el fondo: nada */ }
+      } else sc = true; /* clic en el fondo */
     });
     const up = () => {
       RT.mouse.down = false;
       if (dr) { if (!dr.moved) RT.spriteClicked(dr.sprite); else markDirty(); dr = null; }
+      else if (sc) RT.stageClicked();
+      sc = false;
     };
     cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
     cv.addEventListener('contextmenu', (e) => e.preventDefault());

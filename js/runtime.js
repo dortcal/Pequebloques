@@ -415,6 +415,9 @@
   RT.keyEvent = function (name) {
     RT.hatScripts((h) => h.op === 'event_whenkeypressed' && (h.f.KEY_OPTION === name || h.f.KEY_OPTION === 'any')).forEach((x) => RT.start(x[0], x[1], 1));
   };
+  RT.stageClicked = function () {
+    RT.hatScripts((h, t) => h.op === 'event_whenstageclicked' && t === RT.project.stage).forEach((x) => RT.start(x[0], x[1], 1));
+  };
   RT.spriteClicked = function (sprite) {
     RT.hatScripts((h, t) => h.op === 'event_whenthisspriteclicked' && t === sprite).forEach((x) => RT.start(x[0], x[1], 1));
   };

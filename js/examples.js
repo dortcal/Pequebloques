@@ -313,9 +313,9 @@
           sprites: [
             {
               id: 'lucia', name: 'Lucía', x: -185, y: 30, size: 75, scripts: [
-                [F(), S.voice('ALTO'), S.xy(-185, 30)].concat(L('Hoy hay una carrera en el campo.'), [S.send('lagarto')]),
-                [S.recv('fin'), S.voice('ALTO')].concat(L('Y así terminó la carrera. ¡Qué divertido!')),
-                [S.click(), S.voice('ALTO')].concat(L('Hoy hay una carrera en el campo.'))
+                [F(), S.voice('KITTEN'), S.xy(-185, 30)].concat(L('Hoy hay una carrera en el campo.'), [S.send('lagarto')]),
+                [S.recv('fin'), S.voice('KITTEN')].concat(L('Y así terminó la carrera. ¡Qué divertido!')),
+                [S.click(), S.voice('KITTEN')].concat(L('Hoy hay una carrera en el campo.'))
               ]
             },
             {
@@ -357,10 +357,10 @@
             },
             {
               id: 'yeray', x: -60, y: -70, scripts: [
-                [F(), S.voice('ALTO'), S.xy(-60, -70)],
-                [S.recv('yeray'), S.voice('ALTO')].concat(L('¡Qué grande es! ¿Será simpática?'), [S.send('ballena')]),
-                [S.recv('final'), S.voice('ALTO'), S.rep(3, [S.dy(12), S.wait(0.1), S.dy(-12), S.wait(0.1)])].concat(L('¡Qué día más bonito!')),
-                [S.click(), S.voice('ALTO')].concat(L('¡Qué grande es! ¿Será simpática?'))
+                [F(), S.voice('SQUEAK'), S.xy(-60, -70)],
+                [S.recv('yeray'), S.voice('SQUEAK')].concat(L('¡Qué grande es! ¿Será simpática?'), [S.send('ballena')]),
+                [S.recv('final'), S.voice('SQUEAK'), S.rep(3, [S.dy(12), S.wait(0.1), S.dy(-12), S.wait(0.1)])].concat(L('¡Qué día más bonito!')),
+                [S.click(), S.voice('SQUEAK')].concat(L('¡Qué grande es! ¿Será simpática?'))
               ]
             },
             {
@@ -433,31 +433,31 @@
           sprites: [
             {
               id: 'lucia', name: 'Lucía', x: -120, y: -60, sounds: ['Pop'], scripts: [
-                [F(), S.voice('ALTO'), S.show(), S.xy(-120, -60)].concat(L('¡Yeray, mira! He encontrado un mapa del tesoro.'), [S.send('m1')]),
-                [S.recv('m2'), S.voice('ALTO')].concat(L('¡Vamos a buscarlo! Toca a Yeray para empezar el viaje.'), [S.setv('paso', 1)]),
-                [S.recv('bosque'), S.voice('ALTO'), S.setv('paso', 3), S.xy(-150, -70), S.wait(0.6)].concat(L('¡Qué bosque tan verde! Esto es la laurisilva.'), L('Un perro y una mariposa quieren guiarnos. ¡Toca al que prefieras!')),
-                [S.recv('teide'), S.voice('ALTO'), S.xy(-150, -80), S.wait(0.6)].concat(L('¡Cuánto hemos subido! Este es el Teide, el pico más alto de España.'), [S.send('t2')]),
-                [S.recv('t3'), S.voice('ALTO')].concat(L('Pulsa la tecla espacio para entrar en la cueva.'), [S.setv('paso', 5)]),
+                [F(), S.voice('KITTEN'), S.show(), S.xy(-120, -60)].concat(L('¡Yeray, mira! He encontrado un mapa del tesoro.'), [S.send('m1')]),
+                [S.recv('m2'), S.voice('KITTEN')].concat(L('¡Vamos a buscarlo! Toca a Yeray para empezar el viaje.'), [S.setv('paso', 1)]),
+                [S.recv('bosque'), S.voice('KITTEN'), S.setv('paso', 3), S.xy(-150, -70), S.wait(0.6)].concat(L('¡Qué bosque tan verde! Esto es la laurisilva.'), L('Un perro y una mariposa quieren guiarnos. ¡Toca al que prefieras!')),
+                [S.recv('teide'), S.voice('KITTEN'), S.xy(-150, -80), S.wait(0.6)].concat(L('¡Cuánto hemos subido! Este es el Teide, el pico más alto de España.'), [S.send('t2')]),
+                [S.recv('t3'), S.voice('KITTEN')].concat(L('Pulsa la tecla espacio para entrar en la cueva.'), [S.setv('paso', 5)]),
                 [S.key('space'), S.iff(paso(5), [S.setv('paso', 6), S.send('cueva')])],
-                [S.recv('cueva'), S.voice('ALTO'), S.xy(-150, -90), S.wait(0.8)].concat(L('¡Qué oscuro! Menos mal que los cristales brillan.'), [S.send('c2')]),
-                [S.recv('abrir'), S.voice('ALTO')].concat(L('¡Hay monedas de oro y una nota!'), [S.send('a2')]),
-                [S.recv('final'), S.voice('ALTO'), S.xy(-130, -100), S.wait(0.6)].concat(L('¡Qué aventura tan bonita! Gracias por venir con nosotros.'), [S.send('adios')]),
-                [S.click(), S.voice('ALTO')].concat(L('¡Yeray, mira! He encontrado un mapa del tesoro.'))
+                [S.recv('cueva'), S.voice('KITTEN'), S.xy(-150, -90), S.wait(0.8)].concat(L('¡Qué oscuro! Menos mal que los cristales brillan.'), [S.send('c2')]),
+                [S.recv('abrir'), S.voice('KITTEN')].concat(L('¡Hay monedas de oro y una nota!'), [S.send('a2')]),
+                [S.recv('final'), S.voice('KITTEN'), S.xy(-130, -100), S.wait(0.6)].concat(L('¡Qué aventura tan bonita! Gracias por venir con nosotros.'), [S.send('adios')]),
+                [S.click(), S.voice('KITTEN')].concat(L('¡Yeray, mira! He encontrado un mapa del tesoro.'))
               ]
             },
             {
               id: 'yeray', x: 80, y: -60, scripts: [
-                [F(), S.voice('TENOR'), S.show(), S.xy(80, -60)],
-                [S.recv('m1'), S.voice('TENOR')].concat(L('¡Un tesoro! Dice el mapa que está dentro del volcán.'), [S.send('m2')]),
+                [F(), S.voice('SQUEAK'), S.show(), S.xy(80, -60)],
+                [S.recv('m1'), S.voice('SQUEAK')].concat(L('¡Un tesoro! Dice el mapa que está dentro del volcán.'), [S.send('m2')]),
                 [S.click(), S.ifelse(paso(1), [S.setv('paso', 2), S.send('bosque')], [S.sound('Pop'), S.dy(15), S.wait(0.15), S.dy(-15)])],
                 [S.recv('bosque'), S.xy(-60, -70)],
                 [S.recv('teide'), S.xy(-70, -80)],
-                [S.recv('t2'), S.voice('TENOR')].concat(L('¡Brrr, qué frío hace aquí arriba! Mira, ¡hay una cueva!'), [S.send('t3')]),
+                [S.recv('t2'), S.voice('SQUEAK')].concat(L('¡Brrr, qué frío hace aquí arriba! Mira, ¡hay una cueva!'), [S.send('t3')]),
                 [S.recv('cueva'), S.xy(-70, -90)],
-                [S.recv('c2'), S.voice('TENOR')].concat(L('¡Un cofre! Está cerrado. ¡Toca el cofre para abrirlo!'), [S.setv('paso', 7)]),
-                [S.recv('a2'), S.voice('TENOR')].concat(L('La nota dice: el mayor tesoro es viajar con los amigos.'), [S.send('final')]),
+                [S.recv('c2'), S.voice('SQUEAK')].concat(L('¡Un cofre! Está cerrado. ¡Toca el cofre para abrirlo!'), [S.setv('paso', 7)]),
+                [S.recv('a2'), S.voice('SQUEAK')].concat(L('La nota dice: el mayor tesoro es viajar con los amigos.'), [S.send('final')]),
                 [S.recv('final'), S.xy(-30, -100)],
-                [S.recv('adios'), S.voice('TENOR'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Fin del cuento! ¡Hasta la próxima aventura!'))
+                [S.recv('adios'), S.voice('SQUEAK'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Fin del cuento! ¡Hasta la próxima aventura!'))
               ]
             },
             {
@@ -529,13 +529,13 @@
             },
             {
               id: 'yeray', x: -40, y: -80, scripts: [
-                [F(), S.voice('ALTO'), S.show(), S.xy(-40, -80)],
-                [S.recv('m1'), S.voice('ALTO')].concat(L('¡Yo quiero ir a la Luna! ¿Y tú, robot?'), [S.send('m2')]),
+                [F(), S.voice('SQUEAK'), S.show(), S.xy(-40, -80)],
+                [S.recv('m1'), S.voice('SQUEAK')].concat(L('¡Yo quiero ir a la Luna! ¿Y tú, robot?'), [S.send('m2')]),
                 [S.recv('noche'), S.xy(-110, -100)],
                 [S.recv('despegue'), S.hide()],
                 [S.recv('luna'), S.wait(2.2), S.xy(65, -115), S.show()],
-                [S.recv('l2'), S.voice('ALTO'), S.rep(3, [S.dy(30), S.wait(0.15), S.dy(-30), S.wait(0.15)])].concat(L('¡Casi no peso nada! Mira cómo salto.'), [S.send('l3')]),
-                [S.click(), S.voice('ALTO')].concat(L('¡Yo quiero ir a la Luna!'))
+                [S.recv('l2'), S.voice('SQUEAK'), S.rep(3, [S.dy(30), S.wait(0.15), S.dy(-30), S.wait(0.15)])].concat(L('¡Casi no peso nada! Mira cómo salto.'), [S.send('l3')]),
+                [S.click(), S.voice('SQUEAK')].concat(L('¡Yo quiero ir a la Luna!'))
               ]
             },
             {
@@ -590,17 +590,17 @@
     {
       id: 'mercado-sano', title: 'El mercado de la comida sana', kind: 'cuento', voices: true, stars: 3, bg: 'mercado', sprite: 'manzana',
       desc: 'Mueve a Lucía con las flechas, toca la comida para conocerla y entra en la manzana mágica para descubrir un mensaje escondido.',
-      challenge: 'Usa las flechas del teclado (o el mando de la pantalla) para mover a Lucía. Toca los alimentos, lee los carteles y busca la manzana mágica.',
+      challenge: 'Usa las flechas del teclado (o el mando de la pantalla) para mover a Lucía. Toca los 5 alimentos y escucha los carteles. Cuando los hayas explorado todos, aparecerá la manzana mágica.',
       openSprite: 'Lucía',
       build() {
         const L = S.talk;
         const libre = () => S.eq(S.v('ocupado'), 0);
         /* cada alimento: espera a que Lucía lo toque, suma, avisa al cartel y desaparece */
         const comida = (id, name, x, y, msg, sano) => ({
-          id, name, x, y, size: 55, sounds: ['Pop'], scripts: [
-            [F(), S.show(), S.xy(x, y), S.size(55),
+          id, name, x, y, size: 45, sounds: ['Pop'], scripts: [
+            [F(), S.show(), S.xy(x, y), S.size(45),
               S.waitUntil(S.and(S.touch('Lucía'), libre())), S.sound('Pop')]
-              .concat(sano ? [S.chv('Comida sana', 1)] : [], [S.send(msg), S.hide()]),
+              .concat(sano ? [S.chv('Comida sana', 1)] : [], [S.chv('Explorado', 1), S.send(msg), S.hide()]),
             [S.recv('entrar'), S.hide()]
           ]
         });
@@ -608,28 +608,28 @@
         return make({
           backdrops: ['mercado', 'dentro-manzana'],
           messages: ['manzana', 'zanahoria', 'platano', 'agua', 'caramelo', 'magica', 'entrar', 'tesoro', 'mensaje', 'fin'],
-          vars: [['Comida sana', 0, true], ['paso', 0, false], ['ocupado', 0, false]],
+          vars: [['Comida sana', 0, true], ['Explorado', 0, false], ['paso', 0, false], ['ocupado', 0, false]],
           stage: [[F(), S.backdrop('mercado')], [S.recv('entrar'), S.backdrop('dentro-manzana')]],
           sprites: [
             {
-              id: 'lucia', name: 'Lucía', x: 0, y: -145, size: 70, sounds: ['Pop'], scripts: [
-                [F(), S.voice('ALTO'), S.show(), S.size(70), S.xy(0, -145), S.setv('paso', 0), S.setv('Comida sana', 0), S.setv('ocupado', 0)]
-                  .concat(L('¡Hola! Estoy en el mercado. Muéveme con las flechas del teclado y toca la comida para conocerla.'), [S.setv('paso', 1)]),
+              id: 'lucia', name: 'Lucía', x: -110, y: -92, size: 55, sounds: ['Pop'], scripts: [
+                [F(), S.voice('KITTEN'), S.show(), S.size(55), S.xy(-110, -92), S.setv('paso', 0), S.setv('Comida sana', 0), S.setv('Explorado', 0), S.setv('ocupado', 0)]
+                  .concat(L('¡Hola! Estoy en el mercado. Muéveme con las flechas y toca toda la comida para conocerla. ¡Cuando las conozcas todas, ocurrirá algo mágico!'), [S.setv('paso', 1)]),
                 [F(), S.forever(S.walk(4, () => S.gt(S.v('paso'), 0)))],
                 [S.recv('entrar'), S.xy(-170, -110), S.size(55)],
-                [S.recv('fin'), S.voice('ALTO'), S.sound('Ta-chán'), S.rep(3, [S.dy(16), S.wait(0.1), S.dy(-16), S.wait(0.1)])]
+                [S.recv('fin'), S.voice('KITTEN'), S.sound('Ta-chán'), S.rep(3, [S.dy(16), S.wait(0.1), S.dy(-16), S.wait(0.1)])]
                   .concat(L('¡Lo he conseguido! Ahora sé cómo comer sano.'), [S.stopAll()]),
-                [S.click(), S.voice('ALTO')].concat(L('Muéveme con las flechas.'))
+                [S.click(), S.voice('KITTEN')].concat(L('Muéveme con las flechas.'))
               ]
             },
-            comida('manzana', 'Manzana', -170, -60, 'manzana', true),
-            comida('zanahoria', 'Zanahoria', -80, -85, 'zanahoria', true),
-            comida('platano', 'Plátano', 60, -50, 'platano', true),
-            comida('agua', 'Vaso de agua', 130, -125, 'agua', true),
-            comida('caramelo', 'Caramelo', 190, -60, 'caramelo', false),
+            comida('manzana', 'Manzana', -150, -35, 'manzana', true),
+            comida('zanahoria', 'Zanahoria', -75, -150, 'zanahoria', true),
+            comida('platano', 'Plátano', 0, -35, 'platano', true),
+            comida('agua', 'Vaso de agua', 75, -150, 'agua', true),
+            comida('caramelo', 'Caramelo', 150, -35, 'caramelo', false),
             {
-              id: 'manzana', name: 'Manzana mágica', x: 150, y: 10, size: 170, hidden: true, sounds: ['Magia'], scripts: [
-                [F(), S.hide(), S.xy(150, 10), S.size(170), S.waitUntil(S.and(S.eq(S.v('Comida sana'), 4), libre())), S.show(), S.sound('Magia'), S.send('magica'),
+              id: 'manzana', name: 'Manzana mágica', x: 0, y: 40, size: 150, hidden: true, sounds: ['Magia'], scripts: [
+                [F(), S.hide(), S.xy(0, 40), S.size(150), S.waitUntil(S.and(S.eq(S.v('Explorado'), 5), libre())), S.show(), S.sound('Magia'), S.send('magica'),
                   S.waitUntil(S.and(S.touch('Lucía'), libre())), S.sound('Magia'), S.hide(), S.send('entrar')]
               ]
             },
@@ -681,10 +681,10 @@
           sprites: [
             {
               id: 'lucia', name: 'Lucía', x: -110, y: -125, size: 65, sounds: ['Pop'], scripts: [
-                [F(), S.voice('ALTO'), S.xy(-110, -125)].concat(L('¡Penalti! Mueve la mira con las flechas y pulsa espacio para chutar.'), [S.setv('listo', 1)]),
-                [S.recv('gol'), S.voice('ALTO'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Goooool!')),
-                [S.recv('parada'), S.voice('ALTO')].concat(L('¡Uy! ¡Qué parada!')),
-                [S.recv('fin'), S.voice('ALTO'), R('text2speech_speakAndWait', { WORDS: S.join('Se acabó. Has marcado ', S.join(S.v('Goles'), ' goles. ¡Pulsa la bandera para jugar otra vez!')) })]
+                [F(), S.voice('KITTEN'), S.xy(-110, -125)].concat(L('¡Penalti! Mueve la mira con las flechas y pulsa espacio para chutar.'), [S.setv('listo', 1)]),
+                [S.recv('gol'), S.voice('KITTEN'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Goooool!')),
+                [S.recv('parada'), S.voice('KITTEN')].concat(L('¡Uy! ¡Qué parada!')),
+                [S.recv('fin'), S.voice('KITTEN'), R('text2speech_speakAndWait', { WORDS: S.join('Se acabó. Has marcado ', S.join(S.v('Goles'), ' goles. ¡Pulsa la bandera para jugar otra vez!')) })]
               ]
             },
             {
@@ -775,11 +775,11 @@
             },
             {
               id: 'yeray', x: -50, y: -100, size: 85, scripts: [
-                [F(), S.voice('ALTO'), S.show(), S.xy(-50, -100)],
-                [S.recv('m1'), S.voice('ALTO')].concat(L('El plástico ensucia el mar y hace daño a los animales. ¡Vamos a limpiarlo!'), [S.send('m2')]),
+                [F(), S.voice('SQUEAK'), S.show(), S.xy(-50, -100)],
+                [S.recv('m1'), S.voice('SQUEAK')].concat(L('El plástico ensucia el mar y hace daño a los animales. ¡Vamos a limpiarlo!'), [S.send('m2')]),
                 [S.recv('mar'), S.xy(-100, 60)],
                 [S.recv('final'), S.xy(-30, -100)],
-                [S.recv('adios'), S.voice('ALTO'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Fin del cuento! ¡Hasta pronto!'))
+                [S.recv('adios'), S.voice('SQUEAK'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Fin del cuento! ¡Hasta pronto!'))
               ]
             },
             {
@@ -787,7 +787,7 @@
                 [F(), S.hide(), S.xy(90, -130)],
                 [S.recv('m2'), S.xy(90, -130), S.show()],
                 [S.click(), S.iff(paso(1), [S.chv('botellas', 1), S.sound('Pop'),
-                  S.ifelse(S.eq(S.v('botellas'), 3), [S.setv('paso', 2), S.hidev('botellas'), S.hide(), S.sound('Ta-chán'), S.wait(0.6), S.send('mar')], [S.goto(S.rnd(-170, 170), S.rnd(-160, -100))])])]
+                  S.ifelse(S.eq(S.v('botellas'), 3), [S.setv('paso', 2), S.hidev('botellas'), S.hide(), S.sound('Ta-chán'), S.wait(0.6), S.send('mar')], [S.goto(S.rnd(30, 170), S.rnd(-160, -100))])])]
               ]
             },
             {
@@ -838,19 +838,19 @@
           sprites: [
             {
               id: 'lucia', name: 'Lucía', x: -150, y: -20, size: 85, sounds: ['Pop'], scripts: [
-                [F(), S.voice('ALTO'), S.show(), S.xy(-150, -20), S.hidev('riego')].concat(L('¡Hola! Hoy vamos a plantar una zanahoria en el huerto.'), L('Toca la semilla para plantarla.'), [S.setv('paso', 1)]),
-                [S.recv('plantada'), S.voice('ALTO')].concat(L('¡Ya está plantada! Ahora necesita agua. Toca el vaso tres veces.'), [S.setv('paso', 3), S.setv('riego', 0), S.showv('riego')]),
-                [S.recv('sol'), S.voice('ALTO')].concat(L('¡Muy bien! Ahora necesita sol. Toca el sol.'), [S.setv('paso', 4)]),
-                [S.recv('lista'), S.voice('ALTO')].concat(L('¡Qué grande ha crecido! Toca la zanahoria para cogerla.'), [S.setv('paso', 5)]),
-                [S.recv('cosecha'), S.voice('ALTO'), S.xy(-60, -140), S.wait(0.6)].concat(L('Vamos a llevarla al mercado para compartirla.'), [S.send('fin')]),
-                [S.click(), S.voice('ALTO')].concat(L('Hoy vamos a plantar una zanahoria.'))
+                [F(), S.voice('KITTEN'), S.show(), S.xy(-150, -20), S.hidev('riego')].concat(L('¡Hola! Hoy vamos a plantar una zanahoria en el huerto.'), L('Toca la semilla para plantarla.'), [S.setv('paso', 1)]),
+                [S.recv('plantada'), S.voice('KITTEN')].concat(L('¡Ya está plantada! Ahora necesita agua. Toca el vaso tres veces.'), [S.setv('paso', 3), S.setv('riego', 0), S.showv('riego')]),
+                [S.recv('sol'), S.voice('KITTEN')].concat(L('¡Muy bien! Ahora necesita sol. Toca el sol.'), [S.setv('paso', 4)]),
+                [S.recv('lista'), S.voice('KITTEN')].concat(L('¡Qué grande ha crecido! Toca la zanahoria para cogerla.'), [S.setv('paso', 5)]),
+                [S.recv('cosecha'), S.voice('KITTEN'), S.xy(-60, -140), S.wait(0.6)].concat(L('Vamos a llevarla al mercado para compartirla.'), [S.send('fin')]),
+                [S.click(), S.voice('KITTEN')].concat(L('Hoy vamos a plantar una zanahoria.'))
               ]
             },
             {
               id: 'yeray', x: 150, y: -20, size: 85, hidden: true, scripts: [
-                [F(), S.hide(), S.voice('TENOR'), S.xy(150, -20)],
+                [F(), S.hide(), S.voice('SQUEAK'), S.xy(150, -20)],
                 [S.recv('cosecha'), S.xy(40, -140), S.show()],
-                [S.recv('fin'), S.voice('TENOR'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Qué rica! La zanahoria es buena para la vista. ¡Fin del cuento!'))
+                [S.recv('fin'), S.voice('SQUEAK'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Qué rica! La zanahoria es buena para la vista. ¡Fin del cuento!'))
               ]
             },
             {
@@ -908,10 +908,10 @@
           sprites: [
             {
               id: 'lucia', name: 'Lucía', x: 0, y: -135, size: 75, sounds: ['Pop'], scripts: [
-                [F(), S.xy(0, -135), S.voice('ALTO'), S.setv('Puntos', 0), S.setv('paso', 0), S.forever([
+                [F(), S.xy(0, -135), S.voice('KITTEN'), S.setv('Puntos', 0), S.setv('paso', 0), S.forever([
                   S.iff(S.and(S.keyp('left arrow'), S.gt(S.xpos(), -200)), [S.dx(-7)]),
                   S.iff(S.and(S.keyp('right arrow'), S.lt(S.xpos(), 200)), [S.dx(7)])])],
-                [S.recv('fin'), S.voice('ALTO'), S.sound('Ta-chán'), S.rep(3, [S.dy(16), S.wait(0.1), S.dy(-16), S.wait(0.1)])].concat(S.talk('¡Diez puntos! Las frutas y las verduras nos hacen crecer fuertes.'), [S.stopAll()])
+                [S.recv('fin'), S.voice('KITTEN'), S.sound('Ta-chán'), S.rep(3, [S.dy(16), S.wait(0.1), S.dy(-16), S.wait(0.1)])].concat(S.talk('¡Diez puntos! Las frutas y las verduras nos hacen crecer fuertes.'), [S.stopAll()])
               ]
             },
             { id: 'manzana', x: -120, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: [caer(-120, 0, true)] },

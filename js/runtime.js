@@ -154,7 +154,7 @@
   PQ.stopSounds = stopSounds;
 
   /* ---------- voz (síntesis del navegador) ---------- */
-  const VOICE_STYLE = { ALTO: [1.15, 1.0], TENOR: [0.7, 0.95], SQUEAK: [1.9, 1.12], GIANT: [0.35, 0.85], KITTEN: [1.6, 1.05] };
+  const VOICE_STYLE = { ALTO: [1.15, 1.0], TENOR: [0.7, 0.95], SQUEAK: [1.45, 1.1], GIANT: [0.35, 0.85], KITTEN: [1.65, 1.05] };
   const VOICE_KEYS = ['ALTO', 'TENOR', 'SQUEAK', 'GIANT', 'KITTEN'];
   function esVoices() {
     try { return (g.speechSynthesis.getVoices() || []).filter((v) => /^es/i.test(v.lang)); } catch (e) { return []; }

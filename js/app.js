@@ -853,6 +853,7 @@
     if (!ex) return;
     const p = ex.build();
     p.title = ex.title;
+    p.noPad = !!ex.nopad;
     loadProject(p, { banner: ex.challenge });
     PQ.say(ex.challenge);
     if (ex.openSprite) { const s = p.sprites.find((x) => x.name === ex.openSprite); if (s) { S.target = s; renderAll(); } }
@@ -866,6 +867,7 @@
     b.innerHTML =
       '<div class="by">Diseñado por <b>David OZC</b> · para el alumnado de Infantil y primer ciclo de Primaria.</div>' +
       '<h3>Licencia y derechos</h3><p>© 2026 David OZC. Uso <b>gratuito</b> en centros educativos. Obra bajo licencia <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.es" target="_blank" rel="noopener">Creative Commons BY-NC-ND 4.0</a>: puedes compartirla <b>sin cambios</b>, citando al autor y sin fines comerciales. No se permite modificarla, venderla ni presentarla como propia sin el permiso del autor. Los proyectos que crea el alumnado son suyos.</p>' +
+      '<h3>En iPhone y iPad</h3><p>Usa el dispositivo en <b>horizontal</b>. Para verlo a pantalla completa, pulsa <b>Compartir</b> y «<b>Añadir a pantalla de inicio</b>»; después ábrelo desde ese icono.</p>' +
       '<h3>Cómo se usa</h3><ul>' +
       '<li><b>Arrastra</b> los bloques de la izquierda hasta la zona de programar y <b>engánchalos</b> unos debajo de otros.</li>' +
       '<li><b>Toca un bloque</b> (o un programa entero) para ver qué hace.</li>' +
@@ -939,6 +941,7 @@
       };
       const walk = (arr) => (arr || []).forEach(one);
       PQ.allTargets(S.project).forEach((t) => (t.scripts || []).forEach((sc) => walk(sc.blocks)));
+      if (S.project && S.project.noPad) { show(false); return; }
       if (uses && g.matchMedia && g.matchMedia('(pointer: coarse)').matches) show(true);
     };
     pad.querySelectorAll('.pk').forEach((el) => {
@@ -968,6 +971,13 @@
     };
     document.addEventListener('pointerup', go, { capture: true });
   }
+  /* iPhone/iPad: Safari no permite pantalla completa desde la web; se sugiere añadirla a la pantalla de inicio (una sola vez) */
+  function iosTip() {
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (!ios || navigator.standalone) return;
+    try { if (localStorage.getItem('pq_ios_tip')) return; localStorage.setItem('pq_ios_tip', '1'); } catch (e) { /* sin almacenamiento: se muestra igualmente */ }
+    setTimeout(() => ui.toast('Para verla a pantalla completa: pulsa Compartir y «Añadir a pantalla de inicio».'), 4000);
+  }
   function wireKeys() {
     window.addEventListener('keydown', (e) => {
       if (modalStack.length) return;
@@ -984,7 +994,7 @@
     });
     window.addEventListener('keyup', (e) => { const k = keyName(e); if (k) RT.keys[k] = false; });
     window.addEventListener('blur', () => { RT.keys = {}; });
-    wirePad(); wireFullscreenOnTouch();
+    wirePad(); wireFullscreenOnTouch(); iosTip();
   }
 
   /* ============================ conexión de botones ============================ */
@@ -1080,7 +1090,7 @@
     };
     PQ.onCostumeLoaded = () => { RT.dirty = true; };
     wire(); wireStage(); wireKeys();
-    ED.setZoom(window.innerWidth < 1100 ? 0.9 : 0.92);
+    ED.setZoom(g.matchMedia && g.matchMedia('(orientation: landscape) and (max-height: 450px)').matches ? 0.68 : (window.innerWidth < 1100 ? 0.9 : 0.92));
     loadProject(defaultProject(), { noAuto: true });
     const a = readAuto();
     if (a) {

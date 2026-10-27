@@ -528,7 +528,10 @@
   }
   function onMove(e) {
     if (pending && !drag) {
-      if (Math.hypot(e.clientX - pending.sx, e.clientY - pending.sy) < 6) return;
+      const mdx = e.clientX - pending.sx, mdy = e.clientY - pending.sy;
+      if (Math.hypot(mdx, mdy) < 6) return;
+      /* con el dedo en la paleta, un gesto más vertical que horizontal es para hacer scroll, no para coger el bloque */
+      if (pending.fromPal && e.pointerType === 'touch' && Math.abs(mdy) > Math.abs(mdx) * 1.2) return;
       beginDrag(e);
     }
     if (drag) { e.preventDefault(); updateDrag(e); }

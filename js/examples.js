@@ -1112,7 +1112,7 @@
 
     /* ---------- juego de ritmo con el robot ---------- */
     {
-      id: 'ritmo-robot', title: 'El baile del robot: ¡sigue el ritmo!', kind: 'juego', stars: 2, bg: 'ritmo', sprite: 'flecha',
+      id: 'ritmo-robot', title: 'El baile del robot: ¡sigue el ritmo!', kind: 'juego', nopad: true, stars: 2, bg: 'ritmo', sprite: 'flecha',
       desc: 'Las flechas bajan al compás del tambor. Pulsa la misma flecha (o tócala) cuando llegue al círculo y haz bailar al robot.',
       challenge: 'Mira de qué color es la flecha que baja y pulsa esa flecha del teclado, del mando en pantalla o toca la propia flecha cuando esté en el círculo.',
       openSprite: 'Robot',
@@ -1126,8 +1126,8 @@
           const a = 'activo' + (k + 1), x = XS[k];
           const acierto = () => [S.setv(a, 0), S.hide(), S.chv('Puntos', 1), S.sound('Pop'), S.send('baila'), S.goto(x, 190)];
           return {
-            id: 'flecha', name: 'Flecha ' + NAMES[k], x, y: 190, size: 55, hidden: true, sounds: ['Pop'], scripts: [
-              [F(), S.hide(), S.setv(a, 0), S.costume('Flecha ' + (k + 1)), S.size(55), S.xy(x, 190), S.forever([
+            id: 'flecha', name: 'Flecha ' + NAMES[k], x, y: 190, size: 64, hidden: true, sounds: ['Pop'], scripts: [
+              [F(), S.hide(), S.setv(a, 0), S.costume('Flecha ' + (k + 1)), S.size(64), S.xy(x, 190), S.forever([
                 S.iff(S.eq(S.v(a), 1), [
                   S.dy(-5),
                   S.iff(S.and(S.keyp(KEYS[k]), zona()), acierto()),

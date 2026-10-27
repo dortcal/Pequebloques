@@ -445,7 +445,6 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
   #legal .ccb{height:22px}
   .mbtn.save span{display:none}
   .titlebox input{width:min(120px,16vw)}
-  #btnZoomOut,#btnZoomIn{display:none}
   #guide{left:6px;bottom:6px;width:calc(100% - 12px);padding:6px 8px;border-width:3px;gap:8px;border-radius:16px}
   #guide .mascot{width:40px;height:40px}
   #guide p{font-size:13.5px;margin:0 0 4px;line-height:1.25}
@@ -455,6 +454,54 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
   #banner,#banner p,#banner span{font-size:12.5px;line-height:1.25}
 }
 @media (orientation:landscape) and (max-height:600px) and (max-width:760px){.credit{display:none}}
+
+/* ---------- iPhone y móviles similares (horizontal, pantalla baja) ---------- */
+body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust:100%;-webkit-touch-callout:none}
+#pal,#ws,#cats,#tabs,#stagewrap,.stile,.block{-webkit-user-select:none;user-select:none}
+@media (pointer:coarse){.titlebox input,#spriteinfo input{font-size:16px}}
+@media (orientation:landscape) and (max-height:450px){
+  #menubar{padding:2px 8px;gap:5px}
+  .mbtn{min-height:32px}
+  .titlebox input{min-height:32px;width:min(118px,15vw)}
+  #app{grid-template-columns:minmax(0,1fr) min(46vw,calc((100dvh - 188px) * 1.333 + 22px));padding:3px;gap:5px}
+  #right{overflow:hidden;gap:4px}
+  #stagebox{padding:4px}
+  #stagebar{gap:4px;margin-bottom:4px}
+  .sbtn{width:38px;height:38px;border-radius:11px}
+  .sbtn svg{width:22px;height:22px}
+  .sbtn.flag{width:46px}.sbtn.flag svg{width:28px;height:28px}
+  .sbtn.help{font-size:0;padding:0 6px;gap:0}.sbtn.help svg{width:30px;height:30px}
+  #btnGrid,#btnStageSize{display:none}
+  #stagewrap{width:min(100%,calc((100dvh - 188px) * 1.333));border-width:2px}
+  #spriteinfo{display:none}
+  #lower{flex:none;gap:4px;height:56px}
+  #spritepanel{min-height:0;height:100%;padding:3px 4px;gap:4px;border-radius:12px}
+  #spritelist{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;align-content:center;align-items:center;gap:6px;padding:4px 2px 0}
+  .stile{flex:none;width:48px;height:48px;padding:2px;border-width:2px;border-radius:11px}
+  .stile img{width:34px;height:34px}.stile .nm{display:none}
+  .addbtn{width:38px;height:38px;box-shadow:0 3px 0 #4a34a8}.addbtn svg{width:22px;height:22px}
+  .addwrap{align-items:center}
+  #stagepanel{padding:3px 4px;border-radius:12px;gap:4px;min-height:0;height:100%;align-items:center}
+  #stagepanel .lbl,#btnAddBackdrop{display:none}
+  #stagepanel{flex:none}
+  #pad{padding:4px}
+  #pad .dp{grid-template-columns:repeat(3,34px);grid-template-rows:repeat(2,34px);gap:3px}
+  #pad .space{width:64px;height:34px;font-size:11px}
+  #pad .pk{border-width:2px;border-radius:10px}
+  #stagepanel .tile{width:44px;height:36px}
+  #pal{width:calc(var(--fs) * 15);min-width:150px;padding:4px 6px 40px 6px}
+  #cats{width:50px;padding:4px 2px}
+  #banner{padding:3px 6px;gap:6px}
+  #banner .bi{display:none}
+  #banner .bsp{width:30px;height:30px}.bsp svg{width:18px;height:18px}
+  #banner button{width:26px;height:26px;font-size:15px}
+  #banner .bt{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:11.5px;line-height:1.2}
+  #legal{flex-wrap:nowrap;white-space:nowrap;overflow:hidden;gap:6px;padding:0 8px max(1px,env(safe-area-inset-bottom));font-size:10px}
+  #legal .ccb{height:17px}
+}
+@media (orientation:landscape) and (max-height:450px) and (max-width:800px){#btnZoomOut,#btnZoomIn{display:none}}
+/* paleta: deslizar en vertical con el dedo hace scroll; arrastrar hacia el lado coge el bloque */
+#pal .block{touch-action:pan-y}
 
 </style>
 </head>
@@ -3415,7 +3462,10 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
   }
   function onMove(e) {
     if (pending && !drag) {
-      if (Math.hypot(e.clientX - pending.sx, e.clientY - pending.sy) < 6) return;
+      const mdx = e.clientX - pending.sx, mdy = e.clientY - pending.sy;
+      if (Math.hypot(mdx, mdy) < 6) return;
+      /* con el dedo en la paleta, un gesto más vertical que horizontal es para hacer scroll, no para coger el bloque */
+      if (pending.fromPal && e.pointerType === 'touch' && Math.abs(mdy) > Math.abs(mdx) * 1.2) return;
       beginDrag(e);
     }
     if (drag) { e.preventDefault(); updateDrag(e); }
@@ -4974,7 +5024,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
 
     /* ---------- juego de ritmo con el robot ---------- */
     {
-      id: 'ritmo-robot', title: 'El baile del robot: ¡sigue el ritmo!', kind: 'juego', stars: 2, bg: 'ritmo', sprite: 'flecha',
+      id: 'ritmo-robot', title: 'El baile del robot: ¡sigue el ritmo!', kind: 'juego', nopad: true, stars: 2, bg: 'ritmo', sprite: 'flecha',
       desc: 'Las flechas bajan al compás del tambor. Pulsa la misma flecha (o tócala) cuando llegue al círculo y haz bailar al robot.',
       challenge: 'Mira de qué color es la flecha que baja y pulsa esa flecha del teclado, del mando en pantalla o toca la propia flecha cuando esté en el círculo.',
       openSprite: 'Robot',
@@ -4988,8 +5038,8 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
           const a = 'activo' + (k + 1), x = XS[k];
           const acierto = () => [S.setv(a, 0), S.hide(), S.chv('Puntos', 1), S.sound('Pop'), S.send('baila'), S.goto(x, 190)];
           return {
-            id: 'flecha', name: 'Flecha ' + NAMES[k], x, y: 190, size: 55, hidden: true, sounds: ['Pop'], scripts: [
-              [F(), S.hide(), S.setv(a, 0), S.costume('Flecha ' + (k + 1)), S.size(55), S.xy(x, 190), S.forever([
+            id: 'flecha', name: 'Flecha ' + NAMES[k], x, y: 190, size: 64, hidden: true, sounds: ['Pop'], scripts: [
+              [F(), S.hide(), S.setv(a, 0), S.costume('Flecha ' + (k + 1)), S.size(64), S.xy(x, 190), S.forever([
                 S.iff(S.eq(S.v(a), 1), [
                   S.dy(-5),
                   S.iff(S.and(S.keyp(KEYS[k]), zona()), acierto()),
@@ -6036,6 +6086,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
     if (!ex) return;
     const p = ex.build();
     p.title = ex.title;
+    p.noPad = !!ex.nopad;
     loadProject(p, { banner: ex.challenge });
     PQ.say(ex.challenge);
     if (ex.openSprite) { const s = p.sprites.find((x) => x.name === ex.openSprite); if (s) { S.target = s; renderAll(); } }
@@ -6049,6 +6100,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
     b.innerHTML =
       '<div class="by">Diseñado por <b>David OZC</b> · para el alumnado de Infantil y primer ciclo de Primaria.</div>' +
       '<h3>Licencia y derechos</h3><p>© 2026 David OZC. Uso <b>gratuito</b> en centros educativos. Obra bajo licencia <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.es" target="_blank" rel="noopener">Creative Commons BY-NC-ND 4.0</a>: puedes compartirla <b>sin cambios</b>, citando al autor y sin fines comerciales. No se permite modificarla, venderla ni presentarla como propia sin el permiso del autor. Los proyectos que crea el alumnado son suyos.</p>' +
+      '<h3>En iPhone y iPad</h3><p>Usa el dispositivo en <b>horizontal</b>. Para verlo a pantalla completa, pulsa <b>Compartir</b> y «<b>Añadir a pantalla de inicio</b>»; después ábrelo desde ese icono.</p>' +
       '<h3>Cómo se usa</h3><ul>' +
       '<li><b>Arrastra</b> los bloques de la izquierda hasta la zona de programar y <b>engánchalos</b> unos debajo de otros.</li>' +
       '<li><b>Toca un bloque</b> (o un programa entero) para ver qué hace.</li>' +
@@ -6122,6 +6174,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
       };
       const walk = (arr) => (arr || []).forEach(one);
       PQ.allTargets(S.project).forEach((t) => (t.scripts || []).forEach((sc) => walk(sc.blocks)));
+      if (S.project && S.project.noPad) { show(false); return; }
       if (uses && g.matchMedia && g.matchMedia('(pointer: coarse)').matches) show(true);
     };
     pad.querySelectorAll('.pk').forEach((el) => {
@@ -6151,6 +6204,13 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
     };
     document.addEventListener('pointerup', go, { capture: true });
   }
+  /* iPhone/iPad: Safari no permite pantalla completa desde la web; se sugiere añadirla a la pantalla de inicio (una sola vez) */
+  function iosTip() {
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (!ios || navigator.standalone) return;
+    try { if (localStorage.getItem('pq_ios_tip')) return; localStorage.setItem('pq_ios_tip', '1'); } catch (e) { /* sin almacenamiento: se muestra igualmente */ }
+    setTimeout(() => ui.toast('Para verla a pantalla completa: pulsa Compartir y «Añadir a pantalla de inicio».'), 4000);
+  }
   function wireKeys() {
     window.addEventListener('keydown', (e) => {
       if (modalStack.length) return;
@@ -6167,7 +6227,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
     });
     window.addEventListener('keyup', (e) => { const k = keyName(e); if (k) RT.keys[k] = false; });
     window.addEventListener('blur', () => { RT.keys = {}; });
-    wirePad(); wireFullscreenOnTouch();
+    wirePad(); wireFullscreenOnTouch(); iosTip();
   }
 
   /* ============================ conexión de botones ============================ */
@@ -6263,7 +6323,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
     };
     PQ.onCostumeLoaded = () => { RT.dirty = true; };
     wire(); wireStage(); wireKeys();
-    ED.setZoom(window.innerWidth < 1100 ? 0.9 : 0.92);
+    ED.setZoom(g.matchMedia && g.matchMedia('(orientation: landscape) and (max-height: 450px)').matches ? 0.68 : (window.innerWidth < 1100 ? 0.9 : 0.92));
     loadProject(defaultProject(), { noAuto: true });
     const a = readAuto();
     if (a) {

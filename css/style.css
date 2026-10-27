@@ -427,7 +427,6 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
   #legal .ccb{height:22px}
   .mbtn.save span{display:none}
   .titlebox input{width:min(120px,16vw)}
-  #btnZoomOut,#btnZoomIn{display:none}
   #guide{left:6px;bottom:6px;width:calc(100% - 12px);padding:6px 8px;border-width:3px;gap:8px;border-radius:16px}
   #guide .mascot{width:40px;height:40px}
   #guide p{font-size:13.5px;margin:0 0 4px;line-height:1.25}
@@ -437,3 +436,51 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
   #banner,#banner p,#banner span{font-size:12.5px;line-height:1.25}
 }
 @media (orientation:landscape) and (max-height:600px) and (max-width:760px){.credit{display:none}}
+
+/* ---------- iPhone y móviles similares (horizontal, pantalla baja) ---------- */
+body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust:100%;-webkit-touch-callout:none}
+#pal,#ws,#cats,#tabs,#stagewrap,.stile,.block{-webkit-user-select:none;user-select:none}
+@media (pointer:coarse){.titlebox input,#spriteinfo input{font-size:16px}}
+@media (orientation:landscape) and (max-height:450px){
+  #menubar{padding:2px 8px;gap:5px}
+  .mbtn{min-height:32px}
+  .titlebox input{min-height:32px;width:min(118px,15vw)}
+  #app{grid-template-columns:minmax(0,1fr) min(46vw,calc((100dvh - 188px) * 1.333 + 22px));padding:3px;gap:5px}
+  #right{overflow:hidden;gap:4px}
+  #stagebox{padding:4px}
+  #stagebar{gap:4px;margin-bottom:4px}
+  .sbtn{width:38px;height:38px;border-radius:11px}
+  .sbtn svg{width:22px;height:22px}
+  .sbtn.flag{width:46px}.sbtn.flag svg{width:28px;height:28px}
+  .sbtn.help{font-size:0;padding:0 6px;gap:0}.sbtn.help svg{width:30px;height:30px}
+  #btnGrid,#btnStageSize{display:none}
+  #stagewrap{width:min(100%,calc((100dvh - 188px) * 1.333));border-width:2px}
+  #spriteinfo{display:none}
+  #lower{flex:none;gap:4px;height:56px}
+  #spritepanel{min-height:0;height:100%;padding:3px 4px;gap:4px;border-radius:12px}
+  #spritelist{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;align-content:center;align-items:center;gap:6px;padding:4px 2px 0}
+  .stile{flex:none;width:48px;height:48px;padding:2px;border-width:2px;border-radius:11px}
+  .stile img{width:34px;height:34px}.stile .nm{display:none}
+  .addbtn{width:38px;height:38px;box-shadow:0 3px 0 #4a34a8}.addbtn svg{width:22px;height:22px}
+  .addwrap{align-items:center}
+  #stagepanel{padding:3px 4px;border-radius:12px;gap:4px;min-height:0;height:100%;align-items:center}
+  #stagepanel .lbl,#btnAddBackdrop{display:none}
+  #stagepanel{flex:none}
+  #pad{padding:4px}
+  #pad .dp{grid-template-columns:repeat(3,34px);grid-template-rows:repeat(2,34px);gap:3px}
+  #pad .space{width:64px;height:34px;font-size:11px}
+  #pad .pk{border-width:2px;border-radius:10px}
+  #stagepanel .tile{width:44px;height:36px}
+  #pal{width:calc(var(--fs) * 15);min-width:150px;padding:4px 6px 40px 6px}
+  #cats{width:50px;padding:4px 2px}
+  #banner{padding:3px 6px;gap:6px}
+  #banner .bi{display:none}
+  #banner .bsp{width:30px;height:30px}.bsp svg{width:18px;height:18px}
+  #banner button{width:26px;height:26px;font-size:15px}
+  #banner .bt{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:11.5px;line-height:1.2}
+  #legal{flex-wrap:nowrap;white-space:nowrap;overflow:hidden;gap:6px;padding:0 8px max(1px,env(safe-area-inset-bottom));font-size:10px}
+  #legal .ccb{height:17px}
+}
+@media (orientation:landscape) and (max-height:450px) and (max-width:800px){#btnZoomOut,#btnZoomIn{display:none}}
+/* paleta: deslizar en vertical con el dedo hace scroll; arrastrar hacia el lado coge el bloque */
+#pal .block{touch-action:pan-y}

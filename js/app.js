@@ -823,7 +823,7 @@
       (PQ.EX || []).map((x) => ({ kind: x.kind, voices: x.voices, id: x.id, title: x.title, desc: x.desc, stars: x.stars, bg: x.bg, sprite: x.sprite })));
     function draw() {
       grid.innerHTML = '';
-      items().filter((x) => filter === 'all' || x.kind === filter).forEach((x) => {
+      items().filter((x) => filter === 'all' || (filter === 'voz' ? !!x.voices : (x.kind === filter && !(filter === 'cuento' && x.voices)))).forEach((x) => {
         const c = h('button', 'story'); c.type = 'button';
         const bd = PQ.BACKDROP_LIB.find((b) => b.id === x.bg) || PQ.BACKDROP_LIB[0];
         const sp = PQ.spriteLibById(x.sprite) || PQ.SPRITE_LIB[0];
@@ -839,7 +839,7 @@
         grid.appendChild(c);
       });
     }
-    [['all', 'Todo'], ['tut', 'Tutoriales'], ['cuento', 'Cuentos'], ['reto', 'Retos'], ['juego', 'Juegos']].forEach((f) => {
+    [['all', 'Todo'], ['tut', 'Tutoriales'], ['cuento', 'Cuentos'], ['voz', 'Cuentos con voz'], ['reto', 'Retos'], ['juego', 'Juegos']].forEach((f) => {
       const b = h('button', filter === f[0] ? 'on' : '', f[1]); b.type = 'button';
       b.addEventListener('click', () => { filter = f[0]; $$('button', tabs).forEach((x) => x.classList.toggle('on', x === b)); draw(); });
       tabs.appendChild(b);

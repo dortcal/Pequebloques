@@ -890,33 +890,39 @@
     /* ---------- más juegos ---------- */
     {
       id: 'frutas-si', title: 'Frutas sí, caramelos no', kind: 'juego', stars: 2, bg: 'campo', sprite: 'manzana',
-      desc: 'Mueve a Lucía a izquierda y derecha: atrapa las frutas y verduras y esquiva los caramelos.',
-      challenge: 'Usa las flechas izquierda y derecha. Cada fruta o verdura suma un punto; cada caramelo resta uno. ¡Llega a 10!',
+      desc: 'Mueve a Lucía a izquierda y derecha: atrapa las frutas y verduras y esquiva los caramelos. ¡Consigue 20 puntos!',
+      challenge: 'Usa las flechas izquierda y derecha. Cada fruta o verdura suma un punto; cada caramelo resta uno. ¡Llega a 20!',
       openSprite: 'Lucía',
       build() {
-        const caer = (x0, wait, good) => [F(), S.setv('paso', 0), S.goto(x0, 190), S.wait(wait), S.forever([
+        const caer = (x0, wait, good) => [[F(), S.show(), S.setv('paso', 0), S.goto(x0, 190), S.wait(wait), S.forever([
           S.dy(-5),
           S.iff(S.touch('Lucía'), good
             ? [S.chv('Puntos', 1), S.sound('Pop'), S.goto(S.rnd(-200, 200), 190),
-              S.iff(S.and(S.gt(S.v('Puntos'), 9), S.eq(S.v('paso'), 0)), [S.setv('paso', 1), S.send('fin')])]
+              S.iff(S.and(S.gt(S.v('Puntos'), 19), S.eq(S.v('paso'), 0)), [S.setv('paso', 1), S.setv('Puntos', 20), S.send('fin')])]
             : [S.iff(S.gt(S.v('Puntos'), 0), [S.chv('Puntos', -1)]), S.sound('Boing'), S.goto(S.rnd(-200, 200), 190)]),
           S.iff(S.lt(mk('motion_yposition'), -170), [S.goto(S.rnd(-200, 200), 190)])
-        ])];
+        ])], [S.recv('fin'), S.hide()]];
         return make({
           backdrops: ['campo'], messages: ['fin'], vars: [['Puntos', 0, true], ['paso', 0, false]],
           stage: [[F(), S.backdrop('campo')]],
           sprites: [
             {
               id: 'lucia', name: 'Lucía', x: 0, y: -135, size: 75, sounds: ['Pop'], scripts: [
-                [F(), S.xy(0, -135), S.voice('KITTEN'), S.setv('Puntos', 0), S.setv('paso', 0), S.forever([
+                [F(), S.show(), S.xy(0, -135), S.voice('KITTEN'), S.setv('Puntos', 0), S.setv('paso', 0), S.forever([
                   S.iff(S.and(S.keyp('left arrow'), S.gt(S.xpos(), -200)), [S.dx(-7)]),
                   S.iff(S.and(S.keyp('right arrow'), S.lt(S.xpos(), 200)), [S.dx(7)])])],
-                [S.recv('fin'), S.voice('KITTEN'), S.sound('Ta-chán'), S.rep(3, [S.dy(16), S.wait(0.1), S.dy(-16), S.wait(0.1)])].concat(S.talk('¡Diez puntos! Las frutas y las verduras nos hacen crecer fuertes.'), [S.stopAll()])
+                [S.recv('fin'), S.voice('KITTEN'), S.hide()].concat(S.talk('¡Enhorabuena! ¡Lo has conseguido! Veinte puntos. Las frutas y las verduras nos hacen crecer fuertes.'), [S.wait(1), S.stopAll()])
               ]
             },
-            { id: 'manzana', x: -120, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: [caer(-120, 0, true)] },
-            { id: 'zanahoria', x: 90, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: [caer(90, 1.5, true)] },
-            { id: 'caramelo', x: 0, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: [caer(0, 0.8, false)] }
+            {
+              id: 'premio', name: 'Premio', x: 0, y: 10, size: 40, hidden: true, sounds: ['Magia', 'Ta-chán'], scripts: [
+                [F(), S.hide(), S.size(40)],
+                [S.recv('fin'), S.size(40), S.xy(0, 10), S.show(), S.sound('Magia'), S.rep(14, [S.grow(22), S.wait(0.03)]), S.rep(3, [S.grow(-10), S.wait(0.06), S.grow(10), S.wait(0.06)]), S.sound('Ta-chán')]
+              ]
+            },
+            { id: 'manzana', x: -120, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: caer(-120, 0, true) },
+            { id: 'zanahoria', x: 90, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: caer(90, 1.5, true) },
+            { id: 'caramelo', x: 0, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: caer(0, 0.8, false) }
           ]
         });
       }

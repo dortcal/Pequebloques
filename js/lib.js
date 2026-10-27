@@ -317,6 +317,20 @@
     <circle cx="52" cy="92" r="3.4" fill="${O}"/><circle cx="68" cy="92" r="3.4" fill="${O}"/>
     <path d="M54 102 q6-5 12 0" fill="none" ${st(2.6)}/>`)]]);
 
+  // 30. Premio (cartel final de ánimo)
+  sp('premio', 'Premio', [['premio-a', svg(`
+    <rect x="4" y="10" width="112" height="100" rx="12" fill="#FFF6D6" ${st(3)}/>
+    <rect x="10" y="16" width="100" height="88" rx="8" fill="none" stroke="#FFC933" stroke-width="3" stroke-dasharray="6 4"/>
+    <g ${st(2)}><path d="M48 14 H72 V28 Q72 40 60 42 Q48 40 48 28 Z" fill="#FFD91A"/><path d="M48 18 H42 Q42 30 50 32 M72 18 H78 Q78 30 70 32" fill="none"/><rect x="55" y="42" width="10" height="5" fill="#FFB300"/><rect x="50" y="47" width="20" height="5" rx="2" fill="#FFB300"/></g>
+    <path d="M22 26 l3 7 7 .8 -5.3 4.8 1.6 7 -6.3-3.7 -6.3 3.7 1.6-7 -5.3-4.8 7-.8 Z" fill="#FF6FA8" transform="scale(.7) translate(10 8)"/>
+    <path d="M98 26 l3 7 7 .8 -5.3 4.8 1.6 7 -6.3-3.7 -6.3 3.7 1.6-7 -5.3-4.8 7-.8 Z" fill="#59B7FF" transform="scale(.7) translate(30 8)"/>
+    <g font-family="Arial,Helvetica,sans-serif" font-weight="900" text-anchor="middle" fill="${O}">
+      <text x="60" y="66" font-size="11" fill="#E2554D">¡ENHORABUENA!</text>
+      <text x="60" y="78" font-size="8.2">¡Lo has conseguido!</text>
+      <text x="60" y="90" font-size="6.3" fill="#2A8A57">Las frutas y las verduras</text>
+      <text x="60" y="98" font-size="6.3" fill="#2A8A57">nos hacen crecer fuertes</text>
+    </g>`)]]);
+
   PQ.SPRITE_LIB = SPRITES;
 
   /* ====================== FONDOS 480x360 ====================== */

@@ -1795,6 +1795,20 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
     <circle cx="52" cy="92" r="3.4" fill="${O}"/><circle cx="68" cy="92" r="3.4" fill="${O}"/>
     <path d="M54 102 q6-5 12 0" fill="none" ${st(2.6)}/>`)]]);
 
+  // 30. Premio (cartel final de ánimo)
+  sp('premio', 'Premio', [['premio-a', svg(`
+    <rect x="4" y="10" width="112" height="100" rx="12" fill="#FFF6D6" ${st(3)}/>
+    <rect x="10" y="16" width="100" height="88" rx="8" fill="none" stroke="#FFC933" stroke-width="3" stroke-dasharray="6 4"/>
+    <g ${st(2)}><path d="M48 14 H72 V28 Q72 40 60 42 Q48 40 48 28 Z" fill="#FFD91A"/><path d="M48 18 H42 Q42 30 50 32 M72 18 H78 Q78 30 70 32" fill="none"/><rect x="55" y="42" width="10" height="5" fill="#FFB300"/><rect x="50" y="47" width="20" height="5" rx="2" fill="#FFB300"/></g>
+    <path d="M22 26 l3 7 7 .8 -5.3 4.8 1.6 7 -6.3-3.7 -6.3 3.7 1.6-7 -5.3-4.8 7-.8 Z" fill="#FF6FA8" transform="scale(.7) translate(10 8)"/>
+    <path d="M98 26 l3 7 7 .8 -5.3 4.8 1.6 7 -6.3-3.7 -6.3 3.7 1.6-7 -5.3-4.8 7-.8 Z" fill="#59B7FF" transform="scale(.7) translate(30 8)"/>
+    <g font-family="Arial,Helvetica,sans-serif" font-weight="900" text-anchor="middle" fill="${O}">
+      <text x="60" y="66" font-size="11" fill="#E2554D">¡ENHORABUENA!</text>
+      <text x="60" y="78" font-size="8.2">¡Lo has conseguido!</text>
+      <text x="60" y="90" font-size="6.3" fill="#2A8A57">Las frutas y las verduras</text>
+      <text x="60" y="98" font-size="6.3" fill="#2A8A57">nos hacen crecer fuertes</text>
+    </g>`)]]);
+
   PQ.SPRITE_LIB = SPRITES;
 
   /* ====================== FONDOS 480x360 ====================== */
@@ -4587,33 +4601,39 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
     /* ---------- más juegos ---------- */
     {
       id: 'frutas-si', title: 'Frutas sí, caramelos no', kind: 'juego', stars: 2, bg: 'campo', sprite: 'manzana',
-      desc: 'Mueve a Lucía a izquierda y derecha: atrapa las frutas y verduras y esquiva los caramelos.',
-      challenge: 'Usa las flechas izquierda y derecha. Cada fruta o verdura suma un punto; cada caramelo resta uno. ¡Llega a 10!',
+      desc: 'Mueve a Lucía a izquierda y derecha: atrapa las frutas y verduras y esquiva los caramelos. ¡Consigue 20 puntos!',
+      challenge: 'Usa las flechas izquierda y derecha. Cada fruta o verdura suma un punto; cada caramelo resta uno. ¡Llega a 20!',
       openSprite: 'Lucía',
       build() {
-        const caer = (x0, wait, good) => [F(), S.setv('paso', 0), S.goto(x0, 190), S.wait(wait), S.forever([
+        const caer = (x0, wait, good) => [[F(), S.show(), S.setv('paso', 0), S.goto(x0, 190), S.wait(wait), S.forever([
           S.dy(-5),
           S.iff(S.touch('Lucía'), good
             ? [S.chv('Puntos', 1), S.sound('Pop'), S.goto(S.rnd(-200, 200), 190),
-              S.iff(S.and(S.gt(S.v('Puntos'), 9), S.eq(S.v('paso'), 0)), [S.setv('paso', 1), S.send('fin')])]
+              S.iff(S.and(S.gt(S.v('Puntos'), 19), S.eq(S.v('paso'), 0)), [S.setv('paso', 1), S.setv('Puntos', 20), S.send('fin')])]
             : [S.iff(S.gt(S.v('Puntos'), 0), [S.chv('Puntos', -1)]), S.sound('Boing'), S.goto(S.rnd(-200, 200), 190)]),
           S.iff(S.lt(mk('motion_yposition'), -170), [S.goto(S.rnd(-200, 200), 190)])
-        ])];
+        ])], [S.recv('fin'), S.hide()]];
         return make({
           backdrops: ['campo'], messages: ['fin'], vars: [['Puntos', 0, true], ['paso', 0, false]],
           stage: [[F(), S.backdrop('campo')]],
           sprites: [
             {
               id: 'lucia', name: 'Lucía', x: 0, y: -135, size: 75, sounds: ['Pop'], scripts: [
-                [F(), S.xy(0, -135), S.voice('KITTEN'), S.setv('Puntos', 0), S.setv('paso', 0), S.forever([
+                [F(), S.show(), S.xy(0, -135), S.voice('KITTEN'), S.setv('Puntos', 0), S.setv('paso', 0), S.forever([
                   S.iff(S.and(S.keyp('left arrow'), S.gt(S.xpos(), -200)), [S.dx(-7)]),
                   S.iff(S.and(S.keyp('right arrow'), S.lt(S.xpos(), 200)), [S.dx(7)])])],
-                [S.recv('fin'), S.voice('KITTEN'), S.sound('Ta-chán'), S.rep(3, [S.dy(16), S.wait(0.1), S.dy(-16), S.wait(0.1)])].concat(S.talk('¡Diez puntos! Las frutas y las verduras nos hacen crecer fuertes.'), [S.stopAll()])
+                [S.recv('fin'), S.voice('KITTEN'), S.hide()].concat(S.talk('¡Enhorabuena! ¡Lo has conseguido! Veinte puntos. Las frutas y las verduras nos hacen crecer fuertes.'), [S.wait(1), S.stopAll()])
               ]
             },
-            { id: 'manzana', x: -120, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: [caer(-120, 0, true)] },
-            { id: 'zanahoria', x: 90, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: [caer(90, 1.5, true)] },
-            { id: 'caramelo', x: 0, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: [caer(0, 0.8, false)] }
+            {
+              id: 'premio', name: 'Premio', x: 0, y: 10, size: 40, hidden: true, sounds: ['Magia', 'Ta-chán'], scripts: [
+                [F(), S.hide(), S.size(40)],
+                [S.recv('fin'), S.size(40), S.xy(0, 10), S.show(), S.sound('Magia'), S.rep(14, [S.grow(22), S.wait(0.03)]), S.rep(3, [S.grow(-10), S.wait(0.06), S.grow(10), S.wait(0.06)]), S.sound('Ta-chán')]
+              ]
+            },
+            { id: 'manzana', x: -120, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: caer(-120, 0, true) },
+            { id: 'zanahoria', x: 90, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: caer(90, 1.5, true) },
+            { id: 'caramelo', x: 0, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: caer(0, 0.8, false) }
           ]
         });
       }
@@ -5616,7 +5636,7 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
       (PQ.EX || []).map((x) => ({ kind: x.kind, voices: x.voices, id: x.id, title: x.title, desc: x.desc, stars: x.stars, bg: x.bg, sprite: x.sprite })));
     function draw() {
       grid.innerHTML = '';
-      items().filter((x) => filter === 'all' || x.kind === filter).forEach((x) => {
+      items().filter((x) => filter === 'all' || (filter === 'voz' ? !!x.voices : (x.kind === filter && !(filter === 'cuento' && x.voices)))).forEach((x) => {
         const c = h('button', 'story'); c.type = 'button';
         const bd = PQ.BACKDROP_LIB.find((b) => b.id === x.bg) || PQ.BACKDROP_LIB[0];
         const sp = PQ.spriteLibById(x.sprite) || PQ.SPRITE_LIB[0];
@@ -5632,7 +5652,7 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
         grid.appendChild(c);
       });
     }
-    [['all', 'Todo'], ['tut', 'Tutoriales'], ['cuento', 'Cuentos'], ['reto', 'Retos'], ['juego', 'Juegos']].forEach((f) => {
+    [['all', 'Todo'], ['tut', 'Tutoriales'], ['cuento', 'Cuentos'], ['voz', 'Cuentos con voz'], ['reto', 'Retos'], ['juego', 'Juegos']].forEach((f) => {
       const b = h('button', filter === f[0] ? 'on' : '', f[1]); b.type = 'button';
       b.addEventListener('click', () => { filter = f[0]; $$('button', tabs).forEach((x) => x.classList.toggle('on', x === b)); draw(); });
       tabs.appendChild(b);

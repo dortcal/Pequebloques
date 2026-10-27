@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PequeBloques · programa con bloques · diseñado por David OZC</title>
+<meta name="description" content="Editor de programación por bloques para Infantil y primer ciclo de Primaria. Abre y guarda proyectos de Scratch 3 (.sb3). Sin registro. Diseñado por David OZC.">
+<meta name="theme-color" content="#6A4DE0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='34' width='52' height='20' rx='7' fill='%234C97FF'/%3E%3Crect x='6' y='16' width='40' height='20' rx='7' fill='%23FFBF00'/%3E%3Crect x='20' y='6' width='38' height='18' rx='7' fill='%239966FF'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<a class="skip" href="#ws">Saltar al área de programación</a>
+
+<header id="menubar">
+  <div class="brand" aria-label="PequeBloques">
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+      <rect x="6" y="36" width="52" height="20" rx="8" fill="#4C97FF" stroke="#2f62b8" stroke-width="2.5"/>
+      <rect x="6" y="17" width="42" height="21" rx="8" fill="#FFBF00" stroke="#b78900" stroke-width="2.5"/>
+      <rect x="18" y="5" width="40" height="19" rx="8" fill="#9966FF" stroke="#6b43c4" stroke-width="2.5"/>
+      <circle cx="28" cy="45" r="3" fill="#fff"/><circle cx="40" cy="45" r="3" fill="#fff"/><circle cx="29" cy="46" r="1.3" fill="#243"/><circle cx="41" cy="46" r="1.3" fill="#243"/>
+      <path d="M30 51q4 3 8 0" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+    <span class="bname"><i style="--i:0">P</i><i style="--i:1">e</i><i style="--i:2">q</i><i style="--i:3">u</i><i style="--i:4">e</i><b style="--i:5">B</b><b style="--i:6">l</b><b style="--i:7">o</b><b style="--i:8">q</b><b style="--i:9">u</b><b style="--i:10">e</b><b style="--i:11">s</b></span>
+  </div>
+
+  <nav class="menu" aria-label="Menú principal">
+    <button id="btnStories" class="mbtn hot" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5c3-1.5 6-1.5 8 .5 2-2 5-2 8-.5v14c-3-1.5-6-1.5-8 .5-2-2-5-2-8-.5z"/><path d="M12 5.5v14"/></svg><span>Cuentos y retos</span></button>
+    <button id="btnNew" class="mbtn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M12 11v6M9 14h6"/></svg><span>Nuevo</span></button>
+    <button id="btnOpen" class="mbtn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/><path d="M12 17v-5M9.5 14.5L12 12l2.5 2.5"/></svg><span>Abrir</span></button>
+    <button id="btnSave" class="mbtn save" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h12l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></svg><span>Guardar</span></button>
+    <button id="btnLast" class="mbtn" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4M12 8v5l3 2"/></svg><span>Último</span></button>
+  </nav>
+
+  <label class="titlebox"><span class="sr">Nombre del proyecto</span>
+    <input id="title" type="text" maxlength="40" value="Mi proyecto" autocomplete="off" spellcheck="false">
+  </label>
+
+  <div class="credit" title="Diseñado por David OZC"><span>Diseñado por</span> <b>David OZC</b></div>
+
+  <div class="menuright">
+    <button id="btnLevel" class="mbtn tgl" type="button" aria-pressed="false" title="Mostrar más bloques"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/></svg><span id="levelLabel">Pocos bloques</span></button>
+    <button id="btnVoice" class="mbtn tgl" type="button" aria-pressed="false" title="Leer en voz alta lo que dicen los personajes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg><span>Voz</span></button>
+    <button id="btnZoomOut" class="mbtn sq" type="button" title="Bloques más pequeños" aria-label="Bloques más pequeños"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M16.5 16.5L21 21"/></svg></button>
+    <button id="btnZoomIn" class="mbtn sq" type="button" title="Bloques más grandes" aria-label="Bloques más grandes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M16.5 16.5L21 21"/></svg></button>
+    <button id="btnAbout" class="mbtn sq" type="button" title="Ayuda y créditos" aria-label="Ayuda y créditos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.6 2.6 0 1 1 3.6 2.4c-.8.4-1.1.9-1.1 1.8M12 17v.3"/></svg></button>
+  </div>
+</header>
+
+<main id="app">
+  <section id="left" aria-label="Editor">
+    <div id="tabs" role="tablist">
+      <button id="tabbtn-code" class="tab on" role="tab" aria-selected="true" aria-controls="pane-code" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>Código</button>
+      <button id="tabbtn-cost" class="tab" role="tab" aria-selected="false" aria-controls="pane-cost" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c2 0 2-2 1-3s0-3 2-3h2a4 4 0 0 0 4-4c0-4-4-8-9-8z"/><circle cx="8" cy="10" r="1.2"/><circle cx="12" cy="7" r="1.2"/><circle cx="16" cy="9" r="1.2"/></svg><span id="costTabName">Disfraces</span></button>
+      <button id="tabbtn-sound" class="tab" role="tab" aria-selected="false" aria-controls="pane-sound" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>Sonidos</button>
+    </div>
+
+    <div id="pane-code" class="pane" role="tabpanel">
+      <aside id="cats" aria-label="Categorías de bloques"></aside>
+      <div id="pal" aria-label="Bloques"></div>
+      <div id="wscol">
+        <div id="banner" hidden></div>
+        <div id="ws" tabindex="-1">
+          <div id="wsin"></div>
+          <div id="wshint" hidden>
+            <svg viewBox="0 0 200 120" aria-hidden="true"><path d="M20 90c40-70 110-80 150-30" fill="none" stroke="#9aa9d6" stroke-width="5" stroke-dasharray="3 12" stroke-linecap="round"/><path d="M160 40l14 22-26 2z" fill="#9aa9d6"/></svg>
+            <p>Arrastra aquí los bloques</p>
+          </div>
+        </div>
+        <div id="wstools">
+          <button id="btnUndo" class="rb" type="button" title="Deshacer" aria-label="Deshacer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7L4 12l5 5M4 12h10a6 6 0 0 1 0 12"/></svg></button>
+          <button id="btnRedo" class="rb" type="button" title="Rehacer" aria-label="Rehacer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7l5 5-5 5M20 12H10a6 6 0 0 0 0 12"/></svg></button>
+          <button id="btnClean" class="rb" type="button" title="Ordenar los bloques" aria-label="Ordenar los bloques"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="6" rx="1.5"/><rect x="13" y="4" width="8" height="6" rx="1.5"/><rect x="3" y="14" width="8" height="6" rx="1.5"/><rect x="13" y="14" width="8" height="6" rx="1.5"/></svg></button>
+        </div>
+        <div id="guide" hidden role="region" aria-label="Guía del tutorial"></div>
+      </div>
+    </div>
+
+    <div id="pane-cost" class="pane" role="tabpanel" hidden></div>
+    <div id="pane-sound" class="pane" role="tabpanel" hidden></div>
+  </section>
+
+  <section id="right" aria-label="Escenario">
+    <div id="stagebox">
+      <div id="stagebar">
+        <button id="btnFlag" class="sbtn flag" type="button" title="Bandera verde: empezar" aria-label="Bandera verde: empezar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V3" stroke="#1F7A2B" stroke-width="2.6" stroke-linecap="round"/><path d="M5 4c5-2.5 8 2.5 14 0v10c-6 2.5-9-2.5-14 0z" fill="#4CBF56" stroke="#1F7A2B" stroke-width="2.2" stroke-linejoin="round"/></svg></button>
+        <button id="btnStop" class="sbtn stop" type="button" title="Parar todo" aria-label="Parar todo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z" fill="#E64040" stroke="#a52a2a" stroke-width="2" stroke-linejoin="round"/></svg></button>
+        <button id="btnHelp" class="sbtn help" type="button" title="¿Me ayudas?" aria-label="¿Me ayudas? Pipo te da una pista"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 8C78 8 90 32 88 58 86 80 70 90 50 90 30 90 14 80 12 58 10 32 22 8 50 8z" fill="#8B5CF6" stroke="#5B3BD0" stroke-width="5"/><path d="M30 20Q20 6 12 10 16 22 26 28zM70 20Q80 6 88 10 84 22 74 28z" fill="#FFBF00" stroke="#CC9900" stroke-width="4"/><circle cx="36" cy="46" r="11" fill="#fff"/><circle cx="64" cy="46" r="11" fill="#fff"/><circle cx="38" cy="48" r="5" fill="#2b1d66"/><circle cx="62" cy="48" r="5" fill="#2b1d66"/><path d="M38 68Q50 80 62 68" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg><span>¿Me ayudas?</span></button>
+        <span class="sp"></span>
+        <button id="btnGrid" class="sbtn" type="button" aria-pressed="false" title="Mostrar la cuadrícula" aria-label="Mostrar la cuadrícula"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v18H3zM9 3v18M15 3v18M3 9h18M3 15h18"/></svg></button>
+        <button id="btnStageSize" class="sbtn" type="button" aria-pressed="false" title="Escenario pequeño o grande" aria-label="Cambiar tamaño del escenario"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 12h8"/></svg></button>
+        <button id="btnFull" class="sbtn" type="button" title="Pantalla completa" aria-label="Pantalla completa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      </div>
+      <div id="stagewrap"><canvas id="stage" width="960" height="720" aria-label="Escenario donde se ve el programa"></canvas></div>
+    </div>
+
+    <div id="spriteinfo">
+      <label class="f nm"><span>Objeto</span><input id="inName" type="text" maxlength="24" autocomplete="off"></label>
+      <label class="f"><span>x</span><input id="inX" type="number" step="1"></label>
+      <label class="f"><span>y</span><input id="inY" type="number" step="1"></label>
+      <div class="f vis"><span>Mostrar</span>
+        <button id="btnShow" type="button" aria-label="Mostrar" title="Mostrar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button id="btnHide" type="button" aria-label="Esconder" title="Esconder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><path d="M4 4l16 16"/></svg></button>
+      </div>
+      <label class="f"><span>Tamaño</span><input id="inSize" type="number" step="5" min="5" max="500"></label>
+      <label class="f"><span>Dirección</span><input id="inDir" type="number" step="15"></label>
+    </div>
+
+    <div id="lower">
+      <div id="spritepanel">
+        <div id="spritelist" role="listbox" aria-label="Personajes"></div>
+        <div class="addwrap">
+          <button id="btnAddSprite" class="addbtn" type="button" aria-haspopup="true" title="Añadir personaje" aria-label="Añadir personaje"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+      </div>
+      <div id="stagepanel">
+        <span class="lbl">Fondo</span>
+        <button id="stagetile" class="tile" type="button" aria-label="Escenario y fondos"></button>
+        <button id="btnAddBackdrop" class="addbtn small" type="button" aria-haspopup="true" title="Añadir fondo" aria-label="Añadir fondo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<input id="fileOpen" type="file" accept=".sb3,application/x.scratch.sb3,application/zip" hidden>
+<input id="fileImg" type="file" accept="image/*,.svg" hidden>
+<input id="fileSnd" type="file" accept="audio/*,.wav,.mp3,.ogg" hidden>
+<div id="modalroot"></div>
+<div id="toasts" aria-live="polite" role="status"></div>
+<div id="dropveil" hidden><div>Suelta aquí tu proyecto <b>.sb3</b></div></div>
+
+<script src="js/util.js"></script>
+<script src="js/blocks.js"></script>
+<script src="js/project.js"></script>
+<script src="js/lib.js"></script>
+<script src="js/runtime.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/help.js"></script>
+<script src="js/examples.js"></script>
+<script src="js/tutorials.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

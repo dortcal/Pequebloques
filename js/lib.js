@@ -331,6 +331,60 @@
       <text x="60" y="98" font-size="6.3" fill="#2A8A57">nos hacen crecer fuertes</text>
     </g>`)]]);
 
+  // 31. Paloma rabiche (laurisilva)
+  const paloma = (up) => svg(`
+    <path d="M26 66 L3 56 L6 82 L24 80 Z" fill="#7C90A4" ${st()}/>
+    <path d="M20 68 L8 62 L9 74 Z" fill="#fff" opacity=".85"/>
+    <ellipse cx="58" cy="72" rx="34" ry="26" fill="#A9BCCD" ${st()}/>
+    <ellipse cx="68" cy="80" rx="22" ry="15" fill="#D8B7C6"/>
+    <circle cx="88" cy="46" r="19" fill="#B7C7D6" ${st()}/>
+    <path d="M104 44 L116 48 L104 53 Z" fill="#F29BB0" ${st(2.5)}/>
+    <circle cx="92" cy="41" r="5.6" fill="#FFB347" ${st(2)}/><circle cx="93" cy="41" r="2.6" fill="${O}"/>
+    <path d="M76 56 q10 8 22 2" fill="none" stroke="#D8B7C6" stroke-width="5" stroke-linecap="round" opacity=".9"/>
+    ${up ? `<path d="M40 66 Q26 26 66 30 Q72 54 46 72 Z" fill="#8FA5BA" ${st()}/>`
+         : `<path d="M38 66 Q54 96 84 74 Q66 60 38 66 Z" fill="#8FA5BA" ${st()}/>`}
+    <path d="M52 96 v10 M64 96 v10 M46 106 h12 M58 106 h12" fill="none" stroke="#E88AA2" stroke-width="3.5" stroke-linecap="round"/>`);
+  sp('paloma', 'Paloma', [['paloma-a', paloma(false)], ['paloma-b', paloma(true)]]);
+
+  // 32. Contenedores de reciclaje (amarillo = envases, azul = papel)
+  const contenedor = (col, dark, icon) => svg(`
+    <path d="M24 34 H96 L90 104 H30 Z" fill="${col}" ${st()}/>
+    <rect x="16" y="20" width="88" height="18" rx="7" fill="${dark}" ${st()}/>
+    <rect x="44" y="12" width="32" height="10" rx="5" fill="${dark}" ${st(2.5)}/>
+    ${icon}
+    <circle cx="38" cy="108" r="6" fill="#4B4458" ${st(2.5)}/><circle cx="82" cy="108" r="6" fill="#4B4458" ${st(2.5)}/>`);
+  sp('contenedor', 'Contenedor', [
+    ['contenedor-a', contenedor('#FFD21F', '#F2A900', `<g fill="#fff" ${st(2.4)}><rect x="54" y="48" width="12" height="9" rx="2"/><path d="M52 57 H68 L72 70 V90 Q72 94 68 94 H52 Q48 94 48 90 V70 Z"/></g>`)],
+    ['contenedor-b', contenedor('#3B82F6', '#1F5FC9', `<g fill="#fff" ${st(2.4)}><path d="M46 48 H72 L76 54 V92 H46 Z"/><path d="M52 62 H70 M52 72 H70 M52 82 H64" fill="none"/></g>`)]
+  ]);
+
+  // 33. Carta de memoria: reverso con hoja de laurel + 4 caras con animales de la biblioteca
+  const innerOf = (id) => SPRITES.find((s) => s.id === id).costumes[0][1].replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+  const cartaFrame = (inside) => svg(`<rect x="6" y="4" width="108" height="112" rx="14" fill="#FFFDF4" ${st(3)}/>${inside}`);
+  const cartaBack = svg(`
+    <rect x="6" y="4" width="108" height="112" rx="14" fill="#2F8A4C" ${st(3)}/>
+    <rect x="14" y="12" width="92" height="96" rx="9" fill="none" stroke="#B8EBC2" stroke-width="3" stroke-dasharray="7 5"/>
+    <path d="M60 24 Q94 54 60 98 Q26 54 60 24 Z" fill="#7DD08A" ${st(2.6)}/>
+    <path d="M60 32 V94 M60 54 L46 44 M60 66 L74 54 M60 78 L46 68" fill="none" stroke="#2F8A4C" stroke-width="2.6" stroke-linecap="round"/>`);
+  const faceOf = (id) => cartaFrame(`<g transform="translate(14 18) scale(.8)">${innerOf(id)}</g>`);
+  sp('carta', 'Carta', [['carta-a', cartaBack], ['carta-b', faceOf('canario')], ['carta-c', faceOf('lagarto')], ['carta-d', faceOf('tortuga')], ['carta-e', faceOf('mariposa')]]);
+
+  // 34. Flechas de colores para el juego de ritmo (izquierda, arriba, abajo, derecha)
+  const flecha = (col, rot) => svg(`<g transform="rotate(${rot} 60 60)"><path d="M60 8 L104 56 H78 V108 H42 V56 H16 Z" fill="${col}" ${st(4)}/><path d="M60 20 L90 52 M48 62 V98" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".55"/></g>`);
+  sp('flecha', 'Flecha', [['flecha-a', flecha('#FF6FA8', 270)], ['flecha-b', flecha('#59B7FF', 0)], ['flecha-c', flecha('#FFD91A', 180)], ['flecha-d', flecha('#5ED08A', 90)]]);
+
+  // 35. Cartel de ánimo genérico
+  sp('bravo', 'Muy bien', [['bravo-a', svg(`
+    <rect x="4" y="12" width="112" height="96" rx="14" fill="#FFF6D6" ${st(3)}/>
+    <rect x="10" y="18" width="100" height="84" rx="9" fill="none" stroke="#FFC933" stroke-width="3" stroke-dasharray="6 4"/>
+    <path d="M60 22 l5 11 12 1.3 -9 8 2.7 11.8 -10.7-6.2 -10.7 6.2 2.7-11.8 -9-8 12-1.3 Z" fill="#FFD91A" ${st(2.4)}/>
+    <path d="M24 30 l3 7 7 .8 -5.3 4.8 1.6 7 -6.3-3.7 -6.3 3.7 1.6-7 -5.3-4.8 7-.8 Z" fill="#FF6FA8" transform="scale(.7) translate(0 8)"/>
+    <path d="M96 30 l3 7 7 .8 -5.3 4.8 1.6 7 -6.3-3.7 -6.3 3.7 1.6-7 -5.3-4.8 7-.8 Z" fill="#59B7FF" transform="scale(.7) translate(38 8)"/>
+    <g font-family="Arial,Helvetica,sans-serif" font-weight="900" text-anchor="middle">
+      <text x="60" y="76" font-size="16" fill="#E2554D">¡MUY BIEN!</text>
+      <text x="60" y="94" font-size="10.5" fill="#2A8A57">¡Eres genial!</text>
+    </g>`)]]);
+
   PQ.SPRITE_LIB = SPRITES;
 
   /* ====================== FONDOS 480x360 ====================== */
@@ -526,6 +580,34 @@
     <path d="M0 250 Q120 232 240 250 T480 244 V360 H0 Z" fill="#8A5A32"/>
     <g fill="#6F4526">${[0, 1, 2, 3, 4, 5].map((i) => `<path d="M${10 + i * 80} 286 q30-16 60 0 v10 h-60 Z"/><path d="M${10 + i * 80} 330 q30-16 60 0 v10 h-60 Z"/>`).join('')}</g>
     <ellipse cx="240" cy="266" rx="50" ry="14" fill="#5E3A1E"/>`));
+
+
+  /* bosque de laurisilva al atardecer (mismo dibujo con luz cálida) */
+  (function () {
+    const l = BACKDROPS.find((b) => b.id === 'laurisilva');
+    bd('bosque-tarde', 'Bosque al atardecer', l.svg.replace('</svg>',
+      '<rect width="480" height="360" fill="#FF8A3D" opacity=".26"/><circle cx="396" cy="62" r="30" fill="#FFE066" opacity=".92"/><circle cx="396" cy="62" r="46" fill="#FFE066" opacity=".25"/></svg>'));
+  })();
+
+  /* escenario de ritmo: cuatro carriles con aros de acierto y pista de baile */
+  (function () {
+    const arrow = 'M60 8 L104 56 H78 V108 H42 V56 H16 Z';
+    const lanes = [[160, 270], [240, 0], [320, 180], [400, 90]];
+    let s = `<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2B1B5A"/><stop offset="1" stop-color="#7B2FBE"/></linearGradient></defs>
+      <rect width="480" height="360" fill="url(#s)"/>
+      <g fill="#fff" opacity=".07"><path d="M60 0 L20 360 H120 Z"/><path d="M250 0 L170 360 H330 Z"/><path d="M440 0 L360 360 H480 Z"/></g>
+      <g fill="#FFE066"><circle cx="30" cy="30" r="3"/><circle cx="130" cy="16" r="2.4"/><circle cx="210" cy="40" r="3"/><circle cx="300" cy="18" r="2.4"/><circle cx="380" cy="44" r="3"/><circle cx="452" cy="22" r="2.6"/></g>`;
+    lanes.forEach((l, i) => { s += `<rect x="${l[0] - 38}" y="0" width="76" height="360" fill="#fff" opacity="${i % 2 ? '.05' : '.1'}"/>`; });
+    lanes.forEach((l) => {
+      s += `<circle cx="${l[0]}" cy="290" r="40" fill="#fff" fill-opacity=".12" stroke="#fff" stroke-width="4"/>
+        <g transform="translate(${l[0] - 24} 266) scale(.4)"><g transform="rotate(${l[1]} 60 60)"><path d="${arrow}" fill="none" stroke="#fff" stroke-width="9" stroke-linejoin="round" opacity=".85"/></g></g>`;
+    });
+    s += `<path d="M4 262 H104 L110 340 H0 Z" fill="#3A2A74"/>
+      <g opacity=".9"><path d="M4 262 H36 L34 300 H2 Z" fill="#FF6FA8"/><path d="M36 262 H70 L70 300 H34 Z" fill="#59B7FF"/><path d="M70 262 H104 L106 300 H70 Z" fill="#FFD91A"/>
+      <path d="M2 300 H34 L32 340 H0 Z" fill="#5ED08A"/><path d="M34 300 H70 L70 340 H32 Z" fill="#FF6FA8"/><path d="M70 300 H106 L110 340 H70 Z" fill="#59B7FF"/></g>
+      <rect y="344" width="480" height="16" fill="#241647"/>`;
+    bd('ritmo', 'Pista de baile', bg(s));
+  })();
 
   PQ.BACKDROP_LIB = BACKDROPS;
 

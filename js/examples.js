@@ -953,6 +953,225 @@
           ]
         });
       }
+    },
+    /* ---------- laurisilva: cuento con animales, reciclaje y elecciones ---------- */
+    {
+      id: 'secreto-laurisilva', title: 'El secreto de la laurisilva', kind: 'cuento', voices: true, stars: 3, bg: 'laurisilva', sprite: 'paloma',
+      desc: 'Excursión al bosque de laurisilva: saluda a cuatro animales, recoge una botella y elige el contenedor correcto.',
+      challenge: 'Escucha y toca: primero a los cuatro animales, luego la botella y, al final, el contenedor donde va el plástico. ¡Cuidado con el equivocado!',
+      openSprite: 'Paloma',
+      build() {
+        const L = S.talk;
+        const paso = (n) => S.eq(S.v('paso'), n);
+        const libre = () => S.eq(S.v('ocupado'), 0);
+        const POS = { paloma: [160, 62], canario: [-5, 62], mariposa: [-110, 30], lagarto: [130, -85] };
+        const animal = (id, name, voz, aparece, hecho, frase, extra) => ({
+          id, name, x: POS[id][0], y: POS[id][1], hidden: true, size: id === 'lagarto' ? 80 : 90, sounds: ['Pop'], scripts: [
+            [F(), S.hide(), S.voice(voz)],
+            [S.recv('animales'), S.wait(aparece), S.xy(POS[id][0], POS[id][1]), S.show(), S.sound('Pop'), S.next(), S.wait(0.2), S.next()],
+            [S.recv('basura'), S.hide()],
+            [S.recv('tarde'), S.wait(aparece + 0.5), S.xy(POS[id][0], POS[id][1]), S.show(), S.sound('Pop')],
+            [S.click(), S.iff(S.and(paso(1), libre()), [
+              S.setv('ocupado', 1), S.voice(voz), S.sound('Pop'),
+              S.ifelse(S.eq(S.v(hecho), 0),
+                [S.setv(hecho, 1), S.chv('Animales', 1)].concat(L(frase), [
+                  S.iff(S.eq(S.v('Animales'), 4), [S.setv('paso', 2), S.hidev('Animales'), S.setv('ocupado', 0), S.send('basura')]),
+                  S.setv('ocupado', 0)]),
+                L(frase).concat([S.setv('ocupado', 0)]))
+            ])]
+          ].concat(extra || [])
+        });
+        return make({
+          backdrops: ['laurisilva', 'bosque-tarde'],
+          messages: ['m1', 'm2', 'animales', 'basura', 'b2', 'conts', 'ok', 'tarde', 't2', 't3', 'fin'],
+          vars: [['paso', 0, false], ['Animales', 0, false], ['ocupado', 0, false], ['hPaloma', 0, false], ['hCanario', 0, false], ['hMariposa', 0, false], ['hLagarto', 0, false]],
+          stage: [
+            [F(), S.backdrop('laurisilva'), S.hidev('Animales')],
+            [S.recv('tarde'), S.backdrop('bosque-tarde')]
+          ],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: -170, y: -75, sounds: ['Pop'], scripts: [
+                [F(), S.voice('KITTEN'), S.show(), S.xy(-170, -75), S.setv('paso', 0), S.setv('Animales', 0), S.setv('ocupado', 0),
+                  S.setv('hPaloma', 0), S.setv('hCanario', 0), S.setv('hMariposa', 0), S.setv('hLagarto', 0), S.wait(0.5)]
+                  .concat(L('¡Qué ilusión! Hoy visitamos el bosque de laurisilva, en la isla de Tenerife.'), [S.send('m1')]),
+                [S.recv('m2'), S.voice('KITTEN')].concat(L('Shhh. Escucha con atención. ¡Aquí viven muchos animales!'), [S.send('animales')]),
+                [S.recv('animales'), S.voice('KITTEN'), S.wait(2.6)].concat(L('Toca a los cuatro animales para saludarlos.'), [S.setv('paso', 1), S.setv('Animales', 0), S.showv('Animales')]),
+                [S.recv('b2'), S.voice('KITTEN')].concat(L('Los animales se han asustado. Toca la botella para recogerla.'), [S.setv('paso', 3)]),
+                [S.recv('conts'), S.voice('KITTEN'), S.wait(0.6)].concat(L('Una botella de plástico no se tira al suelo. ¿Dónde va? Toca el contenedor correcto.'), [S.setv('paso', 5)]),
+                [S.recv('t3'), S.voice('KITTEN')].concat(L('Los árboles de la laurisilva beben el agua de la niebla. Si los cuidamos, siempre habrá agua.'), [S.send('fin')]),
+                [S.recv('fin'), S.voice('KITTEN'), S.hide()].concat(L('¡Fin del cuento! Gracias por ayudar al bosque.'), [S.wait(1), S.stopAll()]),
+                [S.click(), S.voice('KITTEN'), S.iff(libre(), L('¡Qué bonito es el bosque!'))]
+              ]
+            },
+            {
+              id: 'yeray', x: -70, y: -75, sounds: ['Pop'], scripts: [
+                [F(), S.voice('SQUEAK'), S.show(), S.xy(-70, -75)],
+                [S.recv('m1'), S.voice('SQUEAK')].concat(L('¡Qué verde está todo! Aquí hay mucha niebla, y los árboles beben el agua de las nubes.'), [S.send('m2')]),
+                [S.recv('basura'), S.voice('SQUEAK'), S.wait(1.2)].concat(L('¡Oh, no! Alguien ha dejado una botella en el suelo.'), [S.send('b2')]),
+                [S.recv('t2'), S.voice('SQUEAK')].concat(L('¡Yo siempre tiraré la basura en su contenedor!'), [S.send('t3')]),
+                [S.click(), S.voice('SQUEAK'), S.iff(libre(), L('¡Me encanta este bosque!'))]
+              ]
+            },
+            animal('paloma', 'Paloma', 'ALTO', 0.2, 'hPaloma', 'Arrurrú. Soy la paloma rabiche. Vivo en lo alto de los árboles del bosque.', [
+              [S.recv('tarde'), S.voice('ALTO'), S.wait(3.6)].concat(L('Arrurrú. ¡Gracias por cuidar nuestro bosque!'), [S.send('t2')])
+            ]),
+            animal('canario', 'Canario', 'SQUEAK', 0.9, 'hCanario', '¡Pío, pío! Soy un canario. ¡Me encanta cantar entre las ramas!'),
+            animal('mariposa', 'Mariposa', 'KITTEN', 1.6, 'hMariposa', 'Soy una mariposa. Vuelo de flor en flor y ayudo a que las plantas crezcan.'),
+            animal('lagarto', 'Lagarto', 'TENOR', 2.2, 'hLagarto', 'Soy un lagarto canario. Me gusta tomar el sol sobre las piedras.'),
+            {
+              id: 'botella', x: 10, y: -110, size: 70, hidden: true, sounds: ['Pop', 'Ta-chán'], scripts: [
+                [F(), S.hide()],
+                [S.recv('basura'), S.xy(10, -110), S.show(), S.sound('Pop')],
+                [S.click(), S.iff(paso(3), [S.setv('paso', 4), S.sound('Pop'), S.glide(0.6, -20, 0), S.send('conts')])],
+                [S.recv('ok'), S.glide(1, 60, -85), S.hide()]
+              ]
+            },
+            {
+              id: 'contenedor', name: 'Contenedor amarillo', x: 60, y: -100, size: 70, hidden: true, sounds: ['Ta-chán', 'Pop'], scripts: [
+                [F(), S.hide(), S.costume('Contenedor 1'), S.voice('TENOR')],
+                [S.recv('conts'), S.xy(60, -100), S.show(), S.sound('Pop')],
+                [S.click(), S.iff(S.and(paso(5), libre()), [
+                  S.setv('paso', 6), S.setv('ocupado', 1), S.voice('TENOR'), S.sound('Ta-chán'), S.send('ok'), S.wait(1.1)]
+                  .concat(L('¡Muy bien! El plástico va al contenedor amarillo.'), [S.hide(), S.setv('ocupado', 0), S.send('tarde')]))]
+              ]
+            },
+            {
+              id: 'contenedor', name: 'Contenedor azul', x: 165, y: -100, size: 70, hidden: true, sounds: ['Boing', 'Pop'], scripts: [
+                [F(), S.hide(), S.costume('Contenedor 2'), S.voice('TENOR')],
+                [S.recv('conts'), S.xy(165, -100), S.show(), S.sound('Pop')],
+                [S.recv('tarde'), S.hide()],
+                [S.click(), S.iff(S.and(paso(5), libre()), [S.setv('ocupado', 1), S.voice('TENOR'), S.sound('Boing')]
+                  .concat(L('Ese es el contenedor azul. Es para el papel y el cartón. ¡Prueba con el amarillo!'), [S.setv('ocupado', 0)]))]
+              ]
+            },
+            {
+              id: 'bravo', x: 0, y: 40, size: 40, hidden: true, sounds: ['Magia'], scripts: [
+                [F(), S.hide(), S.size(40)],
+                [S.recv('fin'), S.size(40), S.xy(0, 50), S.show(), S.sound('Magia'), S.rep(7, [S.grow(14), S.wait(0.03)])]
+              ]
+            }
+          ]
+        });
+      }
+    },
+
+    /* ---------- memoria de parejas ---------- */
+    {
+      id: 'memoria-canarias', title: 'Memoria de animales canarios', kind: 'juego', stars: 1, bg: 'laurisilva', sprite: 'carta',
+      desc: 'Da la vuelta a dos cartas y encuentra las cuatro parejas de animales. Cada carta dice su nombre en voz alta.',
+      challenge: 'Toca una carta y después otra. Si son iguales, ¡pareja! Si no, se vuelven a tapar. Encuentra las cuatro parejas.',
+      openSprite: 'Casilla 1',
+      build() {
+        const NAMES = ['Canario', 'Lagarto', 'Tortuga', 'Mariposa'];
+        const PERM = [[1, 2, 3, 4, 1, 2, 3, 4], [2, 4, 1, 3, 3, 1, 4, 2], [3, 1, 4, 2, 2, 4, 1, 3], [4, 3, 2, 1, 1, 2, 3, 4]];
+        const XS = [-165, -55, 55, 165], YS = [55, -55];
+        const carta = (i) => {
+          const e = 'e' + (i + 1), f = 'f' + (i + 1);
+          return {
+            id: 'carta', name: 'Casilla ' + (i + 1), x: XS[i % 4], y: YS[Math.floor(i / 4)], size: 80, sounds: ['Pop', 'Ta-chán', 'Boing'], scripts: [
+              [F(), S.voice('ALTO'), S.show(), S.size(80), S.costume('Carta 1'), S.setv(e, 0), S.wait(0.3)]
+                .concat([1, 2, 3, 4].map((k) => S.iff(S.eq(S.v('barajar'), k), [S.setv(f, PERM[k - 1][i])]))),
+              [S.click(), S.iff(S.and(S.eq(S.v('bloqueo'), 0), S.eq(S.v(e), 0)), [
+                S.setv('bloqueo', 1), S.setv(e, 1), S.sound('Pop')]
+                .concat([1, 2, 3, 4].map((k) => S.iff(S.eq(S.v(f), k), [S.costume('Carta ' + (k + 1))].concat(S.talk(NAMES[k - 1])))))
+                .concat([S.ifelse(S.eq(S.v('abiertas'), 0),
+                  [S.setv('abiertas', 1), S.setv('primera', S.v(f)), S.setv('bloqueo', 0)],
+                  [S.ifelse(S.eq(S.v('primera'), S.v(f)),
+                    [S.sound('Ta-chán'), S.chv('Parejas', 1), S.send('acierto'), S.wait(0.5), S.setv('abiertas', 0),
+                      S.ifelse(S.eq(S.v('Parejas'), 4), [S.send('fin')], [S.setv('bloqueo', 0)])],
+                    [S.wait(0.5), S.sound('Boing'), S.send('cerrar'), S.wait(0.4), S.setv('abiertas', 0), S.setv('bloqueo', 0)])])]))],
+              [S.recv('acierto'), S.iff(S.eq(S.v(e), 1), [S.setv(e, 2), S.size(95), S.wait(0.15), S.size(80), S.wait(0.15), S.size(95), S.wait(0.15), S.size(80)])],
+              [S.recv('cerrar'), S.iff(S.eq(S.v(e), 1), [S.setv(e, 0), S.costume('Carta 1')])]
+            ]
+          };
+        };
+        const vars = [['Parejas', 0, true], ['bloqueo', 1, false], ['abiertas', 0, false], ['primera', 0, false], ['barajar', 1, false]];
+        for (let i = 1; i <= 8; i++) { vars.push(['e' + i, 0, false]); vars.push(['f' + i, 0, false]); }
+        return make({
+          backdrops: ['laurisilva'], messages: ['acierto', 'cerrar', 'fin'], vars,
+          stage: [[F(), S.backdrop('laurisilva')]],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: -195, y: -150, size: 42, sounds: ['Pop'], scripts: [
+                [F(), S.voice('KITTEN'), S.show(), S.xy(-195, -150), S.setv('bloqueo', 1), S.setv('abiertas', 0), S.setv('Parejas', 0), S.setv('barajar', S.rnd(1, 4)), S.wait(0.6)]
+                  .concat(S.talk('Encuentra las parejas. Toca una carta y luego otra. Si son iguales, ¡pareja!'), [S.setv('bloqueo', 0)]),
+                [S.recv('acierto'), S.voice('KITTEN'), S.wait(0.2), S.iff(S.lt(S.v('Parejas'), 4), S.talk('¡Pareja!'))],
+                [S.recv('fin'), S.voice('KITTEN'), S.hide()].concat(S.talk('¡Muy bien! Has encontrado las cuatro parejas.'), [S.wait(1), S.stopAll()])
+              ]
+            }
+          ].concat([0, 1, 2, 3, 4, 5, 6, 7].map(carta)).concat([{
+            id: 'bravo', x: 0, y: 50, size: 40, hidden: true, sounds: ['Magia'], scripts: [
+              [F(), S.hide(), S.size(40)],
+              [S.recv('fin'), S.size(40), S.xy(0, 40), S.show(), S.sound('Magia'), S.rep(7, [S.grow(14), S.wait(0.03)])]
+            ]
+          }])
+        });
+      }
+    },
+
+    /* ---------- juego de ritmo con el robot ---------- */
+    {
+      id: 'ritmo-robot', title: 'El baile del robot: ¡sigue el ritmo!', kind: 'juego', stars: 2, bg: 'ritmo', sprite: 'flecha',
+      desc: 'Las flechas bajan al compás del tambor. Pulsa la misma flecha (o tócala) cuando llegue al círculo y haz bailar al robot.',
+      challenge: 'Mira de qué color es la flecha que baja y pulsa esa flecha del teclado, del mando en pantalla o toca la propia flecha cuando esté en el círculo.',
+      openSprite: 'Robot',
+      build() {
+        const KEYS = ['left arrow', 'up arrow', 'down arrow', 'right arrow'];
+        const XS = [-80, 0, 80, 160];
+        const NAMES = ['izquierda', 'arriba', 'abajo', 'derecha'];
+        const yy = () => mk('motion_yposition');
+        const zona = () => S.and(S.gt(yy(), -150), S.lt(yy(), -70));
+        const lane = (k) => {
+          const a = 'activo' + (k + 1), x = XS[k];
+          const acierto = () => [S.setv(a, 0), S.hide(), S.chv('Puntos', 1), S.sound('Pop'), S.send('baila'), S.goto(x, 190)];
+          return {
+            id: 'flecha', name: 'Flecha ' + NAMES[k], x, y: 190, size: 55, hidden: true, sounds: ['Pop'], scripts: [
+              [F(), S.hide(), S.setv(a, 0), S.costume('Flecha ' + (k + 1)), S.size(55), S.xy(x, 190), S.forever([
+                S.iff(S.eq(S.v(a), 1), [
+                  S.dy(-5),
+                  S.iff(S.and(S.keyp(KEYS[k]), zona()), acierto()),
+                  S.iff(S.lt(yy(), -165), [S.setv(a, 0), S.hide(), S.goto(x, 190)])
+                ])
+              ])],
+              [S.recv('flecha'), S.iff(S.and(S.eq(S.v('carril'), k + 1), S.eq(S.v(a), 0)), [S.goto(x, 190), S.show(), S.setv(a, 1)])],
+              [S.click(), S.iff(S.and(S.eq(S.v(a), 1), zona()), acierto())]
+            ]
+          };
+        };
+        return make({
+          backdrops: ['ritmo'], messages: ['flecha', 'baila', 'fin'],
+          vars: [['Puntos', 0, true], ['carril', 0, false], ['activo1', 0, false], ['activo2', 0, false], ['activo3', 0, false], ['activo4', 0, false]],
+          stage: [[F(), S.backdrop('ritmo')]],
+          sprites: [
+            {
+              id: 'robot', x: -185, y: -20, size: 80, sounds: ['Pop', 'Tambor', 'Ta-chán'], scripts: [
+                [F(), S.voice('TENOR'), S.show(), S.xy(-185, -20), S.costume('Robot 1'), S.setv('Puntos', 0), S.setv('carril', 0), S.wait(0.5)]
+                  .concat(S.talk('¡Hola! Soy el robot bailarín. Cuando una flecha llegue al círculo, pulsa esa misma flecha. ¡A bailar!'), [
+                    S.wait(0.5),
+                    S.rep(36, [S.setv('carril', S.rnd(1, 4)), S.send('flecha'), S.sound('Tambor'), S.wait(0.5)]),
+                    S.wait(2.5), S.send('fin')]),
+                [S.recv('baila'), S.next(), S.rep(2, [S.goto(-185, -4), S.wait(0.08), S.goto(-185, -20), S.wait(0.08)])],
+                [S.recv('fin'), S.voice('TENOR'), S.costume('Robot 2'), S.sound('Ta-chán'),
+                  S.ifelse(S.gt(S.v('Puntos'), 23),
+                    [R('text2speech_speakAndWait', { WORDS: S.join('¡Increíble! ¡Eres un campeón del ritmo! Has acertado ', S.join(S.v('Puntos'), ' flechas.')) })],
+                    [S.ifelse(S.gt(S.v('Puntos'), 11),
+                      [R('text2speech_speakAndWait', { WORDS: S.join('¡Qué bien bailas! Has acertado ', S.join(S.v('Puntos'), ' flechas.')) })],
+                      [R('text2speech_speakAndWait', { WORDS: S.join('¡Buen intento! Has acertado ', S.join(S.v('Puntos'), ' flechas. Pulsa la bandera y vuelve a bailar, cada vez sale mejor.')) })])]),
+                  S.wait(1), S.stopAll()],
+                [S.click(), S.sound('Pop'), S.next()]
+              ]
+            },
+            lane(0), lane(1), lane(2), lane(3),
+            {
+              id: 'bravo', x: 160, y: 20, size: 30, hidden: true, sounds: ['Magia'], scripts: [
+                [F(), S.hide(), S.size(30)],
+                [S.recv('fin'), S.iff(S.gt(S.v('Puntos'), 11), [S.size(30), S.xy(110, 20), S.show(), S.sound('Magia'), S.rep(8, [S.grow(10), S.wait(0.03)])])]
+              ]
+            }
+          ]
+        });
+      }
     }
 
   ];

@@ -930,7 +930,13 @@
     btn.addEventListener('click', () => show(pad.hidden));
     PQ.padAuto = function () {
       let uses = false;
-      const walk = (arr) => (arr || []).forEach((b) => { if (b.op === 'event_whenkeypressed' && /arrow|space/.test(b.f.KEY_OPTION)) uses = true; walk(b.sub); walk(b.sub2); });
+      const one = (b) => {
+        if (!b) return;
+        if ((b.op === 'event_whenkeypressed' || b.op === 'sensing_keypressed') && /arrow|space/.test((b.f && b.f.KEY_OPTION) || '')) uses = true;
+        walk(b.sub); walk(b.sub2); one(b.cond);
+        if (b.in) Object.keys(b.in).forEach((k) => one(b.in[k]));
+      };
+      const walk = (arr) => (arr || []).forEach(one);
       PQ.allTargets(S.project).forEach((t) => (t.scripts || []).forEach((sc) => walk(sc.blocks)));
       if (uses && g.matchMedia && g.matchMedia('(pointer: coarse)').matches) show(true);
     };

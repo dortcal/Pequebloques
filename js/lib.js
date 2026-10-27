@@ -308,6 +308,15 @@
     <path d="M38 12 H100 L84 34 L100 56 H38 Z" fill="#FF3355" ${st()}/>
     <path d="M24 112 H48" stroke="${O}" stroke-width="5" stroke-linecap="round"/>`)]]);
 
+  // 29. Botella de plástico (basura)
+  sp('botella', 'Botella', [['botella-a', svg(`
+    <rect x="46" y="6" width="28" height="14" rx="4" fill="#E2554D" ${st(2.8)}/>
+    <path d="M48 20 H72 L74 38 Q92 48 92 72 V104 Q92 114 82 114 H38 Q28 114 28 104 V72 Q28 48 46 38 Z" fill="#CDEFFF" fill-opacity=".85" ${st()}/>
+    <path d="M30 76 H90 V102 Q90 112 80 112 H40 Q30 112 30 102 Z" fill="#8FD3F5" opacity=".7"/>
+    <rect x="32" y="62" width="56" height="18" fill="#59B7FF" ${st(2.5)}/>
+    <circle cx="52" cy="92" r="3.4" fill="${O}"/><circle cx="68" cy="92" r="3.4" fill="${O}"/>
+    <path d="M54 102 q6-5 12 0" fill="none" ${st(2.6)}/>`)]]);
+
   PQ.SPRITE_LIB = SPRITES;
 
   /* ====================== FONDOS 480x360 ====================== */
@@ -493,6 +502,16 @@
     <path d="M40 300 L120 172 H360 L440 300 Z" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
     <path d="M190 300 Q240 270 290 300" fill="none" stroke="#fff" stroke-width="5"/>
     <ellipse cx="240" cy="292" rx="8" ry="4" fill="#fff"/>`));
+
+  bd('huerto', 'Huerto', bg(`
+    <defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FD3FF"/><stop offset="1" stop-color="#E4F6FF"/></linearGradient></defs>
+    <rect width="480" height="360" fill="url(#s)"/>
+    ${cloud(90, 60, 1)}${cloud(330, 80, .9)}
+    <path d="M0 190 Q120 150 240 184 T480 170 V360 H0 Z" fill="#7BCB63"/>
+    <g stroke="#8A5A32" stroke-width="5" fill="#C98F5B"><rect x="10" y="150" width="8" height="46"/><rect x="50" y="150" width="8" height="46"/><rect x="90" y="150" width="8" height="46"/><rect x="130" y="150" width="8" height="46"/><rect x="0" y="164" width="150" height="8"/><rect x="0" y="182" width="150" height="8"/></g>
+    <path d="M0 250 Q120 232 240 250 T480 244 V360 H0 Z" fill="#8A5A32"/>
+    <g fill="#6F4526">${[0, 1, 2, 3, 4, 5].map((i) => `<path d="M${10 + i * 80} 286 q30-16 60 0 v10 h-60 Z"/><path d="M${10 + i * 80} 330 q30-16 60 0 v10 h-60 Z"/>`).join('')}</g>
+    <ellipse cx="240" cy="266" rx="50" ry="14" fill="#5E3A1E"/>`));
 
   PQ.BACKDROP_LIB = BACKDROPS;
 

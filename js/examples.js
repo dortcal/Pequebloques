@@ -749,6 +749,205 @@
         });
       }
     }
+,
+    /* ---------- más cuentos interactivos ---------- */
+    {
+      id: 'rescate-mar', title: 'Rescate en el mar', kind: 'cuento', voices: true, stars: 2, bg: 'mar', sprite: 'tortuga',
+      desc: 'Recoge las botellas de la playa y elige quién da un paseo por el mar. ¡Cuidemos el océano!',
+      challenge: 'Toca las 3 botellas de la playa. Después, en el mar, toca a la tortuga o a la ballena para que te lleve de paseo.',
+      openSprite: 'Botella',
+      build() {
+        const L = S.talk;
+        const paso = (n) => S.eq(S.v('paso'), n);
+        return make({
+          backdrops: ['playa', 'mar'], messages: ['m1', 'm2', 'mar', 'm3', 'm4', 'paseot', 'paseob', 'final', 'adios'],
+          vars: [['paso', 0, false], ['botellas', 0, false]],
+          stage: [[F(), S.backdrop('playa'), S.setv('paso', 0)], [S.recv('mar'), S.backdrop('mar')], [S.recv('final'), S.backdrop('playa')]],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: -140, y: -100, size: 85, sounds: ['Pop'], scripts: [
+                [F(), S.voice('KITTEN'), S.show(), S.xy(-140, -100), S.hidev('botellas')].concat(L('¡Qué playa tan bonita! Pero mira, hay botellas de plástico.'), [S.send('m1')]),
+                [S.recv('m2'), S.voice('KITTEN')].concat(L('Toca las botellas para recogerlas. ¡Son tres!'), [S.setv('paso', 1), S.setv('botellas', 0), S.showv('botellas')]),
+                [S.recv('mar'), S.voice('KITTEN'), S.xy(-170, 60)].concat(L('¡Qué limpio está el mar! Mira cuántos amigos.'), [S.send('m3')]),
+                [S.recv('final'), S.voice('KITTEN'), S.xy(-110, -100), S.wait(0.6)].concat(L('¡Qué playa tan limpia! Cuidemos el mar entre todos.'), [S.send('adios')]),
+                [S.click(), S.voice('KITTEN')].concat(L('¡Qué playa tan bonita!'))
+              ]
+            },
+            {
+              id: 'yeray', x: -50, y: -100, size: 85, scripts: [
+                [F(), S.voice('ALTO'), S.show(), S.xy(-50, -100)],
+                [S.recv('m1'), S.voice('ALTO')].concat(L('El plástico ensucia el mar y hace daño a los animales. ¡Vamos a limpiarlo!'), [S.send('m2')]),
+                [S.recv('mar'), S.xy(-100, 60)],
+                [S.recv('final'), S.xy(-30, -100)],
+                [S.recv('adios'), S.voice('ALTO'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Fin del cuento! ¡Hasta pronto!'))
+              ]
+            },
+            {
+              id: 'botella', x: 90, y: -130, size: 60, hidden: true, sounds: ['Pop', 'Ta-chán'], scripts: [
+                [F(), S.hide(), S.xy(90, -130)],
+                [S.recv('m2'), S.xy(90, -130), S.show()],
+                [S.click(), S.iff(paso(1), [S.chv('botellas', 1), S.sound('Pop'),
+                  S.ifelse(S.eq(S.v('botellas'), 3), [S.setv('paso', 2), S.hidev('botellas'), S.hide(), S.sound('Ta-chán'), S.wait(0.6), S.send('mar')], [S.goto(S.rnd(-170, 170), S.rnd(-160, -100))])])]
+              ]
+            },
+            {
+              id: 'tortuga', x: -40, y: -50, size: 90, hidden: true, sounds: ['Chapuzón'], scripts: [
+                [F(), S.hide(), S.voice('GIANT'), S.xy(-40, -50)],
+                [S.recv('mar'), S.xy(-40, -50), S.show()],
+                [S.recv('m3'), S.voice('GIANT')].concat(L('Gracias por limpiar la playa. Ahora podemos nadar sin peligro.'), [S.send('m4')]),
+                [S.click(), S.iff(paso(3), [S.setv('paso', 4), S.send('paseot')])],
+                [S.recv('paseot'), S.voice('GIANT')].concat(L('¡Agarraos a mi caparazón! ¡Vamos a nadar!'), [S.rep(2, [S.glide(1, 100, -30), S.next(), S.glide(1, -40, -50), S.next()]), S.send('final')]),
+                [S.recv('paseob'), S.hide()],
+                [S.recv('final'), S.hide()]
+              ]
+            },
+            {
+              id: 'ballena', x: 130, y: 40, size: 110, hidden: true, sounds: ['Chapuzón'], scripts: [
+                [F(), S.hide(), S.voice('GIANT'), S.xy(130, 40)],
+                [S.recv('mar'), S.xy(130, 40), S.show()],
+                [S.click(), S.iff(paso(3), [S.setv('paso', 4), S.send('paseob')])],
+                [S.recv('paseob'), S.voice('GIANT'), S.sound('Chapuzón'), S.next()].concat(L('Soy una ballena calderón. ¡Vamos a dar un paseo!'), [S.rep(2, [S.glide(1, 0, 70), S.glide(1, 130, 40)]), S.next(), S.send('final')]),
+                [S.recv('paseot'), S.hide()],
+                [S.recv('final'), S.hide()]
+              ]
+            },
+            {
+              id: 'cangrejo', x: 150, y: -120, size: 70, hidden: true, sounds: ['Pop'], scripts: [
+                [F(), S.hide(), S.voice('SQUEAK'), S.xy(150, -120)],
+                [S.recv('mar'), S.show()],
+                [S.recv('m4'), S.voice('SQUEAK')].concat(L('Toca a la tortuga o a la ballena para dar un paseo.'), [S.setv('paso', 3)]),
+                [S.recv('final'), S.hide()]
+              ]
+            }
+          ]
+        });
+      }
+    },
+    {
+      id: 'huerto-lucia', title: 'El huerto de Lucía', kind: 'cuento', voices: true, stars: 2, bg: 'huerto', sprite: 'zanahoria',
+      desc: 'Planta una semilla, riégala, dale sol y mira cómo crece una zanahoria. Después, ¡al mercado!',
+      challenge: 'Toca la semilla, toca el vaso de agua tres veces, toca el sol y por último toca la zanahoria para cogerla.',
+      openSprite: 'Zanahoria',
+      build() {
+        const L = S.talk;
+        const paso = (n) => S.eq(S.v('paso'), n);
+        return make({
+          backdrops: ['huerto', 'mercado'], messages: ['m1', 'plantada', 'sol', 'crece', 'lista', 'cosecha', 'fin', 'riega'],
+          vars: [['paso', 0, false], ['riego', 0, false]],
+          stage: [[F(), S.backdrop('huerto'), S.setv('paso', 0)], [S.recv('cosecha'), S.backdrop('mercado')]],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: -150, y: -20, size: 85, sounds: ['Pop'], scripts: [
+                [F(), S.voice('ALTO'), S.show(), S.xy(-150, -20), S.hidev('riego')].concat(L('¡Hola! Hoy vamos a plantar una zanahoria en el huerto.'), L('Toca la semilla para plantarla.'), [S.setv('paso', 1)]),
+                [S.recv('plantada'), S.voice('ALTO')].concat(L('¡Ya está plantada! Ahora necesita agua. Toca el vaso tres veces.'), [S.setv('paso', 3), S.setv('riego', 0), S.showv('riego')]),
+                [S.recv('sol'), S.voice('ALTO')].concat(L('¡Muy bien! Ahora necesita sol. Toca el sol.'), [S.setv('paso', 4)]),
+                [S.recv('lista'), S.voice('ALTO')].concat(L('¡Qué grande ha crecido! Toca la zanahoria para cogerla.'), [S.setv('paso', 5)]),
+                [S.recv('cosecha'), S.voice('ALTO'), S.xy(-60, -140), S.wait(0.6)].concat(L('Vamos a llevarla al mercado para compartirla.'), [S.send('fin')]),
+                [S.click(), S.voice('ALTO')].concat(L('Hoy vamos a plantar una zanahoria.'))
+              ]
+            },
+            {
+              id: 'yeray', x: 150, y: -20, size: 85, hidden: true, scripts: [
+                [F(), S.hide(), S.voice('TENOR'), S.xy(150, -20)],
+                [S.recv('cosecha'), S.xy(40, -140), S.show()],
+                [S.recv('fin'), S.voice('TENOR'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Qué rica! La zanahoria es buena para la vista. ¡Fin del cuento!'))
+              ]
+            },
+            {
+              id: 'semilla', x: -90, y: -60, size: 50, sounds: ['Pop'], scripts: [
+                [F(), S.show(), S.xy(-90, -60)],
+                [S.click(), S.iff(paso(1), [S.setv('paso', 2), S.sound('Pop'), S.glide(0.8, 0, -86), S.hide(), S.send('plantada')])]
+              ]
+            },
+            {
+              id: 'agua', x: 150, y: 20, size: 55, hidden: true, sounds: ['Chapuzón'], scripts: [
+                [F(), S.hide(), S.xy(150, 20)],
+                [S.recv('plantada'), S.show()],
+                [S.click(), S.iff(paso(3), [S.chv('riego', 1), S.sound('Chapuzón'), S.dy(-15), S.wait(0.2), S.dy(15), S.send('riega'),
+                  S.iff(S.eq(S.v('riego'), 3), [S.setv('paso', 3.5), S.hidev('riego'), S.hide(), S.send('sol')])])]
+              ]
+            },
+            {
+              id: 'estrella', name: 'Sol', x: 170, y: 120, size: 70, hidden: true, sounds: ['Magia'], scripts: [
+                [F(), S.hide(), S.xy(170, 120)],
+                [S.recv('sol'), S.show()],
+                [S.click(), S.iff(paso(4), [S.setv('paso', 4.5), S.sound('Magia'), S.grow(30), S.wait(0.3), S.hide(), S.send('crece')])]
+              ]
+            },
+            {
+              id: 'zanahoria', x: 0, y: -72, size: 15, hidden: true, sounds: ['Pop'], scripts: [
+                [F(), S.hide(), S.size(15), S.xy(0, -72)],
+                [S.recv('plantada'), S.size(15), S.xy(0, -72), S.show()],
+                [S.recv('riega'), S.grow(12), S.dy(7)],
+                [S.recv('crece'), S.rep(8, [S.grow(8), S.dy(3), S.wait(0.12)]), S.send('lista')],
+                [S.click(), S.iff(paso(5), [S.setv('paso', 6), S.sound('Pop'), S.hide(), S.send('cosecha')])]
+              ]
+            }
+          ]
+        });
+      }
+    },
+    /* ---------- más juegos ---------- */
+    {
+      id: 'frutas-si', title: 'Frutas sí, caramelos no', kind: 'juego', stars: 2, bg: 'campo', sprite: 'manzana',
+      desc: 'Mueve a Lucía a izquierda y derecha: atrapa las frutas y verduras y esquiva los caramelos.',
+      challenge: 'Usa las flechas izquierda y derecha. Cada fruta o verdura suma un punto; cada caramelo resta uno. ¡Llega a 10!',
+      openSprite: 'Lucía',
+      build() {
+        const caer = (x0, wait, good) => [F(), S.setv('paso', 0), S.goto(x0, 190), S.wait(wait), S.forever([
+          S.dy(-5),
+          S.iff(S.touch('Lucía'), good
+            ? [S.chv('Puntos', 1), S.sound('Pop'), S.goto(S.rnd(-200, 200), 190),
+              S.iff(S.and(S.gt(S.v('Puntos'), 9), S.eq(S.v('paso'), 0)), [S.setv('paso', 1), S.send('fin')])]
+            : [S.iff(S.gt(S.v('Puntos'), 0), [S.chv('Puntos', -1)]), S.sound('Boing'), S.goto(S.rnd(-200, 200), 190)]),
+          S.iff(S.lt(mk('motion_yposition'), -170), [S.goto(S.rnd(-200, 200), 190)])
+        ])];
+        return make({
+          backdrops: ['campo'], messages: ['fin'], vars: [['Puntos', 0, true], ['paso', 0, false]],
+          stage: [[F(), S.backdrop('campo')]],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: 0, y: -135, size: 75, sounds: ['Pop'], scripts: [
+                [F(), S.xy(0, -135), S.voice('ALTO'), S.setv('Puntos', 0), S.setv('paso', 0), S.forever([
+                  S.iff(S.and(S.keyp('left arrow'), S.gt(S.xpos(), -200)), [S.dx(-7)]),
+                  S.iff(S.and(S.keyp('right arrow'), S.lt(S.xpos(), 200)), [S.dx(7)])])],
+                [S.recv('fin'), S.voice('ALTO'), S.sound('Ta-chán'), S.rep(3, [S.dy(16), S.wait(0.1), S.dy(-16), S.wait(0.1)])].concat(S.talk('¡Diez puntos! Las frutas y las verduras nos hacen crecer fuertes.'), [S.stopAll()])
+              ]
+            },
+            { id: 'manzana', x: -120, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: [caer(-120, 0, true)] },
+            { id: 'zanahoria', x: 90, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: [caer(90, 1.5, true)] },
+            { id: 'caramelo', x: 0, y: 190, size: 45, sounds: ['Pop', 'Boing'], scripts: [caer(0, 0.8, false)] }
+          ]
+        });
+      }
+    },
+    {
+      id: 'atrapa-pez', title: 'Atrapa al pez', kind: 'juego', stars: 1, bg: 'mar', sprite: 'pez',
+      desc: 'El pez no para quieto. Toca todos los peces que puedas en 20 segundos.',
+      challenge: 'Toca al pez cada vez que cambie de sitio. ¿Cuántos atrapas en 20 segundos? Prueba a cambiar la velocidad del pez.',
+      openSprite: 'Pez',
+      build() {
+        return make({
+          backdrops: ['mar'], messages: ['fin'], vars: [['Peces', 0, true], ['Tiempo', 20, true]],
+          stage: [[F(), S.backdrop('mar')]],
+          sprites: [
+            {
+              id: 'pez', x: 0, y: 0, size: 65, sounds: ['Pop'], scripts: [
+                [F(), S.setv('Peces', 0), S.forever([S.goto(S.rnd(-170, 170), S.rnd(-110, 110)), S.next(), S.wait(0.7)])],
+                [S.click(), S.chv('Peces', 1), S.sound('Pop'), S.goto(S.rnd(-170, 170), S.rnd(-110, 110))]
+              ]
+            },
+            {
+              id: 'cangrejo', x: 160, y: -130, size: 60, sounds: ['Ta-chán'], scripts: [
+                [F(), S.voice('SQUEAK'), S.setv('Tiempo', 20), S.rep(20, [S.wait(1), S.chv('Tiempo', -1)]), S.send('fin')],
+                [S.recv('fin'), S.voice('SQUEAK'), S.sound('Ta-chán'),
+                  R('text2speech_speakAndWait', { WORDS: S.join('¡Se acabó el tiempo! Has atrapado ', S.join(S.v('Peces'), ' peces.')) }), S.stopAll()]
+              ]
+            }
+          ]
+        });
+      }
+    }
 
   ];
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -294,7 +294,8 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
 #banner[hidden]{display:none}
 #banner .bi{width:34px;height:34px;border-radius:50%;background:#FFB300;display:flex;align-items:center;justify-content:center;flex:none}
 #banner .bi svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-#banner .bt{flex:1;line-height:1.3}
+#banner{flex-wrap:wrap}
+#banner .bt{flex:1 1 150px;min-width:150px;line-height:1.3}
 #banner button{border:0;background:rgba(0,0,0,.1);border-radius:50%;width:34px;height:34px;color:#5a3d00;font-size:18px;font-weight:900;padding:0}
 #guide{position:absolute;left:12px;bottom:12px;width:min(540px,calc(100% - 24px));background:#fff;border:4px solid #8B5CF6;border-radius:22px;box-shadow:0 10px 30px rgba(40,30,120,.3);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;z-index:7;animation:pop .25s cubic-bezier(.2,1.3,.4,1)}
 #guide[hidden]{display:none}
@@ -391,7 +392,17 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
 #legal .ccl{display:inline-flex}
 #legal .ccb{height:26px;width:auto;display:block}
 #legal .lg{opacity:.85;max-width:62em}
-@media (max-height:620px),(max-width:700px){#legal .lg{display:none}}
+@media (max-height:820px),(max-width:700px){#legal .lg{display:none}}
+.tile{flex:none}
+@media (min-width:701px) and (max-width:1180px){
+  #app{grid-template-columns:minmax(0,1fr) clamp(320px,34vw,400px)}
+  #cats{width:64px}
+  #pal{width:calc(var(--fs) * 16.5);min-width:200px;padding-right:6px}
+  #btnGrid,#btnStageSize{display:none}
+}
+@media (pointer:coarse){.stile .x,.stile .dup{width:32px;height:32px;top:-10px}.stile .x{right:-10px}.stile .dup{left:-10px}}
+@media (max-height:800px) and (min-height:451px){#spriteinfo{display:none}}
+@media (max-height:700px) and (min-height:451px){#btnGrid,#btnStageSize{display:none}#spritepanel{min-height:96px}.stile{width:78px}}
 
 /* ---------- tabletas y móviles: pantalla completa y siempre en horizontal ---------- */
 body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
@@ -490,3 +501,6 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 #stagebox.pfull #stagebar{width:100%;margin-bottom:6px;flex:none}
 #stagebox.pfull #stagewrap{width:min(100%,calc((100dvh - 66px) * 1.333));max-height:none;margin:0 auto;border:0;border-radius:6px}
 #stagebox.pfull #btnGrid,#stagebox.pfull #btnStageSize{display:none}
+
+/* navegadores algo antiguos (iPadOS 14): sin la propiedad «inset» */
+.modal-back,#dropveil,#rotate,#stagebox.pfull{top:0;left:0;right:0;bottom:0}

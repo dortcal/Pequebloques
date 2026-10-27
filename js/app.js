@@ -978,6 +978,12 @@
     try { if (localStorage.getItem('pq_ios_tip')) return; localStorage.setItem('pq_ios_tip', '1'); } catch (e) { /* sin almacenamiento: se muestra igualmente */ }
     setTimeout(() => ui.toast('Para verla a pantalla completa: pulsa Compartir y «Añadir a pantalla de inicio».'), 4000);
   }
+  /* iPadOS/Safari antiguos sin aspect-ratio: se calcula la altura del escenario (4:3) con JavaScript */
+  function aspectFallback() {
+    if (g.CSS && g.CSS.supports && g.CSS.supports('aspect-ratio', '1 / 1')) return;
+    const f = () => { const w = $('#stagewrap'); if (!w) return; w.style.height = ''; w.style.height = Math.round(w.getBoundingClientRect().width * 0.75) + 'px'; };
+    g.addEventListener('resize', f); g.addEventListener('orientationchange', f); setInterval(f, 500); f();
+  }
   function wireKeys() {
     window.addEventListener('keydown', (e) => {
       if (modalStack.length) return;
@@ -994,7 +1000,7 @@
     });
     window.addEventListener('keyup', (e) => { const k = keyName(e); if (k) RT.keys[k] = false; });
     window.addEventListener('blur', () => { RT.keys = {}; });
-    wirePad(); wireFullscreenOnTouch(); iosTip();
+    wirePad(); wireFullscreenOnTouch(); iosTip(); aspectFallback();
   }
 
   /* ============================ conexión de botones ============================ */

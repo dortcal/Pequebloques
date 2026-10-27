@@ -569,6 +569,7 @@
     const r = be.getBoundingClientRect();
     let dragged;
     if (fromPal) {
+      ED.pushUndo();
       dragged = [PQ.clone(be._b)];
     } else {
       ED.pushUndo();

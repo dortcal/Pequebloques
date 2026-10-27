@@ -210,6 +210,7 @@
     if (opts.banner) showBanner(opts.banner);
     updateLevelBtn();
     renderAll();
+    if (PQ.padAuto) PQ.padAuto();
     dirty = false;
     if (!opts.noAuto) markDirty();
     $('#ws').scrollTop = 0; $('#ws').scrollLeft = 0;
@@ -920,6 +921,28 @@
     if (k.length === 1) return k.toLowerCase();
     return null;
   }
+  /* mando en pantalla: simula las teclas de flecha y espacio con el dedo o el ratón */
+  function wirePad() {
+    const pad = $('#pad'), btn = $('#btnPad');
+    const show = (on) => { pad.hidden = !on; btn.setAttribute('aria-pressed', String(on)); };
+    btn.addEventListener('click', () => show(pad.hidden));
+    PQ.padAuto = function () {
+      let uses = false;
+      const walk = (arr) => (arr || []).forEach((b) => { if (b.op === 'event_whenkeypressed' && /arrow|space/.test(b.f.KEY_OPTION)) uses = true; walk(b.sub); walk(b.sub2); });
+      PQ.allTargets(S.project).forEach((t) => (t.scripts || []).forEach((sc) => walk(sc.blocks)));
+      if (uses && g.matchMedia && g.matchMedia('(pointer: coarse)').matches) show(true);
+    };
+    pad.querySelectorAll('.pk').forEach((el) => {
+      const k = el.dataset.k; let timer = null;
+      const up = () => { if (timer) { clearInterval(timer); timer = null; } RT.keys[k] = false; el.classList.remove('on'); };
+      el.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (x) { /* nada */ }
+        RT.keys[k] = true; el.classList.add('on'); RT.keyEvent(k);
+        if (k !== 'space') timer = setInterval(() => RT.keyEvent(k), 140);
+      });
+      ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((ev) => el.addEventListener(ev, up));
+    });
+  }
   function wireKeys() {
     window.addEventListener('keydown', (e) => {
       if (modalStack.length) return;
@@ -936,6 +959,7 @@
     });
     window.addEventListener('keyup', (e) => { const k = keyName(e); if (k) RT.keys[k] = false; });
     window.addEventListener('blur', () => { RT.keys = {}; });
+    wirePad();
   }
 
   /* ============================ conexión de botones ============================ */

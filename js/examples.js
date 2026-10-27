@@ -12,6 +12,15 @@
     if (sub2) b.sub2 = sub2;
     return b;
   };
+  /* bloque cuyos argumentos pueden ser valores o reporteros encajados */
+  const R = (op, args) => {
+    const b = mk(op);
+    Object.keys(args).forEach((k) => {
+      const a = args[k];
+      if (a && typeof a === 'object' && a.op) { b.in = b.in || {}; b.in[k] = a; } else b.f[k] = a;
+    });
+    return b;
+  };
   const D = {
     flag: () => mk('event_whenflagclicked'),
     key: (k) => mk('event_whenkeypressed', { KEY_OPTION: k }),
@@ -29,7 +38,7 @@
     say: (t) => mk('looks_say', { MESSAGE: t }),
     costume: (n) => mk('looks_switchcostumeto', { COSTUME: n }),
     next: () => mk('looks_nextcostume'),
-    backdrop: (n) => mk('looks_switchbackdropto', { BACKDROP: n }),
+    backdrop: (n) => { const b = PQ.BACKDROP_LIB.find((x) => x.id === n); return mk('looks_switchbackdropto', { BACKDROP: b ? b.name : n }); },
     grow: (n) => mk('looks_changesizeby', { CHANGE: n }),
     size: (n) => mk('looks_setsizeto', { SIZE: n }),
     show: () => mk('looks_show'),
@@ -42,7 +51,30 @@
     voice: (v) => mk('text2speech_setVoice', { VOICE: v }),
     speak: (t) => mk('text2speech_speakAndWait', { WORDS: t }),
     /* hablar: el bocadillo aparece solo mientras suena la voz */
-    talk: (t) => [mk('text2speech_speakAndWait', { WORDS: t })]
+    talk: (t) => [mk('text2speech_speakAndWait', { WORDS: t })],
+    /* movimiento y datos */
+    glide: (s, x, y) => R('motion_glidesecstoxy', { SECS: s, X: x, Y: y }),
+    goto: (x, y) => R('motion_gotoxy', { X: x, Y: y }),
+    setv: (n, val) => R('data_setvariableto', { VARIABLE: n, VALUE: val }),
+    chv: (n, val) => R('data_changevariableby', { VARIABLE: n, VALUE: val }),
+    showv: (n) => mk('data_showvariable', { VARIABLE: n }),
+    hidev: (n) => mk('data_hidevariable', { VARIABLE: n }),
+    stopAll: () => mk('control_stop', { STOP_OPTION: 'all' }),
+    /* condiciones y reporteros */
+    iff: (c, sub) => { const b = mk('control_if', null, sub); b.cond = c; return b; },
+    ifelse: (c, sub, sub2) => { const b = mk('control_if_else', null, sub, sub2); b.cond = c; return b; },
+    waitUntil: (c) => { const b = mk('control_wait_until'); b.cond = c; return b; },
+    v: (n) => mk('data_variable', { VARIABLE: n }),
+    eq: (a, b) => R('operator_equals', { OPERAND1: a, OPERAND2: b }),
+    gt: (a, b) => R('operator_gt', { OPERAND1: a, OPERAND2: b }),
+    lt: (a, b) => R('operator_lt', { OPERAND1: a, OPERAND2: b }),
+    and: (a, b) => { const x = mk('operator_and'); x.in = { OPERAND1: a, OPERAND2: b }; return x; },
+    rnd: (a, b) => R('operator_random', { FROM: a, TO: b }),
+    minus: (a, b) => R('operator_subtract', { NUM1: a, NUM2: b }),
+    times: (a, b) => R('operator_multiply', { NUM1: a, NUM2: b }),
+    join: (a, b) => R('operator_join', { STRING1: a, STRING2: b }),
+    xpos: () => mk('motion_xposition'),
+    touch: (n) => mk('sensing_touchingobject', { TOUCHINGOBJECTMENU: n })
   };
   const script = (x, y, blocks) => ({ x, y, blocks });
 
@@ -51,6 +83,7 @@
     const p = PQ.newProject();
     (o.backdrops || ['blanco']).forEach((b) => p.stage.costumes.push(PQ.makeBackdrop(b)));
     p.messages = o.messages && o.messages.length ? o.messages.slice() : ['mensaje1'];
+    p.vars = (o.vars || []).map((v) => ({ name: v[0], value: v[1], show: !!v[2] }));
     (o.sprites || []).forEach((d) => {
       const t = PQ.makeSprite(d.id, p);
       if (d.name) t.name = d.name;
@@ -83,10 +116,10 @@
           sprites: [{
             id: 'canario', x: -170, y: -50, sounds: ['Pop', 'Ta-chán'],
             scripts: [
-              [F(), S.backdrop('Playa'), S.xy(-170, -50), S.sayFor('¡Hola! Soy un canario.', 2),
+              [F(), S.backdrop('playa'), S.xy(-170, -50), S.sayFor('¡Hola! Soy un canario.', 2),
                 S.sayFor('Hoy voy a volar hasta el Teide.', 2),
                 S.rep(10, [S.move(10), S.next(), S.wait(0.1)]), S.send('teide')],
-              [S.recv('teide'), S.backdrop('Teide'), S.xy(-150, -60), S.sound('Ta-chán'),
+              [S.recv('teide'), S.backdrop('teide'), S.xy(-150, -60), S.sound('Ta-chán'),
                 S.rep(8, [S.move(15), S.next(), S.wait(0.1)]), S.sayFor('¡Qué bonito se ve desde aquí!', 3)]
             ]
           }]
@@ -273,23 +306,23 @@
           backdrops: ['campo'], messages: ['lagarto', 'tortuga', 'carrera', 'fin'],
           sprites: [
             {
-              id: 'lucia', name: 'Lucía', x: -170, y: -60, size: 80, scripts: [
-                [F(), S.voice('ALTO'), S.xy(-170, -60)].concat(L('Hoy hay una carrera en el campo.'), [S.send('lagarto')]),
+              id: 'lucia', name: 'Lucía', x: -185, y: 30, size: 75, scripts: [
+                [F(), S.voice('ALTO'), S.xy(-185, 30)].concat(L('Hoy hay una carrera en el campo.'), [S.send('lagarto')]),
                 [S.recv('fin'), S.voice('ALTO')].concat(L('Y así terminó la carrera. ¡Qué divertido!')),
                 [S.click(), S.voice('ALTO')].concat(L('Hoy hay una carrera en el campo.'))
               ]
             },
             {
-              id: 'lagarto', x: -140, y: -120, size: 85, scripts: [
-                [F(), S.xy(-140, -120), S.voice('SQUEAK')],
+              id: 'lagarto', x: -130, y: -55, size: 85, scripts: [
+                [F(), S.xy(-130, -55), S.voice('SQUEAK')],
                 [S.recv('lagarto'), S.voice('SQUEAK')].concat(L('¡Yo soy el más rápido de toda la isla!'), [S.send('tortuga')]),
                 [S.recv('carrera'), S.rep(12, [S.dx(18), S.next(), S.wait(0.1)]), S.voice('SQUEAK')].concat(L('¡He ganado! ¡He ganado!')),
                 [S.click(), S.voice('SQUEAK')].concat(L('¡Yo soy el más rápido de toda la isla!'))
               ]
             },
             {
-              id: 'tortuga', x: -140, y: -40, size: 85, scripts: [
-                [F(), S.xy(-140, -40), S.voice('GIANT')],
+              id: 'tortuga', x: -130, y: -125, size: 85, scripts: [
+                [F(), S.xy(-130, -125), S.voice('GIANT')],
                 [S.recv('tortuga'), S.voice('GIANT')].concat(L('Despacito y con buena letra. Vamos a correr.'), [S.send('carrera')]),
                 [S.recv('carrera'), S.rep(12, [S.dx(5), S.next(), S.wait(0.3)]), S.voice('GIANT')].concat(L('Yo llegaré… un poquito más tarde.'), [S.send('fin')]),
                 [S.click(), S.voice('GIANT')].concat(L('Despacito y con buena letra.'))
@@ -343,12 +376,12 @@
       build() {
         const L = S.talk;
         return make({
-          backdrops: ['noche'], messages: ['estrella', 'cohete', 'viaje'],
+          backdrops: ['noche'], messages: ['estrella', 'cohete', 'subir', 'viaje'],
           sprites: [
             {
               id: 'robot', x: -150, y: -80, scripts: [
-                [F(), S.voice('TENOR'), S.xy(-150, -80)].concat(L('Soy un robot y nunca he viajado al espacio.'), [S.send('estrella')]),
-                [S.recv('viaje'), S.voice('TENOR'), S.xy(-30, -80)].concat(L('¡Estoy dentro del cohete! ¡Qué emoción!')),
+                [F(), S.voice('TENOR'), S.show(), S.xy(-150, -80)].concat(L('Soy un robot y nunca he viajado al espacio.'), [S.send('estrella')]),
+                [S.recv('subir'), S.voice('TENOR')].concat(L('¡Allá voy! ¡Me subo al cohete!'), [S.glide(1, 60, -90), S.hide(), S.send('viaje')]),
                 [S.click(), S.voice('TENOR')].concat(L('Soy un robot y nunca he viajado al espacio.'))
               ]
             },
@@ -361,14 +394,360 @@
             },
             {
               id: 'cohete', x: 60, y: -90, size: 70, sounds: ['Bocina'], scripts: [
-                [F(), S.xy(60, -90), S.voice('SQUEAK')],
-                [S.recv('cohete'), S.voice('SQUEAK')].concat(L('¡Tres, dos, uno, despegue!'), [S.send('viaje'), S.sound('Bocina'), S.rep(20, [S.dy(10), S.wait(0.05)]), S.hide()]),
+                [F(), S.show(), S.xy(60, -90), S.voice('SQUEAK')],
+                [S.recv('cohete'), S.voice('SQUEAK')].concat(L('¡Sube, robot! Te estoy esperando.'), [S.send('subir')]),
+                [S.recv('viaje'), S.voice('SQUEAK')].concat(L('¡Tres, dos, uno, despegue!'), [S.sound('Bocina'), S.rep(20, [S.dy(10), S.wait(0.05)]), S.hide()]),
                 [S.click(), S.voice('SQUEAK')].concat(L('¡Tres, dos, uno, despegue!'))
               ]
             }
           ]
         });
       }
+    },
+    /* ---------- cuentos largos, con cambios de escenario ---------- */
+    {
+      id: 'tesoro-teide', title: 'El tesoro del Teide', kind: 'cuento', voices: true, stars: 3, bg: 'teide', sprite: 'cofre',
+      desc: 'Lucía y Yeray buscan un tesoro. Cinco escenarios y tú decides quién les guía.',
+      challenge: 'Pulsa la bandera y escucha. Cuando te lo pidan, toca a Yeray, elige un guía y pulsa la tecla espacio. ¿Qué voz le pondrías al perro?',
+      openSprite: 'Yeray',
+      build() {
+        const L = S.talk;
+        const paso = (n) => S.eq(S.v('paso'), n);
+        return make({
+          backdrops: ['pueblo', 'laurisilva', 'teide', 'cueva', 'playa'],
+          messages: ['m1', 'm2', 'bosque', 'elperro', 'lamariposa', 'teide', 't2', 't3', 'cueva', 'c2', 'abrir', 'a2', 'final', 'adios'],
+          vars: [['paso', 0, false]],
+          stage: [
+            [F(), S.backdrop('pueblo'), S.setv('paso', 0)],
+            [S.recv('bosque'), S.backdrop('laurisilva')],
+            [S.recv('teide'), S.backdrop('teide')],
+            [S.recv('cueva'), S.backdrop('cueva')],
+            [S.recv('final'), S.backdrop('playa')]
+          ],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: -120, y: -60, sounds: ['Pop'], scripts: [
+                [F(), S.voice('ALTO'), S.show(), S.xy(-120, -60)].concat(L('¡Yeray, mira! He encontrado un mapa del tesoro.'), [S.send('m1')]),
+                [S.recv('m2'), S.voice('ALTO')].concat(L('¡Vamos a buscarlo! Toca a Yeray para empezar el viaje.'), [S.setv('paso', 1)]),
+                [S.recv('bosque'), S.voice('ALTO'), S.setv('paso', 3), S.xy(-150, -70), S.wait(0.6)].concat(L('¡Qué bosque tan verde! Esto es la laurisilva.'), L('Un perro y una mariposa quieren guiarnos. ¡Toca al que prefieras!')),
+                [S.recv('teide'), S.voice('ALTO'), S.xy(-150, -80), S.wait(0.6)].concat(L('¡Cuánto hemos subido! Este es el Teide, el pico más alto de España.'), [S.send('t2')]),
+                [S.recv('t3'), S.voice('ALTO')].concat(L('Pulsa la tecla espacio para entrar en la cueva.'), [S.setv('paso', 5)]),
+                [S.key('space'), S.iff(paso(5), [S.setv('paso', 6), S.send('cueva')])],
+                [S.recv('cueva'), S.voice('ALTO'), S.xy(-150, -90), S.wait(0.8)].concat(L('¡Qué oscuro! Menos mal que los cristales brillan.'), [S.send('c2')]),
+                [S.recv('abrir'), S.voice('ALTO')].concat(L('¡Hay monedas de oro y una nota!'), [S.send('a2')]),
+                [S.recv('final'), S.voice('ALTO'), S.xy(-130, -100), S.wait(0.6)].concat(L('¡Qué aventura tan bonita! Gracias por venir con nosotros.'), [S.send('adios')]),
+                [S.click(), S.voice('ALTO')].concat(L('¡Yeray, mira! He encontrado un mapa del tesoro.'))
+              ]
+            },
+            {
+              id: 'yeray', x: 80, y: -60, scripts: [
+                [F(), S.voice('TENOR'), S.show(), S.xy(80, -60)],
+                [S.recv('m1'), S.voice('TENOR')].concat(L('¡Un tesoro! Dice el mapa que está dentro del volcán.'), [S.send('m2')]),
+                [S.click(), S.ifelse(paso(1), [S.setv('paso', 2), S.send('bosque')], [S.sound('Pop'), S.dy(15), S.wait(0.15), S.dy(-15)])],
+                [S.recv('bosque'), S.xy(-60, -70)],
+                [S.recv('teide'), S.xy(-70, -80)],
+                [S.recv('t2'), S.voice('TENOR')].concat(L('¡Brrr, qué frío hace aquí arriba! Mira, ¡hay una cueva!'), [S.send('t3')]),
+                [S.recv('cueva'), S.xy(-70, -90)],
+                [S.recv('c2'), S.voice('TENOR')].concat(L('¡Un cofre! Está cerrado. ¡Toca el cofre para abrirlo!'), [S.setv('paso', 7)]),
+                [S.recv('a2'), S.voice('TENOR')].concat(L('La nota dice: el mayor tesoro es viajar con los amigos.'), [S.send('final')]),
+                [S.recv('final'), S.xy(-30, -100)],
+                [S.recv('adios'), S.voice('TENOR'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Fin del cuento! ¡Hasta la próxima aventura!'))
+              ]
+            },
+            {
+              id: 'perro', x: 120, y: -70, hidden: true, sounds: ['Pop'], scripts: [
+                [F(), S.hide(), S.xy(120, -70), S.voice('SQUEAK')],
+                [S.recv('bosque'), S.xy(120, -70), S.show()],
+                [S.click(), S.iff(paso(3), [S.setv('paso', 4), S.send('elperro')])],
+                [S.recv('elperro'), S.voice('SQUEAK')].concat(L('¡Guau, guau! Yo conozco el camino. ¡Seguidme!'), [S.send('teide')]),
+                [S.recv('lamariposa'), S.hide()],
+                [S.recv('teide'), S.xy(40, -80)],
+                [S.recv('cueva'), S.xy(40, -95)],
+                [S.recv('final'), S.xy(70, -115)]
+              ]
+            },
+            {
+              id: 'mariposa', x: 150, y: 40, hidden: true, sounds: ['Pop'], scripts: [
+                [F(), S.hide(), S.xy(150, 40), S.voice('KITTEN')],
+                [S.recv('bosque'), S.xy(150, 40), S.show()],
+                [S.click(), S.iff(paso(3), [S.setv('paso', 4), S.send('lamariposa')])],
+                [S.recv('lamariposa'), S.voice('KITTEN')].concat(L('Volaré delante de vosotros. ¡Venid conmigo!'), [S.send('teide')]),
+                [S.recv('elperro'), S.hide()],
+                [S.recv('teide'), S.xy(40, 30)],
+                [S.recv('cueva'), S.xy(-10, 20)],
+                [S.recv('final'), S.xy(40, 20)],
+                [F(), S.forever([S.next(), S.wait(0.25)])]
+              ]
+            },
+            {
+              id: 'cofre', x: 110, y: -90, size: 90, hidden: true, sounds: ['Ta-chán'], scripts: [
+                [F(), S.hide(), S.costume('Cofre 1'), S.xy(110, -90)],
+                [S.recv('cueva'), S.costume('Cofre 1'), S.xy(110, -90), S.show()],
+                [S.click(), S.iff(paso(7), [S.setv('paso', 8), S.costume('Cofre 2'), S.sound('Ta-chán'), S.grow(20), S.wait(0.4), S.grow(-20), S.send('abrir')])],
+                [S.recv('final'), S.hide()]
+              ]
+            }
+          ]
+        });
+      }
+    },
+    {
+      id: 'viaje-luna', title: 'Viaje a la Luna', kind: 'cuento', voices: true, stars: 3, bg: 'luna', sprite: 'cohete',
+      desc: 'De la clase al espacio: enciende los motores, atrapa estrellas y lleva al robot hasta la bandera.',
+      challenge: 'Escucha y juega: toca al robot, toca el cohete tres veces, atrapa tres estrellas y, en la Luna, mueve al robot con las flechas hasta la bandera.',
+      openSprite: 'Cohete',
+      build() {
+        const L = S.talk;
+        const paso = (n) => S.eq(S.v('paso'), n);
+        const move = (k, dx, dy) => [S.key(k), S.iff(S.gt(S.v('paso'), 6), [dx ? S.dx(dx) : S.dy(dy)])];
+        return make({
+          backdrops: ['aula', 'noche', 'espacio', 'luna'],
+          messages: ['m1', 'm2', 'm3', 'noche', 'despegue', 'espacio', 'luna', 'l2', 'l3', 'final', 'f2'],
+          vars: [['paso', 0, false], ['motores', 0, false], ['estrellas', 0, false]],
+          stage: [
+            [F(), S.backdrop('aula'), S.setv('paso', 0), S.hidev('motores'), S.hidev('estrellas')],
+            [S.recv('noche'), S.backdrop('noche')],
+            [S.recv('espacio'), S.backdrop('espacio')],
+            [S.recv('luna'), S.backdrop('luna')]
+          ],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: -150, y: -80, sounds: ['Pop'], scripts: [
+                [F(), S.voice('KITTEN'), S.show(), S.xy(-150, -80)].concat(L('Hoy, en clase, vamos a hablar de la Luna.'), [S.send('m1')]),
+                [S.recv('m3'), S.voice('KITTEN')].concat(L('Entonces, ¡a la plataforma de lanzamiento! Toca al robot para ir.'), [S.setv('paso', 1)]),
+                [S.recv('noche'), S.voice('KITTEN'), S.xy(-185, -100), S.wait(0.8)].concat(L('Para encender los motores, toca el cohete tres veces.'), [S.setv('paso', 3), S.setv('motores', 0), S.showv('motores')]),
+                [S.recv('despegue'), S.hide()],
+                [S.recv('luna'), S.voice('KITTEN'), S.wait(2.2), S.xy(-5, -112), S.show()].concat(L('¡Hemos llegado a la Luna! ¡Mira qué bonita se ve la Tierra!'), [S.send('l2')]),
+                [S.recv('f2'), S.voice('KITTEN')].concat(L('Gracias por viajar con nosotros. ¡Fin del cuento!')),
+                [S.click(), S.voice('KITTEN')].concat(L('Hoy vamos a hablar de la Luna.'))
+              ]
+            },
+            {
+              id: 'yeray', x: -40, y: -80, scripts: [
+                [F(), S.voice('ALTO'), S.show(), S.xy(-40, -80)],
+                [S.recv('m1'), S.voice('ALTO')].concat(L('¡Yo quiero ir a la Luna! ¿Y tú, robot?'), [S.send('m2')]),
+                [S.recv('noche'), S.xy(-110, -100)],
+                [S.recv('despegue'), S.hide()],
+                [S.recv('luna'), S.wait(2.2), S.xy(65, -115), S.show()],
+                [S.recv('l2'), S.voice('ALTO'), S.rep(3, [S.dy(30), S.wait(0.15), S.dy(-30), S.wait(0.15)])].concat(L('¡Casi no peso nada! Mira cómo salto.'), [S.send('l3')]),
+                [S.click(), S.voice('ALTO')].concat(L('¡Yo quiero ir a la Luna!'))
+              ]
+            },
+            {
+              id: 'robot', x: 100, y: -80, sounds: ['Pop', 'Ta-chán'], scripts: [
+                [F(), S.voice('TENOR'), S.show(), S.xy(100, -80)],
+                [S.recv('m2'), S.voice('TENOR')].concat(L('Bip, bip. Mis baterías están cargadas. ¡Vamos!'), [S.send('m3')]),
+                [S.click(), S.ifelse(paso(1), [S.setv('paso', 2), S.send('noche')], [S.sound('Pop'), S.next()])],
+                [S.recv('noche'), S.xy(-35, -100)],
+                [S.recv('despegue'), S.hide()],
+                [S.recv('luna'), S.wait(2.2), S.xy(-75, -105), S.show()],
+                [S.recv('l3'), S.voice('TENOR')].concat(L('Bip. Con las flechas puedes moverme. ¡Llévame hasta la bandera!'), [S.setv('paso', 7)]),
+                move('left arrow', -15, 0), move('right arrow', 15, 0), move('up arrow', 0, 15), move('down arrow', 0, -15),
+                [S.recv('final'), S.voice('TENOR'), S.sound('Ta-chán'), S.setv('paso', 8)].concat(L('¡Bip, bip! ¡Misión cumplida!'), [S.send('f2')])
+              ]
+            },
+            {
+              id: 'cohete', x: 60, y: -60, hidden: true, sounds: ['Bocina', 'Pop'], scripts: [
+                [F(), S.hide(), S.xy(100, -60), S.dir(90), S.size(100), S.voice('SQUEAK')],
+                [S.recv('noche'), S.xy(100, -60), S.show()],
+                [S.click(), S.iff(paso(3), [
+                  S.chv('motores', 1), S.sound('Pop'),
+                  S.iff(S.eq(S.v('motores'), 1), S.talk('¡Uno!')),
+                  S.iff(S.eq(S.v('motores'), 2), S.talk('¡Dos!')),
+                  S.iff(S.eq(S.v('motores'), 3), [S.setv('paso', 4), S.hidev('motores')].concat(S.talk('¡Tres! ¡Motores encendidos!'), [S.send('despegue')]))
+                ])],
+                [S.recv('despegue'), S.sound('Bocina'), S.rep(16, [S.dy(14), S.wait(0.05)]), S.hide(), S.wait(0.3), S.send('espacio')],
+                [S.recv('espacio'), S.xy(-170, -110), S.size(70), S.show(), S.sound('Pop'), S.glide(2, -100, -30)],
+                [S.recv('luna'), S.glide(2, 150, -95), S.size(70)]
+              ]
+            },
+            {
+              id: 'estrella', x: 100, y: 80, size: 70, hidden: true, sounds: ['Magia'], scripts: [
+                [F(), S.hide(), S.voice('KITTEN')],
+                [S.recv('espacio'), S.wait(2.2), S.xy(100, 80), S.show(), S.voice('KITTEN')].concat(L('¡Hola, viajeros! Toca tres estrellas para llegar a la Luna.'), [S.setv('paso', 5), S.setv('estrellas', 0), S.showv('estrellas')]),
+                [S.click(), S.iff(paso(5), [
+                  S.chv('estrellas', 1), S.sound('Magia'), S.grow(30), S.wait(0.2), S.grow(-30),
+                  S.ifelse(S.eq(S.v('estrellas'), 3), [S.setv('paso', 6), S.hidev('estrellas'), S.hide(), S.send('luna')], [S.goto(S.rnd(-170, 170), S.rnd(-10, 120))])
+                ])]
+              ]
+            },
+            {
+              id: 'bandera', x: -170, y: -100, size: 80, hidden: true, sounds: ['Pop'], scripts: [
+                [F(), S.hide()],
+                [S.recv('luna'), S.xy(-170, -100), S.show(), S.waitUntil(S.and(S.gt(S.v('paso'), 6), S.touch('Robot'))), S.send('final')]
+              ]
+            }
+          ]
+        });
+      }
+    },
+    /* ---------- alimentación sana: se mueve con las flechas ---------- */
+    {
+      id: 'mercado-sano', title: 'El mercado de la comida sana', kind: 'cuento', voices: true, stars: 3, bg: 'mercado', sprite: 'manzana',
+      desc: 'Mueve a Lucía con las flechas, toca la comida para conocerla y entra en la manzana mágica para descubrir un mensaje escondido.',
+      challenge: 'Usa las flechas del teclado (o el mando de la pantalla) para mover a Lucía. Toca los alimentos, lee los carteles y busca la manzana mágica.',
+      openSprite: 'Lucía',
+      build() {
+        const L = S.talk;
+        const libre = () => S.eq(S.v('ocupado'), 0);
+        const mover = (k, dx, dy) => [S.key(k), S.iff(S.gt(S.v('paso'), 0), [dx ? S.dx(dx) : S.dy(dy)])];
+        /* cada alimento: espera a que Lucía lo toque, suma, avisa al cartel y desaparece */
+        const comida = (id, name, x, y, msg, sano) => ({
+          id, name, x, y, size: 55, sounds: ['Pop'], scripts: [
+            [F(), S.show(), S.xy(x, y), S.size(55),
+              S.waitUntil(S.and(S.touch('Lucía'), libre())), S.sound('Pop')]
+              .concat(sano ? [S.chv('Comida sana', 1)] : [], [S.send(msg), S.hide()]),
+            [S.recv('entrar'), S.hide()]
+          ]
+        });
+        const info = (msg, text) => [S.recv(msg), S.voice('ALTO'), S.setv('ocupado', 1), S.show()].concat(L(text), [S.hide(), S.setv('ocupado', 0)]);
+        return make({
+          backdrops: ['mercado', 'dentro-manzana'],
+          messages: ['manzana', 'zanahoria', 'platano', 'agua', 'caramelo', 'magica', 'entrar', 'tesoro', 'mensaje', 'fin'],
+          vars: [['Comida sana', 0, true], ['paso', 0, false], ['ocupado', 0, false]],
+          stage: [[F(), S.backdrop('mercado')], [S.recv('entrar'), S.backdrop('dentro-manzana')]],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: 0, y: -145, size: 70, sounds: ['Pop'], scripts: [
+                [F(), S.voice('ALTO'), S.show(), S.size(70), S.xy(0, -145), S.setv('paso', 0), S.setv('Comida sana', 0), S.setv('ocupado', 0)]
+                  .concat(L('¡Hola! Estoy en el mercado. Muéveme con las flechas del teclado y toca la comida para conocerla.'), [S.setv('paso', 1)]),
+                mover('left arrow', -18, 0), mover('right arrow', 18, 0), mover('up arrow', 0, 18), mover('down arrow', 0, -18),
+                [S.recv('entrar'), S.xy(-170, -110), S.size(55)],
+                [S.recv('fin'), S.voice('ALTO'), S.sound('Ta-chán'), S.rep(3, [S.dy(16), S.wait(0.1), S.dy(-16), S.wait(0.1)])]
+                  .concat(L('¡Lo he conseguido! Ahora sé cómo comer sano.'), [S.stopAll()]),
+                [S.click(), S.voice('ALTO')].concat(L('Muéveme con las flechas.'))
+              ]
+            },
+            comida('manzana', 'Manzana', -170, -60, 'manzana', true),
+            comida('zanahoria', 'Zanahoria', -80, -85, 'zanahoria', true),
+            comida('platano', 'Plátano', 60, -50, 'platano', true),
+            comida('agua', 'Vaso de agua', 130, -125, 'agua', true),
+            comida('caramelo', 'Caramelo', 190, -60, 'caramelo', false),
+            {
+              id: 'manzana', name: 'Manzana mágica', x: 150, y: 10, size: 170, hidden: true, sounds: ['Magia'], scripts: [
+                [F(), S.hide(), S.xy(150, 10), S.size(170), S.waitUntil(S.and(S.eq(S.v('Comida sana'), 4), libre())), S.show(), S.sound('Magia'), S.send('magica'),
+                  S.waitUntil(S.and(S.touch('Lucía'), libre())), S.sound('Magia'), S.hide(), S.send('entrar')]
+              ]
+            },
+            {
+              id: 'semilla', x: 130, y: -70, size: 60, hidden: true, sounds: ['Pop'], scripts: [
+                [F(), S.hide()],
+                [S.recv('entrar'), S.xy(130, -70), S.show(), S.waitUntil(S.touch('Lucía')), S.sound('Pop'), S.hide(), S.send('tesoro')]
+              ]
+            },
+            {
+              id: 'pergamino', x: 0, y: 0, size: 40, hidden: true, sounds: ['Ta-chán'], scripts: [
+                [F(), S.hide(), S.size(40)],
+                [S.recv('tesoro'), S.xy(0, 0), S.size(40), S.show(), S.sound('Ta-chán'), S.rep(6, [S.grow(12), S.wait(0.05)]), S.send('mensaje')]
+              ]
+            },
+            {
+              id: 'cartel', x: -150, y: 85, size: 80, hidden: true, sounds: ['Pop'], scripts: [
+                [F(), S.hide(), S.xy(-150, 85), S.setv('ocupado', 0)],
+                info('manzana', 'La manzana tiene vitaminas y fibra. ¡Es una merienda muy sana!'),
+                info('zanahoria', 'La zanahoria es crujiente y buena para la vista.'),
+                info('platano', 'Los plátanos de Canarias dan energía para jugar y correr.'),
+                info('agua', 'El agua es la mejor bebida. ¡Bebe agua a todas horas!'),
+                info('caramelo', 'Los caramelos tienen mucho azúcar. Solo de vez en cuando, y después, ¡a lavarse los dientes!'),
+                info('magica', '¡Mira! Ha aparecido una manzana mágica. ¡Tócala con Lucía para entrar!'),
+                [S.recv('entrar'), S.voice('ALTO'), S.xy(0, 110), S.setv('ocupado', 1), S.show()]
+                  .concat(L('Estás dentro de la manzana. Busca la semilla sonriente.'), [S.hide(), S.setv('ocupado', 0)]),
+                [S.recv('mensaje'), S.voice('ALTO'), S.xy(0, 120), S.size(90), S.show()]
+                  .concat(L('Has encontrado el mensaje escondido. Dice: come fruta y verdura cada día, bebe agua y muévete mucho. ¡Así creces fuerte y sano!'), [S.send('fin')])
+              ]
+            }
+          ]
+        });
+      }
+    },
+    /* ---------- juegos de movimiento ---------- */
+    {
+      id: 'penalti', title: '¡Penalti!', kind: 'reto', stars: 2, bg: 'estadio', sprite: 'balon',
+      desc: 'Elige hacia dónde chutar con las flechas y pulsa espacio. ¡El portero se tira al azar!',
+      challenge: 'Mueve la mira con las flechas izquierda y derecha y pulsa la tecla espacio para chutar. Tienes 5 tiros. ¿Cuántos goles marcas?',
+      openSprite: 'Portero',
+      build() {
+        const L = S.talk;
+        const libre = () => S.eq(S.v('listo'), 1);
+        const salto = (cond) => S.eq(S.v('salto'), cond);
+        return make({
+          backdrops: ['estadio'], messages: ['chuta', 'gol', 'parada', 'siguiente', 'reset', 'fin'],
+          vars: [['Goles', 0, true], ['Tiros', 5, true], ['listo', 0, false], ['tiro', 0, false], ['salto', 0, false]],
+          stage: [[F(), S.backdrop('estadio')]],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: -110, y: -125, size: 65, sounds: ['Pop'], scripts: [
+                [F(), S.voice('ALTO'), S.xy(-110, -125)].concat(L('¡Penalti! Mueve la mira con las flechas y pulsa espacio para chutar.'), [S.setv('listo', 1)]),
+                [S.recv('gol'), S.voice('ALTO'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Goooool!')),
+                [S.recv('parada'), S.voice('ALTO')].concat(L('¡Uy! ¡Qué parada!')),
+                [S.recv('fin'), S.voice('ALTO'), R('text2speech_speakAndWait', { WORDS: S.join('Se acabó. Has marcado ', S.join(S.v('Goles'), ' goles. ¡Pulsa la bandera para jugar otra vez!')) })]
+              ]
+            },
+            {
+              id: 'portero', x: 0, y: 62, size: 70, sounds: ['Pop'], scripts: [
+                [F(), S.xy(0, 62), S.dir(90), S.costume('Portero 1')],
+                [S.recv('chuta'),
+                  S.setv('salto', S.times(S.minus(S.rnd(1, 3), 2), 100)),
+                  S.ifelse(salto(-100), [S.dir(30), S.costume('Portero 2'), S.glide(0.4, -100, 62)], [S.ifelse(salto(100), [S.dir(150), S.costume('Portero 2'), S.glide(0.4, 100, 62)], [S.costume('Portero 2'), S.glide(0.4, 0, 90)])])],
+                [S.recv('reset'), S.xy(0, 62), S.dir(90), S.costume('Portero 1')]
+              ]
+            },
+            {
+              id: 'balon', x: 0, y: -110, size: 45, sounds: ['Pop', 'Ta-chán', 'Boing'], scripts: [
+                [F(), S.xy(0, -110), S.costume('Balón 1'), S.setv('Goles', 0), S.setv('Tiros', 5), S.setv('listo', 0), S.setv('tiro', 0)],
+                [S.key('space'), S.iff(libre(), [S.setv('listo', 0), S.send('chuta')])],
+                [S.recv('chuta'), S.sound('Pop'), S.chv('Tiros', -1), S.glide(0.45, S.v('tiro'), 62), S.next(), S.wait(0.3),
+                  S.ifelse(S.eq(S.v('tiro'), S.v('salto')), [S.send('parada')], [S.send('gol')])],
+                [S.recv('gol'), S.chv('Goles', 1), S.sound('Ta-chán'), S.wait(1.6), S.send('siguiente')],
+                [S.recv('parada'), S.sound('Boing'), S.wait(1.6), S.send('siguiente')],
+                [S.recv('siguiente'), S.ifelse(S.eq(S.v('Tiros'), 0), [S.send('fin')], [S.xy(0, -110), S.costume('Balón 1'), S.send('reset'), S.setv('listo', 1)])]
+              ]
+            },
+            {
+              id: 'mira', x: 0, y: 62, size: 55, sounds: ['Pop'], scripts: [
+                [F(), S.xy(0, 62), S.setv('tiro', 0)],
+                [S.key('left arrow'), S.iff(S.and(libre(), S.gt(S.xpos(), -90)), [S.dx(-100), S.setv('tiro', S.xpos())])],
+                [S.key('right arrow'), S.iff(S.and(libre(), S.lt(S.xpos(), 90)), [S.dx(100), S.setv('tiro', S.xpos())])],
+                [S.recv('reset'), S.xy(0, 62), S.setv('tiro', 0)]
+              ]
+            }
+          ]
+        });
+      }
+    },
+    {
+      id: 'atrapa-platanos', title: 'Atrapa los plátanos', kind: 'reto', stars: 1, bg: 'campo', sprite: 'lagarto',
+      desc: 'Mueve al lagarto con las flechas y come 10 plátanos. Cada vez aparece uno en un sitio nuevo.',
+      challenge: 'Mueve al lagarto con las flechas y atrapa los plátanos. ¿Puedes cambiar el número de plátanos para ganar o la velocidad?',
+      openSprite: 'Lagarto',
+      build() {
+        return make({
+          backdrops: ['campo'], messages: ['fin'], vars: [['Plátanos', 0, true]],
+          stage: [[F(), S.backdrop('campo')]],
+          sprites: [
+            {
+              id: 'lagarto', x: -140, y: -110, size: 75, sounds: ['Pop'], scripts: [
+                [F(), S.xy(-140, -110), S.voice('SQUEAK'), S.setv('Plátanos', 0)],
+                [S.key('right arrow'), S.dx(20), S.dir(90), S.next()],
+                [S.key('left arrow'), S.dx(-20), S.next()],
+                [S.key('up arrow'), S.dy(20), S.next()],
+                [S.key('down arrow'), S.dy(-20), S.next()],
+                [S.recv('fin'), S.voice('SQUEAK'), S.sound('Pop')].concat(S.talk('¡Qué rico! Me he comido diez plátanos.'), [S.stopAll()]),
+                [S.click(), S.voice('SQUEAK')].concat(S.talk('Muéveme con las flechas.'))
+              ]
+            },
+            {
+              id: 'platano', x: 100, y: -20, size: 60, sounds: ['Pop'], scripts: [
+                [F(), S.xy(100, -20), S.forever([
+                  S.iff(S.touch('Lagarto'), [S.chv('Plátanos', 1), S.sound('Pop'), S.goto(S.rnd(-170, 170), S.rnd(-120, 40)),
+                    S.iff(S.eq(S.v('Plátanos'), 10), [S.send('fin')]), S.wait(0.3)])
+                ])]
+              ]
+            }
+          ]
+        });
+      }
     }
+
   ];
 })(typeof window !== 'undefined' ? window : globalThis);

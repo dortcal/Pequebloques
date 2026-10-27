@@ -14,7 +14,8 @@ Editor de programación por bloques para el alumnado de **Infantil y primer cicl
 - Modo **«Pocos bloques»** (por defecto, para los más pequeños) y **«Más bloques»**.
 - **Botón «¿Me ayudas?»**: Pipo da una pista según lo que falte en el programa, la lee en voz alta y enseña con una mano dónde arrastrar el bloque. Si el alumno lleva un rato sin hacer nada, el botón se mueve para llamar su atención.
 - **Voces**: Pipo lee los retos, los tutoriales y las pistas; el bloque «decir en voz alta» permite que cada personaje tenga su voz (normal, grave, ardilla, gigante, gatito). Con «Voz» activado, también se lee cada bloque al tocarlo.
-- **3 tutoriales guiados**, **8 cuentos y retos** y **3 cuentos con diálogo de voces** ambientados en Canarias.
+- **3 tutoriales guiados**, **8 cuentos y retos**, **6 cuentos con voces** (tres de ellos largos, con cambio de escenarios y decisiones: «El tesoro del Teide», «Viaje a la Luna» y «El mercado de la comida sana») y **2 juegos de movimiento** (¡Penalti! con portero y «Atrapa los plátanos»), ambientados en Canarias.
+- **Mando en pantalla** (botón del mando junto al escenario): flechas y espacio con el dedo, para jugar en tabletas sin teclado. Se abre solo en pantallas táctiles cuando el proyecto usa teclas.
 - Editor de disfraces (pintar, subir imagen), grabación de voz, 16 personajes, 12 fondos y 8 sonidos originales.
 - Copia automática en el navegador (botón «Último») y descarga como .sb3.
 

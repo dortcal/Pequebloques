@@ -202,6 +202,112 @@
     <path d="M44 22 q-6-10 0-16 M52 22 q0-12 8-14 M60 22 q6-8 14-6" fill="none" stroke="#7FC4FF" stroke-width="3.5" stroke-linecap="round"/>`);
   sp('ballena', 'Ballena', [['ballena-a', ballena(false)], ['ballena-b', ballena(true)]]);
 
+  // 17. Balón
+  const balon = (r) => svg(`
+    <g transform="rotate(${r} 60 60)"><circle cx="60" cy="60" r="42" fill="#fff" ${st()}/>
+    <path d="M60 38 L80 52 L72 76 L48 76 L40 52 Z" fill="${O}"/>
+    <path d="M60 38 V20 M80 52 L98 46 M72 76 L84 94 M48 76 L36 94 M40 52 L22 46" fill="none" ${st(3)}/>
+    <path d="M44 24 Q60 16 76 24 M100 56 Q104 72 94 84 M26 84 Q16 72 20 56" fill="none" stroke="${O}" stroke-width="2.5" stroke-linecap="round" opacity=".5"/></g>`);
+  sp('balon', 'Balón', [['balon-a', balon(0)], ['balon-b', balon(36)]]);
+
+  // 18. Portero
+  const portero = (up) => svg(`
+    <path d="${up ? 'M42 52 L24 14' : 'M42 54 L16 72'}" fill="none" stroke="#F0C9A2" stroke-width="10" stroke-linecap="round"/>
+    <path d="${up ? 'M78 52 L96 14' : 'M78 54 L104 72'}" fill="none" stroke="#F0C9A2" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="${up ? 22 : 13}" cy="${up ? 11 : 74}" r="9" fill="#6BD56B" ${st(2.5)}/><circle cx="${up ? 98 : 107}" cy="${up ? 11 : 74}" r="9" fill="#6BD56B" ${st(2.5)}/>
+    <rect x="40" y="94" width="14" height="22" rx="5" fill="#2E2A3C" ${st(2.5)}/><rect x="66" y="94" width="14" height="22" rx="5" fill="#2E2A3C" ${st(2.5)}/>
+    <rect x="38" y="46" width="44" height="52" rx="12" fill="#FF7A3D" ${st()}/>
+    <rect x="38" y="82" width="44" height="16" rx="6" fill="#3a2c4f"/>
+    <circle cx="60" cy="30" r="20" fill="#F0C9A2" ${st()}/>
+    <path d="M40 28 Q40 8 60 8 Q82 8 80 28 Q72 18 60 20 Q48 18 40 28 Z" fill="#5B3A29" ${st(2.5)}/>
+    <circle cx="53" cy="32" r="3" fill="${O}"/><circle cx="67" cy="32" r="3" fill="${O}"/>
+    <path d="M53 40 q7 ${up ? 8 : 5} 14 0" fill="none" ${st(2.6)}/>
+    <text x="60" y="72" font-size="18" font-weight="900" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif">1</text>`);
+  sp('portero', 'Portero', [['portero-a', portero(false)], ['portero-b', portero(true)]]);
+
+  // 19. Mira (diana)
+  sp('mira', 'Mira', [['mira-a', svg(`
+    <circle cx="60" cy="60" r="38" fill="#FF3355" fill-opacity=".18" stroke="#FF3355" stroke-width="7"/>
+    <circle cx="60" cy="60" r="18" fill="none" stroke="#FF3355" stroke-width="5"/>
+    <path d="M60 8 V34 M60 86 V112 M8 60 H34 M86 60 H112" stroke="#FF3355" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="60" cy="60" r="5" fill="#FF3355"/>`)]]);
+
+  // 20. Cofre del tesoro
+  const cofre = (open) => svg(`
+    <rect x="12" y="56" width="96" height="52" rx="8" fill="#B5713A" ${st()}/>
+    <path d="M12 74 H108 M40 56 V108 M80 56 V108" fill="none" stroke="#8A5A32" stroke-width="3.5"/>
+    ${open ? `<path d="M14 56 L8 24 Q60 6 112 24 L106 56 Z" fill="#C98445" ${st()}/>
+      <ellipse cx="60" cy="56" rx="44" ry="8" fill="#FFD91A" ${st(2.5)}/>
+      <circle cx="40" cy="48" r="7" fill="#FFE066" ${st(2)}/><circle cx="62" cy="44" r="8" fill="#FFD91A" ${st(2)}/><circle cx="82" cy="49" r="7" fill="#FFE066" ${st(2)}/>
+      <path d="M16 12 l4 8 M60 2 v10 M104 12 l-4 8" stroke="#FFD91A" stroke-width="4" stroke-linecap="round"/>`
+    : `<path d="M12 56 Q12 22 60 22 Q108 22 108 56 Z" fill="#C98445" ${st()}/><path d="M40 56 V26 M80 56 V26" fill="none" stroke="#8A5A32" stroke-width="3.5"/>`}
+    <rect x="50" y="62" width="20" height="22" rx="5" fill="#FFD91A" ${st(2.5)}/><circle cx="60" cy="71" r="3.5" fill="${O}"/>`);
+  sp('cofre', 'Cofre', [['cofre-a', cofre(false)], ['cofre-b', cofre(true)]]);
+
+  // 21. Manzana
+  sp('manzana', 'Manzana', [['manzana-a', svg(`
+    <path d="M60 30 Q70 8 86 8 Q84 26 66 32" fill="#5DBB4A" ${st(2.8)}/>
+    <path d="M60 32 Q40 18 22 38 Q8 62 28 92 Q42 112 60 104 Q78 112 92 92 Q112 62 98 38 Q80 18 60 32 Z" fill="#FF4D5E" ${st()}/>
+    <path d="M30 44 Q24 58 30 72" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".6"/>
+    <circle cx="48" cy="62" r="4.6" fill="${O}"/><circle cx="74" cy="62" r="4.6" fill="${O}"/>
+    <circle cx="49.5" cy="60.5" r="1.5" fill="#fff"/><circle cx="75.5" cy="60.5" r="1.5" fill="#fff"/>
+    <path d="M52 74 q9 9 18 0" fill="none" ${st(3)}/><circle cx="40" cy="72" r="4.4" fill="#FF9AA8" opacity=".8"/><circle cx="82" cy="72" r="4.4" fill="#FF9AA8" opacity=".8"/>`)]]);
+
+  // 22. Zanahoria
+  sp('zanahoria', 'Zanahoria', [['zanahoria-a', svg(`
+    <path d="M52 30 Q44 6 54 4 Q58 16 60 28 Q64 6 76 6 Q72 20 68 30 Z" fill="#4DBB5A" ${st(2.6)}/>
+    <path d="M36 32 Q60 22 84 32 Q92 40 74 112 Q60 118 46 112 Q28 40 36 32 Z" fill="#FF8A1F" ${st()}/>
+    <path d="M44 50 h10 M70 66 h10 M48 84 h9" stroke="#E56F00" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="51" cy="50" r="4.2" fill="${O}"/><circle cx="69" cy="50" r="4.2" fill="${O}"/>
+    <circle cx="52" cy="48.8" r="1.4" fill="#fff"/><circle cx="70" cy="48.8" r="1.4" fill="#fff"/>
+    <path d="M52 62 q8 8 16 0" fill="none" ${st(3)}/>`)]]);
+
+  // 23. Vaso de agua
+  sp('agua', 'Vaso de agua', [['agua-a', svg(`
+    <path d="M26 20 H94 L84 108 Q60 116 36 108 Z" fill="#E8F7FF" ${st()}/>
+    <path d="M31 50 H89 L84 108 Q60 116 36 108 Z" fill="#5FC3FF" ${st(2.5)}/>
+    <path d="M38 40 q6-5 12 0 t12 0 t12 0" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".9"/>
+    <circle cx="50" cy="72" r="4.2" fill="${O}"/><circle cx="70" cy="72" r="4.2" fill="${O}"/>
+    <circle cx="51.4" cy="70.6" r="1.4" fill="#fff"/><circle cx="71.4" cy="70.6" r="1.4" fill="#fff"/>
+    <path d="M52 84 q8 8 16 0" fill="none" ${st(3)}/>
+    <path d="M96 12 q8 12 0 18 q-8-6 0-18 Z" fill="#7FD0FF" ${st(2)}/>`)]]);
+
+  // 24. Caramelo (dulce: «de vez en cuando»)
+  sp('caramelo', 'Caramelo', [['caramelo-a', svg(`
+    <path d="M24 60 L6 44 L8 76 Z M96 60 L114 44 L112 76 Z" fill="#FF8AC1" ${st()}/>
+    <circle cx="60" cy="60" r="34" fill="#FF6FA8" ${st()}/>
+    <path d="M36 40 Q60 56 82 34 M30 62 Q60 78 90 58 M40 84 Q62 94 84 80" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".85"/>
+    <circle cx="50" cy="56" r="3.6" fill="${O}"/><circle cx="70" cy="56" r="3.6" fill="${O}"/>
+    <path d="M52 70 q8 -6 16 0" fill="none" ${st(2.8)}/>`)]]);
+
+  // 25. Pergamino (mensaje escondido)
+  sp('pergamino', 'Pergamino', [['pergamino-a', svg(`
+    <rect x="22" y="22" width="76" height="76" fill="#FFF1C9" ${st()}/>
+    <rect x="14" y="14" width="92" height="14" rx="7" fill="#E8C378" ${st()}/><rect x="14" y="92" width="92" height="14" rx="7" fill="#E8C378" ${st()}/>
+    <path d="M34 42 H86 M34 54 H80 M34 66 H86 M34 78 H66" fill="none" stroke="#B5713A" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="86" cy="80" r="9" fill="#E2554D" ${st(2.2)}/><path d="M86 75 l2 4 4 .6 -3 3 .8 4 -3.8-2 -3.8 2 .8-4 -3-3 4-.6 Z" fill="#FFE066"/>`)]]);
+
+  // 26. Cartel de información
+  sp('cartel', 'Cartel', [['cartel-a', svg(`
+    <rect x="54" y="78" width="12" height="38" fill="#8A5A32" ${st(2.5)}/>
+    <rect x="8" y="14" width="104" height="68" rx="12" fill="#FFF3D0" ${st()}/>
+    <rect x="15" y="21" width="90" height="54" rx="8" fill="none" stroke="#E8C378" stroke-width="4"/>
+    <circle cx="60" cy="48" r="20" fill="#3D8BFF" ${st()}/>
+    <rect x="56.5" y="46" width="7" height="16" rx="3" fill="#fff"/><circle cx="60" cy="38" r="4.2" fill="#fff"/>`)]]);
+
+  // 27. Semilla
+  sp('semilla', 'Semilla', [['semilla-a', svg(`
+    <path d="M60 10 Q96 52 84 86 Q72 112 60 112 Q48 112 36 86 Q24 52 60 10 Z" fill="#7B4A2A" ${st()}/>
+    <path d="M50 44 Q44 66 52 90" fill="none" stroke="#B5713A" stroke-width="5" stroke-linecap="round" opacity=".8"/>
+    <circle cx="52" cy="66" r="3.6" fill="#fff"/><circle cx="70" cy="66" r="3.6" fill="#fff"/><circle cx="53" cy="66.5" r="1.8" fill="${O}"/><circle cx="71" cy="66.5" r="1.8" fill="${O}"/>
+    <path d="M54 80 q6 5 12 0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>`)]]);
+
+  // 28. Bandera
+  sp('bandera', 'Bandera', [['bandera-a', svg(`
+    <path d="M34 8 V112" fill="none" stroke="#C9D3DD" stroke-width="7" stroke-linecap="round"/>
+    <path d="M38 12 H100 L84 34 L100 56 H38 Z" fill="#FF3355" ${st()}/>
+    <path d="M24 112 H48" stroke="${O}" stroke-width="5" stroke-linecap="round"/>`)]]);
+
   PQ.SPRITE_LIB = SPRITES;
 
   /* ====================== FONDOS 480x360 ====================== */
@@ -325,6 +431,69 @@
 
   bd('blanco', 'Blanco', bg('<rect width="480" height="360" fill="#fff"/>'));
   bd('cuadricula', 'Cuadrícula', bg(`<rect width="480" height="360" fill="#fff"/><g stroke="#CBD6EA" stroke-width="1.5">${[...Array(11)].map((_, i) => `<path d="M${(i + 1) * 40} 0 V360"/>`).join('')}${[...Array(8)].map((_, i) => `<path d="M0 ${(i + 1) * 40} H480"/>`).join('')}</g><path d="M240 0 V360 M0 180 H480" stroke="#8FA5CF" stroke-width="3"/>`));
+  bd('mercado', 'Mercado', bg(`
+    <defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FD3FF"/><stop offset="1" stop-color="#FFF0CF"/></linearGradient></defs>
+    <rect width="480" height="360" fill="url(#s)"/>
+    ${[['#FF8A4D', 6, 90, 100, 120], ['#FFD91A', 112, 70, 96, 140], ['#59B7FF', 214, 96, 96, 114], ['#FF6FA8', 316, 78, 90, 132], ['#FFFFFF', 410, 100, 70, 110]].map((h) =>
+      `<g><rect x="${h[1]}" y="${h[2]}" width="${h[3]}" height="${h[4]}" fill="${h[0]}" stroke="#3a2c4f" stroke-width="3"/><rect x="${h[1] + 14}" y="${h[2] + 16}" width="18" height="22" fill="#BFE9FF" stroke="#3a2c4f" stroke-width="2.5"/><rect x="${h[1] + h[3] - 34}" y="${h[2] + 16}" width="18" height="22" fill="#BFE9FF" stroke="#3a2c4f" stroke-width="2.5"/></g>`).join('')}
+    <rect y="200" width="480" height="160" fill="#E9D3A8"/>
+    <g stroke="#CDB57F" stroke-width="3"><path d="M0 250 H480"/><path d="M0 300 H480"/><path d="M80 200 L40 360"/><path d="M200 200 V360"/><path d="M320 200 L360 360"/><path d="M440 200 L500 360"/></g>
+    ${[[16, '#E2554D'], [176, '#2FB37D'], [336, '#FFB300']].map((a) =>
+      `<g><rect x="${a[0] + 6}" y="170" width="116" height="60" fill="#B5713A" stroke="#3a2c4f" stroke-width="3"/><path d="M${a[0]} 112 H${a[0] + 128} L${a[0] + 118} 168 H${a[0] + 10} Z" fill="${a[1]}" stroke="#3a2c4f" stroke-width="3"/>
+      <path d="M${a[0] + 26} 112 L${a[0] + 22} 168 M${a[0] + 52} 112 L${a[0] + 50} 168 M${a[0] + 78} 112 L${a[0] + 78} 168 M${a[0] + 104} 112 L${a[0] + 106} 168" stroke="#fff" stroke-width="9" opacity=".85"/>
+      <path d="M${a[0]} 112 H${a[0] + 128} L${a[0] + 118} 168 H${a[0] + 10} Z" fill="none" stroke="#3a2c4f" stroke-width="3"/></g>`).join('')}
+    <g stroke="#3a2c4f" stroke-width="2.5"><circle cx="40" cy="210" r="10" fill="#FF4D5E"/><circle cx="60" cy="214" r="10" fill="#FF4D5E"/><circle cx="82" cy="210" r="10" fill="#7ACB57"/><circle cx="104" cy="214" r="10" fill="#FF4D5E"/>
+    <circle cx="200" cy="212" r="10" fill="#FF8A1F"/><circle cx="222" cy="214" r="10" fill="#FF8A1F"/><circle cx="244" cy="211" r="10" fill="#FFD91A"/><circle cx="266" cy="214" r="10" fill="#FFD91A"/>
+    <circle cx="362" cy="212" r="10" fill="#B866FF"/><circle cx="384" cy="214" r="10" fill="#B866FF"/><circle cx="406" cy="211" r="10" fill="#FF6FA8"/></g>`));
+
+  bd('dentro-manzana', 'Dentro de la manzana', bg(`
+    <defs><radialGradient id="r" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#FFFBE6"/><stop offset="1" stop-color="#FFE9A0"/></radialGradient></defs>
+    <rect width="480" height="360" fill="#C81E3A"/>
+    <path d="M0 0 H480 V360 H0 Z M24 18 Q8 120 20 190 Q40 330 240 342 Q440 330 460 190 Q472 120 456 18 Z" fill="#E2354F" fill-rule="evenodd" opacity=".0"/>
+    <path d="M30 40 Q14 150 38 250 Q70 330 240 336 Q410 330 442 250 Q466 150 450 40 Q380 16 240 30 Q100 16 30 40 Z" fill="url(#r)" stroke="#8E1228" stroke-width="8"/>
+    <g stroke="#F1D27A" stroke-width="3" fill="none" opacity=".8"><path d="M240 60 V150"/><path d="M120 80 Q150 130 190 160"/><path d="M360 80 Q330 130 290 160"/><path d="M70 160 Q130 190 170 200"/><path d="M410 160 Q350 190 310 200"/></g>
+    <path d="M150 150 Q240 110 330 150 Q360 210 330 260 Q240 300 150 260 Q120 210 150 150 Z" fill="#E8F2A8" stroke="#B9C85A" stroke-width="5"/>
+    <g fill="#7B4A2A" stroke="#3a2c4f" stroke-width="3"><path d="M190 190 Q206 220 190 246 Q174 220 190 190 Z"/><path d="M290 190 Q306 220 290 246 Q274 220 290 190 Z"/><path d="M240 170 Q256 200 240 226 Q224 200 240 170 Z"/></g>
+    <circle cx="240" cy="18" r="9" fill="#7B4A2A"/>`));
+
+  bd('cueva', 'Cueva del volcán', bg(`
+    <defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#241A3D"/><stop offset="1" stop-color="#5A3B52"/></linearGradient></defs>
+    <rect width="480" height="360" fill="url(#s)"/>
+    <path d="M0 0 H480 V70 L450 40 L420 90 L388 36 L350 100 L312 44 L276 96 L240 30 L204 100 L166 40 L130 94 L94 36 L58 88 L24 44 L0 80 Z" fill="#150F26"/>
+    <path d="M0 360 V250 Q120 220 240 250 T480 240 V360 Z" fill="#3E2A3F"/>
+    <path d="M0 360 V300 Q140 276 280 304 T480 292 V360 Z" fill="#2B1C2E"/>
+    <g stroke="#3a2c4f" stroke-width="3"><path d="M70 250 L56 190 L92 226 Z" fill="#59E0FF"/><path d="M100 252 L108 170 L132 240 Z" fill="#A58BFF"/><path d="M380 246 L372 176 L406 232 Z" fill="#FF8AC1"/><path d="M410 248 L428 196 L440 244 Z" fill="#59E0FF"/></g>
+    <circle cx="96" cy="210" r="40" fill="#59E0FF" opacity=".12"/><circle cx="396" cy="210" r="40" fill="#FF8AC1" opacity=".12"/>
+    <g fill="#FFE066"><circle cx="150" cy="120" r="2.4"/><circle cx="330" cy="140" r="2.4"/><circle cx="250" cy="170" r="2"/></g>
+    <g transform="translate(226 222)"><rect x="0" y="0" width="8" height="40" fill="#8A5A32"/><path d="M4 -4 Q-8 -20 4 -34 Q16 -20 4 -4 Z" fill="#FF8A1F" stroke="#3a2c4f" stroke-width="2"/></g>`));
+
+  bd('luna', 'La Luna', bg(`
+    <defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05071A"/><stop offset="1" stop-color="#22285E"/></linearGradient>
+    <radialGradient id="t" cx=".35" cy=".35" r=".8"><stop offset="0" stop-color="#7FD0FF"/><stop offset="1" stop-color="#2D6FD0"/></radialGradient></defs>
+    <rect width="480" height="360" fill="url(#s)"/>
+    <g fill="#fff"><circle cx="40" cy="40" r="2"/><circle cx="120" cy="90" r="1.6"/><circle cx="200" cy="30" r="2.2"/><circle cx="290" cy="80" r="1.6"/><circle cx="440" cy="50" r="2"/><circle cx="360" cy="130" r="1.6"/><circle cx="70" cy="150" r="1.8"/></g>
+    <circle cx="372" cy="86" r="42" fill="url(#t)" stroke="#BFE3FF" stroke-width="3"/>
+    <path d="M346 70 Q362 58 372 74 Q364 94 350 90 Z M382 96 Q398 92 404 108 Q392 120 380 112 Z" fill="#4DBB5A"/>
+    <path d="M0 250 Q100 220 220 246 T480 236 V360 H0 Z" fill="#B9BCCB"/>
+    <path d="M0 300 Q140 272 300 302 T480 290 V360 H0 Z" fill="#9EA2B8"/>
+    <g fill="#8B8FA8" stroke="#6E7290" stroke-width="3"><ellipse cx="90" cy="290" rx="34" ry="10"/><ellipse cx="330" cy="272" rx="26" ry="8"/><ellipse cx="420" cy="320" rx="38" ry="11"/><ellipse cx="200" cy="330" rx="22" ry="7"/></g>`));
+
+  bd('estadio', 'Estadio de fútbol', bg(`
+    <defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6FC0FF"/><stop offset="1" stop-color="#CBEBFF"/></linearGradient></defs>
+    <rect width="480" height="360" fill="url(#s)"/>
+    <rect y="40" width="480" height="70" fill="#7A6CC8"/>
+    <g>${[...Array(40)].map((_, i) => `<circle cx="${6 + i * 12}" cy="${56 + (i % 3) * 16}" r="5" fill="${['#FFD91A', '#FF6FA8', '#FFFFFF', '#59B7FF', '#FF8A4D'][i % 5]}"/>`).join('')}</g>
+    <rect y="104" width="480" height="10" fill="#4C3F99"/>
+    <rect y="114" width="480" height="246" fill="#4DBB5A"/>
+    <g fill="#43AD50">${[0, 1, 2, 3, 4, 5].map((i) => `<rect x="${i * 80}" y="114" width="40" height="246"/>`).join('')}</g>
+    <rect x="70" y="40" width="340" height="132" fill="#fff" fill-opacity=".18"/>
+    <g stroke="#fff" stroke-width="1.6" opacity=".7">${[...Array(14)].map((_, i) => `<path d="M${70 + i * 26} 50 V172"/>`).join('')}${[...Array(6)].map((_, i) => `<path d="M70 ${60 + i * 22} H410"/>`).join('')}</g>
+    <path d="M70 172 V48 H410 V172" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M70 172 V48 H410 V172" fill="none" stroke="#C9D3DD" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M40 300 L120 172 H360 L440 300 Z" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M190 300 Q240 270 290 300" fill="none" stroke="#fff" stroke-width="5"/>
+    <ellipse cx="240" cy="292" rx="8" ry="4" fill="#fff"/>`));
+
   PQ.BACKDROP_LIB = BACKDROPS;
 
   /* ====================== SONIDOS ====================== */

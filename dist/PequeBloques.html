@@ -383,6 +383,16 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
 #banner .bsp{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:#fff;color:#5b3bd0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 #e3c04a}
 #banner .bsp svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 
+/* ---- mando en pantalla (flechas y espacio) ---- */
+#pad{position:absolute;left:0;right:0;bottom:0;padding:8px;display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none;z-index:6}
+#pad[hidden]{display:none}
+#pad .dp{display:grid;grid-template-columns:repeat(3,clamp(36px,8.5vw,52px));grid-template-rows:repeat(2,clamp(36px,8.5vw,52px));gap:4px;grid-template-areas:". up ." "left down right"}
+#pad .pk{pointer-events:auto;touch-action:none;border:3px solid #5b3bd0;background:rgba(255,255,255,.82);color:#4a3fa0;border-radius:14px;display:flex;align-items:center;justify-content:center;font:800 14px/1 inherit;padding:0;box-shadow:0 3px 0 rgba(91,59,208,.45);-webkit-user-select:none;user-select:none}
+#pad .pk svg{width:60%;height:60%;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+#pad .pk.on{background:#5b3bd0;color:#fff;transform:translateY(2px);box-shadow:none}
+#pad .up{grid-area:up}#pad .left{grid-area:left}#pad .down{grid-area:down}#pad .right{grid-area:right}
+#pad .space{width:clamp(84px,22vw,130px);height:clamp(36px,8.5vw,52px);letter-spacing:.06em}
+
 </style>
 </head>
 <body>
@@ -464,11 +474,21 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
         <button id="btnStop" class="sbtn stop" type="button" title="Parar todo" aria-label="Parar todo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z" fill="#E64040" stroke="#a52a2a" stroke-width="2" stroke-linejoin="round"/></svg></button>
         <button id="btnHelp" class="sbtn help" type="button" title="¿Me ayudas?" aria-label="¿Me ayudas? Pipo te da una pista"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 8C78 8 90 32 88 58 86 80 70 90 50 90 30 90 14 80 12 58 10 32 22 8 50 8z" fill="#8B5CF6" stroke="#5B3BD0" stroke-width="5"/><path d="M30 20Q20 6 12 10 16 22 26 28zM70 20Q80 6 88 10 84 22 74 28z" fill="#FFBF00" stroke="#CC9900" stroke-width="4"/><circle cx="36" cy="46" r="11" fill="#fff"/><circle cx="64" cy="46" r="11" fill="#fff"/><circle cx="38" cy="48" r="5" fill="#2b1d66"/><circle cx="62" cy="48" r="5" fill="#2b1d66"/><path d="M38 68Q50 80 62 68" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg><span>¿Me ayudas?</span></button>
         <span class="sp"></span>
+        <button id="btnPad" class="sbtn" type="button" aria-pressed="false" title="Mando con flechas" aria-label="Mostrar u ocultar el mando con flechas"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="7" width="19" height="11" rx="5.5"/><path d="M8 10v5M5.5 12.5h5"/><circle cx="15.5" cy="11.5" r="1"/><circle cx="18" cy="14" r="1"/></svg></button>
         <button id="btnGrid" class="sbtn" type="button" aria-pressed="false" title="Mostrar la cuadrícula" aria-label="Mostrar la cuadrícula"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v18H3zM9 3v18M15 3v18M3 9h18M3 15h18"/></svg></button>
         <button id="btnStageSize" class="sbtn" type="button" aria-pressed="false" title="Escenario pequeño o grande" aria-label="Cambiar tamaño del escenario"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 12h8"/></svg></button>
         <button id="btnFull" class="sbtn" type="button" title="Pantalla completa" aria-label="Pantalla completa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
       </div>
-      <div id="stagewrap"><canvas id="stage" width="960" height="720" aria-label="Escenario donde se ve el programa"></canvas></div>
+      <div id="stagewrap"><canvas id="stage" width="960" height="720" aria-label="Escenario donde se ve el programa"></canvas>
+        <div id="pad" hidden>
+          <button type="button" class="pk space" data-k="space" aria-label="Tecla espacio">ESPACIO</button>
+          <div class="dp">
+            <button type="button" class="pk up" data-k="up arrow" aria-label="Flecha arriba"><svg viewBox="0 0 24 24"><path d="M12 19V6M6 12l6-6 6 6"/></svg></button>
+            <button type="button" class="pk left" data-k="left arrow" aria-label="Flecha izquierda"><svg viewBox="0 0 24 24"><path d="M19 12H6M12 6l-6 6 6 6"/></svg></button>
+            <button type="button" class="pk right" data-k="right arrow" aria-label="Flecha derecha"><svg viewBox="0 0 24 24"><path d="M5 12h13M12 6l6 6-6 6"/></svg></button>
+            <button type="button" class="pk down" data-k="down arrow" aria-label="Flecha abajo"><svg viewBox="0 0 24 24"><path d="M12 5v13M6 12l6 6 6-6"/></svg></button>
+          </div>
+        </div></div>
     </div>
 
     <div id="spriteinfo">
@@ -1656,6 +1676,112 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
     <path d="M44 22 q-6-10 0-16 M52 22 q0-12 8-14 M60 22 q6-8 14-6" fill="none" stroke="#7FC4FF" stroke-width="3.5" stroke-linecap="round"/>`);
   sp('ballena', 'Ballena', [['ballena-a', ballena(false)], ['ballena-b', ballena(true)]]);
 
+  // 17. Balón
+  const balon = (r) => svg(`
+    <g transform="rotate(${r} 60 60)"><circle cx="60" cy="60" r="42" fill="#fff" ${st()}/>
+    <path d="M60 38 L80 52 L72 76 L48 76 L40 52 Z" fill="${O}"/>
+    <path d="M60 38 V20 M80 52 L98 46 M72 76 L84 94 M48 76 L36 94 M40 52 L22 46" fill="none" ${st(3)}/>
+    <path d="M44 24 Q60 16 76 24 M100 56 Q104 72 94 84 M26 84 Q16 72 20 56" fill="none" stroke="${O}" stroke-width="2.5" stroke-linecap="round" opacity=".5"/></g>`);
+  sp('balon', 'Balón', [['balon-a', balon(0)], ['balon-b', balon(36)]]);
+
+  // 18. Portero
+  const portero = (up) => svg(`
+    <path d="${up ? 'M42 52 L24 14' : 'M42 54 L16 72'}" fill="none" stroke="#F0C9A2" stroke-width="10" stroke-linecap="round"/>
+    <path d="${up ? 'M78 52 L96 14' : 'M78 54 L104 72'}" fill="none" stroke="#F0C9A2" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="${up ? 22 : 13}" cy="${up ? 11 : 74}" r="9" fill="#6BD56B" ${st(2.5)}/><circle cx="${up ? 98 : 107}" cy="${up ? 11 : 74}" r="9" fill="#6BD56B" ${st(2.5)}/>
+    <rect x="40" y="94" width="14" height="22" rx="5" fill="#2E2A3C" ${st(2.5)}/><rect x="66" y="94" width="14" height="22" rx="5" fill="#2E2A3C" ${st(2.5)}/>
+    <rect x="38" y="46" width="44" height="52" rx="12" fill="#FF7A3D" ${st()}/>
+    <rect x="38" y="82" width="44" height="16" rx="6" fill="#3a2c4f"/>
+    <circle cx="60" cy="30" r="20" fill="#F0C9A2" ${st()}/>
+    <path d="M40 28 Q40 8 60 8 Q82 8 80 28 Q72 18 60 20 Q48 18 40 28 Z" fill="#5B3A29" ${st(2.5)}/>
+    <circle cx="53" cy="32" r="3" fill="${O}"/><circle cx="67" cy="32" r="3" fill="${O}"/>
+    <path d="M53 40 q7 ${up ? 8 : 5} 14 0" fill="none" ${st(2.6)}/>
+    <text x="60" y="72" font-size="18" font-weight="900" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif">1</text>`);
+  sp('portero', 'Portero', [['portero-a', portero(false)], ['portero-b', portero(true)]]);
+
+  // 19. Mira (diana)
+  sp('mira', 'Mira', [['mira-a', svg(`
+    <circle cx="60" cy="60" r="38" fill="#FF3355" fill-opacity=".18" stroke="#FF3355" stroke-width="7"/>
+    <circle cx="60" cy="60" r="18" fill="none" stroke="#FF3355" stroke-width="5"/>
+    <path d="M60 8 V34 M60 86 V112 M8 60 H34 M86 60 H112" stroke="#FF3355" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="60" cy="60" r="5" fill="#FF3355"/>`)]]);
+
+  // 20. Cofre del tesoro
+  const cofre = (open) => svg(`
+    <rect x="12" y="56" width="96" height="52" rx="8" fill="#B5713A" ${st()}/>
+    <path d="M12 74 H108 M40 56 V108 M80 56 V108" fill="none" stroke="#8A5A32" stroke-width="3.5"/>
+    ${open ? `<path d="M14 56 L8 24 Q60 6 112 24 L106 56 Z" fill="#C98445" ${st()}/>
+      <ellipse cx="60" cy="56" rx="44" ry="8" fill="#FFD91A" ${st(2.5)}/>
+      <circle cx="40" cy="48" r="7" fill="#FFE066" ${st(2)}/><circle cx="62" cy="44" r="8" fill="#FFD91A" ${st(2)}/><circle cx="82" cy="49" r="7" fill="#FFE066" ${st(2)}/>
+      <path d="M16 12 l4 8 M60 2 v10 M104 12 l-4 8" stroke="#FFD91A" stroke-width="4" stroke-linecap="round"/>`
+    : `<path d="M12 56 Q12 22 60 22 Q108 22 108 56 Z" fill="#C98445" ${st()}/><path d="M40 56 V26 M80 56 V26" fill="none" stroke="#8A5A32" stroke-width="3.5"/>`}
+    <rect x="50" y="62" width="20" height="22" rx="5" fill="#FFD91A" ${st(2.5)}/><circle cx="60" cy="71" r="3.5" fill="${O}"/>`);
+  sp('cofre', 'Cofre', [['cofre-a', cofre(false)], ['cofre-b', cofre(true)]]);
+
+  // 21. Manzana
+  sp('manzana', 'Manzana', [['manzana-a', svg(`
+    <path d="M60 30 Q70 8 86 8 Q84 26 66 32" fill="#5DBB4A" ${st(2.8)}/>
+    <path d="M60 32 Q40 18 22 38 Q8 62 28 92 Q42 112 60 104 Q78 112 92 92 Q112 62 98 38 Q80 18 60 32 Z" fill="#FF4D5E" ${st()}/>
+    <path d="M30 44 Q24 58 30 72" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".6"/>
+    <circle cx="48" cy="62" r="4.6" fill="${O}"/><circle cx="74" cy="62" r="4.6" fill="${O}"/>
+    <circle cx="49.5" cy="60.5" r="1.5" fill="#fff"/><circle cx="75.5" cy="60.5" r="1.5" fill="#fff"/>
+    <path d="M52 74 q9 9 18 0" fill="none" ${st(3)}/><circle cx="40" cy="72" r="4.4" fill="#FF9AA8" opacity=".8"/><circle cx="82" cy="72" r="4.4" fill="#FF9AA8" opacity=".8"/>`)]]);
+
+  // 22. Zanahoria
+  sp('zanahoria', 'Zanahoria', [['zanahoria-a', svg(`
+    <path d="M52 30 Q44 6 54 4 Q58 16 60 28 Q64 6 76 6 Q72 20 68 30 Z" fill="#4DBB5A" ${st(2.6)}/>
+    <path d="M36 32 Q60 22 84 32 Q92 40 74 112 Q60 118 46 112 Q28 40 36 32 Z" fill="#FF8A1F" ${st()}/>
+    <path d="M44 50 h10 M70 66 h10 M48 84 h9" stroke="#E56F00" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="51" cy="50" r="4.2" fill="${O}"/><circle cx="69" cy="50" r="4.2" fill="${O}"/>
+    <circle cx="52" cy="48.8" r="1.4" fill="#fff"/><circle cx="70" cy="48.8" r="1.4" fill="#fff"/>
+    <path d="M52 62 q8 8 16 0" fill="none" ${st(3)}/>`)]]);
+
+  // 23. Vaso de agua
+  sp('agua', 'Vaso de agua', [['agua-a', svg(`
+    <path d="M26 20 H94 L84 108 Q60 116 36 108 Z" fill="#E8F7FF" ${st()}/>
+    <path d="M31 50 H89 L84 108 Q60 116 36 108 Z" fill="#5FC3FF" ${st(2.5)}/>
+    <path d="M38 40 q6-5 12 0 t12 0 t12 0" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".9"/>
+    <circle cx="50" cy="72" r="4.2" fill="${O}"/><circle cx="70" cy="72" r="4.2" fill="${O}"/>
+    <circle cx="51.4" cy="70.6" r="1.4" fill="#fff"/><circle cx="71.4" cy="70.6" r="1.4" fill="#fff"/>
+    <path d="M52 84 q8 8 16 0" fill="none" ${st(3)}/>
+    <path d="M96 12 q8 12 0 18 q-8-6 0-18 Z" fill="#7FD0FF" ${st(2)}/>`)]]);
+
+  // 24. Caramelo (dulce: «de vez en cuando»)
+  sp('caramelo', 'Caramelo', [['caramelo-a', svg(`
+    <path d="M24 60 L6 44 L8 76 Z M96 60 L114 44 L112 76 Z" fill="#FF8AC1" ${st()}/>
+    <circle cx="60" cy="60" r="34" fill="#FF6FA8" ${st()}/>
+    <path d="M36 40 Q60 56 82 34 M30 62 Q60 78 90 58 M40 84 Q62 94 84 80" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".85"/>
+    <circle cx="50" cy="56" r="3.6" fill="${O}"/><circle cx="70" cy="56" r="3.6" fill="${O}"/>
+    <path d="M52 70 q8 -6 16 0" fill="none" ${st(2.8)}/>`)]]);
+
+  // 25. Pergamino (mensaje escondido)
+  sp('pergamino', 'Pergamino', [['pergamino-a', svg(`
+    <rect x="22" y="22" width="76" height="76" fill="#FFF1C9" ${st()}/>
+    <rect x="14" y="14" width="92" height="14" rx="7" fill="#E8C378" ${st()}/><rect x="14" y="92" width="92" height="14" rx="7" fill="#E8C378" ${st()}/>
+    <path d="M34 42 H86 M34 54 H80 M34 66 H86 M34 78 H66" fill="none" stroke="#B5713A" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="86" cy="80" r="9" fill="#E2554D" ${st(2.2)}/><path d="M86 75 l2 4 4 .6 -3 3 .8 4 -3.8-2 -3.8 2 .8-4 -3-3 4-.6 Z" fill="#FFE066"/>`)]]);
+
+  // 26. Cartel de información
+  sp('cartel', 'Cartel', [['cartel-a', svg(`
+    <rect x="54" y="78" width="12" height="38" fill="#8A5A32" ${st(2.5)}/>
+    <rect x="8" y="14" width="104" height="68" rx="12" fill="#FFF3D0" ${st()}/>
+    <rect x="15" y="21" width="90" height="54" rx="8" fill="none" stroke="#E8C378" stroke-width="4"/>
+    <circle cx="60" cy="48" r="20" fill="#3D8BFF" ${st()}/>
+    <rect x="56.5" y="46" width="7" height="16" rx="3" fill="#fff"/><circle cx="60" cy="38" r="4.2" fill="#fff"/>`)]]);
+
+  // 27. Semilla
+  sp('semilla', 'Semilla', [['semilla-a', svg(`
+    <path d="M60 10 Q96 52 84 86 Q72 112 60 112 Q48 112 36 86 Q24 52 60 10 Z" fill="#7B4A2A" ${st()}/>
+    <path d="M50 44 Q44 66 52 90" fill="none" stroke="#B5713A" stroke-width="5" stroke-linecap="round" opacity=".8"/>
+    <circle cx="52" cy="66" r="3.6" fill="#fff"/><circle cx="70" cy="66" r="3.6" fill="#fff"/><circle cx="53" cy="66.5" r="1.8" fill="${O}"/><circle cx="71" cy="66.5" r="1.8" fill="${O}"/>
+    <path d="M54 80 q6 5 12 0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>`)]]);
+
+  // 28. Bandera
+  sp('bandera', 'Bandera', [['bandera-a', svg(`
+    <path d="M34 8 V112" fill="none" stroke="#C9D3DD" stroke-width="7" stroke-linecap="round"/>
+    <path d="M38 12 H100 L84 34 L100 56 H38 Z" fill="#FF3355" ${st()}/>
+    <path d="M24 112 H48" stroke="${O}" stroke-width="5" stroke-linecap="round"/>`)]]);
+
   PQ.SPRITE_LIB = SPRITES;
 
   /* ====================== FONDOS 480x360 ====================== */
@@ -1779,6 +1905,69 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
 
   bd('blanco', 'Blanco', bg('<rect width="480" height="360" fill="#fff"/>'));
   bd('cuadricula', 'Cuadrícula', bg(`<rect width="480" height="360" fill="#fff"/><g stroke="#CBD6EA" stroke-width="1.5">${[...Array(11)].map((_, i) => `<path d="M${(i + 1) * 40} 0 V360"/>`).join('')}${[...Array(8)].map((_, i) => `<path d="M0 ${(i + 1) * 40} H480"/>`).join('')}</g><path d="M240 0 V360 M0 180 H480" stroke="#8FA5CF" stroke-width="3"/>`));
+  bd('mercado', 'Mercado', bg(`
+    <defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FD3FF"/><stop offset="1" stop-color="#FFF0CF"/></linearGradient></defs>
+    <rect width="480" height="360" fill="url(#s)"/>
+    ${[['#FF8A4D', 6, 90, 100, 120], ['#FFD91A', 112, 70, 96, 140], ['#59B7FF', 214, 96, 96, 114], ['#FF6FA8', 316, 78, 90, 132], ['#FFFFFF', 410, 100, 70, 110]].map((h) =>
+      `<g><rect x="${h[1]}" y="${h[2]}" width="${h[3]}" height="${h[4]}" fill="${h[0]}" stroke="#3a2c4f" stroke-width="3"/><rect x="${h[1] + 14}" y="${h[2] + 16}" width="18" height="22" fill="#BFE9FF" stroke="#3a2c4f" stroke-width="2.5"/><rect x="${h[1] + h[3] - 34}" y="${h[2] + 16}" width="18" height="22" fill="#BFE9FF" stroke="#3a2c4f" stroke-width="2.5"/></g>`).join('')}
+    <rect y="200" width="480" height="160" fill="#E9D3A8"/>
+    <g stroke="#CDB57F" stroke-width="3"><path d="M0 250 H480"/><path d="M0 300 H480"/><path d="M80 200 L40 360"/><path d="M200 200 V360"/><path d="M320 200 L360 360"/><path d="M440 200 L500 360"/></g>
+    ${[[16, '#E2554D'], [176, '#2FB37D'], [336, '#FFB300']].map((a) =>
+      `<g><rect x="${a[0] + 6}" y="170" width="116" height="60" fill="#B5713A" stroke="#3a2c4f" stroke-width="3"/><path d="M${a[0]} 112 H${a[0] + 128} L${a[0] + 118} 168 H${a[0] + 10} Z" fill="${a[1]}" stroke="#3a2c4f" stroke-width="3"/>
+      <path d="M${a[0] + 26} 112 L${a[0] + 22} 168 M${a[0] + 52} 112 L${a[0] + 50} 168 M${a[0] + 78} 112 L${a[0] + 78} 168 M${a[0] + 104} 112 L${a[0] + 106} 168" stroke="#fff" stroke-width="9" opacity=".85"/>
+      <path d="M${a[0]} 112 H${a[0] + 128} L${a[0] + 118} 168 H${a[0] + 10} Z" fill="none" stroke="#3a2c4f" stroke-width="3"/></g>`).join('')}
+    <g stroke="#3a2c4f" stroke-width="2.5"><circle cx="40" cy="210" r="10" fill="#FF4D5E"/><circle cx="60" cy="214" r="10" fill="#FF4D5E"/><circle cx="82" cy="210" r="10" fill="#7ACB57"/><circle cx="104" cy="214" r="10" fill="#FF4D5E"/>
+    <circle cx="200" cy="212" r="10" fill="#FF8A1F"/><circle cx="222" cy="214" r="10" fill="#FF8A1F"/><circle cx="244" cy="211" r="10" fill="#FFD91A"/><circle cx="266" cy="214" r="10" fill="#FFD91A"/>
+    <circle cx="362" cy="212" r="10" fill="#B866FF"/><circle cx="384" cy="214" r="10" fill="#B866FF"/><circle cx="406" cy="211" r="10" fill="#FF6FA8"/></g>`));
+
+  bd('dentro-manzana', 'Dentro de la manzana', bg(`
+    <defs><radialGradient id="r" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#FFFBE6"/><stop offset="1" stop-color="#FFE9A0"/></radialGradient></defs>
+    <rect width="480" height="360" fill="#C81E3A"/>
+    <path d="M0 0 H480 V360 H0 Z M24 18 Q8 120 20 190 Q40 330 240 342 Q440 330 460 190 Q472 120 456 18 Z" fill="#E2354F" fill-rule="evenodd" opacity=".0"/>
+    <path d="M30 40 Q14 150 38 250 Q70 330 240 336 Q410 330 442 250 Q466 150 450 40 Q380 16 240 30 Q100 16 30 40 Z" fill="url(#r)" stroke="#8E1228" stroke-width="8"/>
+    <g stroke="#F1D27A" stroke-width="3" fill="none" opacity=".8"><path d="M240 60 V150"/><path d="M120 80 Q150 130 190 160"/><path d="M360 80 Q330 130 290 160"/><path d="M70 160 Q130 190 170 200"/><path d="M410 160 Q350 190 310 200"/></g>
+    <path d="M150 150 Q240 110 330 150 Q360 210 330 260 Q240 300 150 260 Q120 210 150 150 Z" fill="#E8F2A8" stroke="#B9C85A" stroke-width="5"/>
+    <g fill="#7B4A2A" stroke="#3a2c4f" stroke-width="3"><path d="M190 190 Q206 220 190 246 Q174 220 190 190 Z"/><path d="M290 190 Q306 220 290 246 Q274 220 290 190 Z"/><path d="M240 170 Q256 200 240 226 Q224 200 240 170 Z"/></g>
+    <circle cx="240" cy="18" r="9" fill="#7B4A2A"/>`));
+
+  bd('cueva', 'Cueva del volcán', bg(`
+    <defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#241A3D"/><stop offset="1" stop-color="#5A3B52"/></linearGradient></defs>
+    <rect width="480" height="360" fill="url(#s)"/>
+    <path d="M0 0 H480 V70 L450 40 L420 90 L388 36 L350 100 L312 44 L276 96 L240 30 L204 100 L166 40 L130 94 L94 36 L58 88 L24 44 L0 80 Z" fill="#150F26"/>
+    <path d="M0 360 V250 Q120 220 240 250 T480 240 V360 Z" fill="#3E2A3F"/>
+    <path d="M0 360 V300 Q140 276 280 304 T480 292 V360 Z" fill="#2B1C2E"/>
+    <g stroke="#3a2c4f" stroke-width="3"><path d="M70 250 L56 190 L92 226 Z" fill="#59E0FF"/><path d="M100 252 L108 170 L132 240 Z" fill="#A58BFF"/><path d="M380 246 L372 176 L406 232 Z" fill="#FF8AC1"/><path d="M410 248 L428 196 L440 244 Z" fill="#59E0FF"/></g>
+    <circle cx="96" cy="210" r="40" fill="#59E0FF" opacity=".12"/><circle cx="396" cy="210" r="40" fill="#FF8AC1" opacity=".12"/>
+    <g fill="#FFE066"><circle cx="150" cy="120" r="2.4"/><circle cx="330" cy="140" r="2.4"/><circle cx="250" cy="170" r="2"/></g>
+    <g transform="translate(226 222)"><rect x="0" y="0" width="8" height="40" fill="#8A5A32"/><path d="M4 -4 Q-8 -20 4 -34 Q16 -20 4 -4 Z" fill="#FF8A1F" stroke="#3a2c4f" stroke-width="2"/></g>`));
+
+  bd('luna', 'La Luna', bg(`
+    <defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05071A"/><stop offset="1" stop-color="#22285E"/></linearGradient>
+    <radialGradient id="t" cx=".35" cy=".35" r=".8"><stop offset="0" stop-color="#7FD0FF"/><stop offset="1" stop-color="#2D6FD0"/></radialGradient></defs>
+    <rect width="480" height="360" fill="url(#s)"/>
+    <g fill="#fff"><circle cx="40" cy="40" r="2"/><circle cx="120" cy="90" r="1.6"/><circle cx="200" cy="30" r="2.2"/><circle cx="290" cy="80" r="1.6"/><circle cx="440" cy="50" r="2"/><circle cx="360" cy="130" r="1.6"/><circle cx="70" cy="150" r="1.8"/></g>
+    <circle cx="372" cy="86" r="42" fill="url(#t)" stroke="#BFE3FF" stroke-width="3"/>
+    <path d="M346 70 Q362 58 372 74 Q364 94 350 90 Z M382 96 Q398 92 404 108 Q392 120 380 112 Z" fill="#4DBB5A"/>
+    <path d="M0 250 Q100 220 220 246 T480 236 V360 H0 Z" fill="#B9BCCB"/>
+    <path d="M0 300 Q140 272 300 302 T480 290 V360 H0 Z" fill="#9EA2B8"/>
+    <g fill="#8B8FA8" stroke="#6E7290" stroke-width="3"><ellipse cx="90" cy="290" rx="34" ry="10"/><ellipse cx="330" cy="272" rx="26" ry="8"/><ellipse cx="420" cy="320" rx="38" ry="11"/><ellipse cx="200" cy="330" rx="22" ry="7"/></g>`));
+
+  bd('estadio', 'Estadio de fútbol', bg(`
+    <defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6FC0FF"/><stop offset="1" stop-color="#CBEBFF"/></linearGradient></defs>
+    <rect width="480" height="360" fill="url(#s)"/>
+    <rect y="40" width="480" height="70" fill="#7A6CC8"/>
+    <g>${[...Array(40)].map((_, i) => `<circle cx="${6 + i * 12}" cy="${56 + (i % 3) * 16}" r="5" fill="${['#FFD91A', '#FF6FA8', '#FFFFFF', '#59B7FF', '#FF8A4D'][i % 5]}"/>`).join('')}</g>
+    <rect y="104" width="480" height="10" fill="#4C3F99"/>
+    <rect y="114" width="480" height="246" fill="#4DBB5A"/>
+    <g fill="#43AD50">${[0, 1, 2, 3, 4, 5].map((i) => `<rect x="${i * 80}" y="114" width="40" height="246"/>`).join('')}</g>
+    <rect x="70" y="40" width="340" height="132" fill="#fff" fill-opacity=".18"/>
+    <g stroke="#fff" stroke-width="1.6" opacity=".7">${[...Array(14)].map((_, i) => `<path d="M${70 + i * 26} 50 V172"/>`).join('')}${[...Array(6)].map((_, i) => `<path d="M70 ${60 + i * 22} H410"/>`).join('')}</g>
+    <path d="M70 172 V48 H410 V172" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M70 172 V48 H410 V172" fill="none" stroke="#C9D3DD" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M40 300 L120 172 H360 L440 300 Z" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M190 300 Q240 270 290 300" fill="none" stroke="#fff" stroke-width="5"/>
+    <ellipse cx="240" cy="292" rx="8" ry="4" fill="#fff"/>`));
+
   PQ.BACKDROP_LIB = BACKDROPS;
 
   /* ====================== SONIDOS ====================== */
@@ -3441,6 +3630,15 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
     if (sub2) b.sub2 = sub2;
     return b;
   };
+  /* bloque cuyos argumentos pueden ser valores o reporteros encajados */
+  const R = (op, args) => {
+    const b = mk(op);
+    Object.keys(args).forEach((k) => {
+      const a = args[k];
+      if (a && typeof a === 'object' && a.op) { b.in = b.in || {}; b.in[k] = a; } else b.f[k] = a;
+    });
+    return b;
+  };
   const D = {
     flag: () => mk('event_whenflagclicked'),
     key: (k) => mk('event_whenkeypressed', { KEY_OPTION: k }),
@@ -3458,7 +3656,7 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
     say: (t) => mk('looks_say', { MESSAGE: t }),
     costume: (n) => mk('looks_switchcostumeto', { COSTUME: n }),
     next: () => mk('looks_nextcostume'),
-    backdrop: (n) => mk('looks_switchbackdropto', { BACKDROP: n }),
+    backdrop: (n) => { const b = PQ.BACKDROP_LIB.find((x) => x.id === n); return mk('looks_switchbackdropto', { BACKDROP: b ? b.name : n }); },
     grow: (n) => mk('looks_changesizeby', { CHANGE: n }),
     size: (n) => mk('looks_setsizeto', { SIZE: n }),
     show: () => mk('looks_show'),
@@ -3471,7 +3669,30 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
     voice: (v) => mk('text2speech_setVoice', { VOICE: v }),
     speak: (t) => mk('text2speech_speakAndWait', { WORDS: t }),
     /* hablar: el bocadillo aparece solo mientras suena la voz */
-    talk: (t) => [mk('text2speech_speakAndWait', { WORDS: t })]
+    talk: (t) => [mk('text2speech_speakAndWait', { WORDS: t })],
+    /* movimiento y datos */
+    glide: (s, x, y) => R('motion_glidesecstoxy', { SECS: s, X: x, Y: y }),
+    goto: (x, y) => R('motion_gotoxy', { X: x, Y: y }),
+    setv: (n, val) => R('data_setvariableto', { VARIABLE: n, VALUE: val }),
+    chv: (n, val) => R('data_changevariableby', { VARIABLE: n, VALUE: val }),
+    showv: (n) => mk('data_showvariable', { VARIABLE: n }),
+    hidev: (n) => mk('data_hidevariable', { VARIABLE: n }),
+    stopAll: () => mk('control_stop', { STOP_OPTION: 'all' }),
+    /* condiciones y reporteros */
+    iff: (c, sub) => { const b = mk('control_if', null, sub); b.cond = c; return b; },
+    ifelse: (c, sub, sub2) => { const b = mk('control_if_else', null, sub, sub2); b.cond = c; return b; },
+    waitUntil: (c) => { const b = mk('control_wait_until'); b.cond = c; return b; },
+    v: (n) => mk('data_variable', { VARIABLE: n }),
+    eq: (a, b) => R('operator_equals', { OPERAND1: a, OPERAND2: b }),
+    gt: (a, b) => R('operator_gt', { OPERAND1: a, OPERAND2: b }),
+    lt: (a, b) => R('operator_lt', { OPERAND1: a, OPERAND2: b }),
+    and: (a, b) => { const x = mk('operator_and'); x.in = { OPERAND1: a, OPERAND2: b }; return x; },
+    rnd: (a, b) => R('operator_random', { FROM: a, TO: b }),
+    minus: (a, b) => R('operator_subtract', { NUM1: a, NUM2: b }),
+    times: (a, b) => R('operator_multiply', { NUM1: a, NUM2: b }),
+    join: (a, b) => R('operator_join', { STRING1: a, STRING2: b }),
+    xpos: () => mk('motion_xposition'),
+    touch: (n) => mk('sensing_touchingobject', { TOUCHINGOBJECTMENU: n })
   };
   const script = (x, y, blocks) => ({ x, y, blocks });
 
@@ -3480,6 +3701,7 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
     const p = PQ.newProject();
     (o.backdrops || ['blanco']).forEach((b) => p.stage.costumes.push(PQ.makeBackdrop(b)));
     p.messages = o.messages && o.messages.length ? o.messages.slice() : ['mensaje1'];
+    p.vars = (o.vars || []).map((v) => ({ name: v[0], value: v[1], show: !!v[2] }));
     (o.sprites || []).forEach((d) => {
       const t = PQ.makeSprite(d.id, p);
       if (d.name) t.name = d.name;
@@ -3512,10 +3734,10 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
           sprites: [{
             id: 'canario', x: -170, y: -50, sounds: ['Pop', 'Ta-chán'],
             scripts: [
-              [F(), S.backdrop('Playa'), S.xy(-170, -50), S.sayFor('¡Hola! Soy un canario.', 2),
+              [F(), S.backdrop('playa'), S.xy(-170, -50), S.sayFor('¡Hola! Soy un canario.', 2),
                 S.sayFor('Hoy voy a volar hasta el Teide.', 2),
                 S.rep(10, [S.move(10), S.next(), S.wait(0.1)]), S.send('teide')],
-              [S.recv('teide'), S.backdrop('Teide'), S.xy(-150, -60), S.sound('Ta-chán'),
+              [S.recv('teide'), S.backdrop('teide'), S.xy(-150, -60), S.sound('Ta-chán'),
                 S.rep(8, [S.move(15), S.next(), S.wait(0.1)]), S.sayFor('¡Qué bonito se ve desde aquí!', 3)]
             ]
           }]
@@ -3702,23 +3924,23 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
           backdrops: ['campo'], messages: ['lagarto', 'tortuga', 'carrera', 'fin'],
           sprites: [
             {
-              id: 'lucia', name: 'Lucía', x: -170, y: -60, size: 80, scripts: [
-                [F(), S.voice('ALTO'), S.xy(-170, -60)].concat(L('Hoy hay una carrera en el campo.'), [S.send('lagarto')]),
+              id: 'lucia', name: 'Lucía', x: -185, y: 30, size: 75, scripts: [
+                [F(), S.voice('ALTO'), S.xy(-185, 30)].concat(L('Hoy hay una carrera en el campo.'), [S.send('lagarto')]),
                 [S.recv('fin'), S.voice('ALTO')].concat(L('Y así terminó la carrera. ¡Qué divertido!')),
                 [S.click(), S.voice('ALTO')].concat(L('Hoy hay una carrera en el campo.'))
               ]
             },
             {
-              id: 'lagarto', x: -140, y: -120, size: 85, scripts: [
-                [F(), S.xy(-140, -120), S.voice('SQUEAK')],
+              id: 'lagarto', x: -130, y: -55, size: 85, scripts: [
+                [F(), S.xy(-130, -55), S.voice('SQUEAK')],
                 [S.recv('lagarto'), S.voice('SQUEAK')].concat(L('¡Yo soy el más rápido de toda la isla!'), [S.send('tortuga')]),
                 [S.recv('carrera'), S.rep(12, [S.dx(18), S.next(), S.wait(0.1)]), S.voice('SQUEAK')].concat(L('¡He ganado! ¡He ganado!')),
                 [S.click(), S.voice('SQUEAK')].concat(L('¡Yo soy el más rápido de toda la isla!'))
               ]
             },
             {
-              id: 'tortuga', x: -140, y: -40, size: 85, scripts: [
-                [F(), S.xy(-140, -40), S.voice('GIANT')],
+              id: 'tortuga', x: -130, y: -125, size: 85, scripts: [
+                [F(), S.xy(-130, -125), S.voice('GIANT')],
                 [S.recv('tortuga'), S.voice('GIANT')].concat(L('Despacito y con buena letra. Vamos a correr.'), [S.send('carrera')]),
                 [S.recv('carrera'), S.rep(12, [S.dx(5), S.next(), S.wait(0.3)]), S.voice('GIANT')].concat(L('Yo llegaré… un poquito más tarde.'), [S.send('fin')]),
                 [S.click(), S.voice('GIANT')].concat(L('Despacito y con buena letra.'))
@@ -3772,12 +3994,12 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
       build() {
         const L = S.talk;
         return make({
-          backdrops: ['noche'], messages: ['estrella', 'cohete', 'viaje'],
+          backdrops: ['noche'], messages: ['estrella', 'cohete', 'subir', 'viaje'],
           sprites: [
             {
               id: 'robot', x: -150, y: -80, scripts: [
-                [F(), S.voice('TENOR'), S.xy(-150, -80)].concat(L('Soy un robot y nunca he viajado al espacio.'), [S.send('estrella')]),
-                [S.recv('viaje'), S.voice('TENOR'), S.xy(-30, -80)].concat(L('¡Estoy dentro del cohete! ¡Qué emoción!')),
+                [F(), S.voice('TENOR'), S.show(), S.xy(-150, -80)].concat(L('Soy un robot y nunca he viajado al espacio.'), [S.send('estrella')]),
+                [S.recv('subir'), S.voice('TENOR')].concat(L('¡Allá voy! ¡Me subo al cohete!'), [S.glide(1, 60, -90), S.hide(), S.send('viaje')]),
                 [S.click(), S.voice('TENOR')].concat(L('Soy un robot y nunca he viajado al espacio.'))
               ]
             },
@@ -3790,15 +4012,361 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
             },
             {
               id: 'cohete', x: 60, y: -90, size: 70, sounds: ['Bocina'], scripts: [
-                [F(), S.xy(60, -90), S.voice('SQUEAK')],
-                [S.recv('cohete'), S.voice('SQUEAK')].concat(L('¡Tres, dos, uno, despegue!'), [S.send('viaje'), S.sound('Bocina'), S.rep(20, [S.dy(10), S.wait(0.05)]), S.hide()]),
+                [F(), S.show(), S.xy(60, -90), S.voice('SQUEAK')],
+                [S.recv('cohete'), S.voice('SQUEAK')].concat(L('¡Sube, robot! Te estoy esperando.'), [S.send('subir')]),
+                [S.recv('viaje'), S.voice('SQUEAK')].concat(L('¡Tres, dos, uno, despegue!'), [S.sound('Bocina'), S.rep(20, [S.dy(10), S.wait(0.05)]), S.hide()]),
                 [S.click(), S.voice('SQUEAK')].concat(L('¡Tres, dos, uno, despegue!'))
               ]
             }
           ]
         });
       }
+    },
+    /* ---------- cuentos largos, con cambios de escenario ---------- */
+    {
+      id: 'tesoro-teide', title: 'El tesoro del Teide', kind: 'cuento', voices: true, stars: 3, bg: 'teide', sprite: 'cofre',
+      desc: 'Lucía y Yeray buscan un tesoro. Cinco escenarios y tú decides quién les guía.',
+      challenge: 'Pulsa la bandera y escucha. Cuando te lo pidan, toca a Yeray, elige un guía y pulsa la tecla espacio. ¿Qué voz le pondrías al perro?',
+      openSprite: 'Yeray',
+      build() {
+        const L = S.talk;
+        const paso = (n) => S.eq(S.v('paso'), n);
+        return make({
+          backdrops: ['pueblo', 'laurisilva', 'teide', 'cueva', 'playa'],
+          messages: ['m1', 'm2', 'bosque', 'elperro', 'lamariposa', 'teide', 't2', 't3', 'cueva', 'c2', 'abrir', 'a2', 'final', 'adios'],
+          vars: [['paso', 0, false]],
+          stage: [
+            [F(), S.backdrop('pueblo'), S.setv('paso', 0)],
+            [S.recv('bosque'), S.backdrop('laurisilva')],
+            [S.recv('teide'), S.backdrop('teide')],
+            [S.recv('cueva'), S.backdrop('cueva')],
+            [S.recv('final'), S.backdrop('playa')]
+          ],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: -120, y: -60, sounds: ['Pop'], scripts: [
+                [F(), S.voice('ALTO'), S.show(), S.xy(-120, -60)].concat(L('¡Yeray, mira! He encontrado un mapa del tesoro.'), [S.send('m1')]),
+                [S.recv('m2'), S.voice('ALTO')].concat(L('¡Vamos a buscarlo! Toca a Yeray para empezar el viaje.'), [S.setv('paso', 1)]),
+                [S.recv('bosque'), S.voice('ALTO'), S.setv('paso', 3), S.xy(-150, -70), S.wait(0.6)].concat(L('¡Qué bosque tan verde! Esto es la laurisilva.'), L('Un perro y una mariposa quieren guiarnos. ¡Toca al que prefieras!')),
+                [S.recv('teide'), S.voice('ALTO'), S.xy(-150, -80), S.wait(0.6)].concat(L('¡Cuánto hemos subido! Este es el Teide, el pico más alto de España.'), [S.send('t2')]),
+                [S.recv('t3'), S.voice('ALTO')].concat(L('Pulsa la tecla espacio para entrar en la cueva.'), [S.setv('paso', 5)]),
+                [S.key('space'), S.iff(paso(5), [S.setv('paso', 6), S.send('cueva')])],
+                [S.recv('cueva'), S.voice('ALTO'), S.xy(-150, -90), S.wait(0.8)].concat(L('¡Qué oscuro! Menos mal que los cristales brillan.'), [S.send('c2')]),
+                [S.recv('abrir'), S.voice('ALTO')].concat(L('¡Hay monedas de oro y una nota!'), [S.send('a2')]),
+                [S.recv('final'), S.voice('ALTO'), S.xy(-130, -100), S.wait(0.6)].concat(L('¡Qué aventura tan bonita! Gracias por venir con nosotros.'), [S.send('adios')]),
+                [S.click(), S.voice('ALTO')].concat(L('¡Yeray, mira! He encontrado un mapa del tesoro.'))
+              ]
+            },
+            {
+              id: 'yeray', x: 80, y: -60, scripts: [
+                [F(), S.voice('TENOR'), S.show(), S.xy(80, -60)],
+                [S.recv('m1'), S.voice('TENOR')].concat(L('¡Un tesoro! Dice el mapa que está dentro del volcán.'), [S.send('m2')]),
+                [S.click(), S.ifelse(paso(1), [S.setv('paso', 2), S.send('bosque')], [S.sound('Pop'), S.dy(15), S.wait(0.15), S.dy(-15)])],
+                [S.recv('bosque'), S.xy(-60, -70)],
+                [S.recv('teide'), S.xy(-70, -80)],
+                [S.recv('t2'), S.voice('TENOR')].concat(L('¡Brrr, qué frío hace aquí arriba! Mira, ¡hay una cueva!'), [S.send('t3')]),
+                [S.recv('cueva'), S.xy(-70, -90)],
+                [S.recv('c2'), S.voice('TENOR')].concat(L('¡Un cofre! Está cerrado. ¡Toca el cofre para abrirlo!'), [S.setv('paso', 7)]),
+                [S.recv('a2'), S.voice('TENOR')].concat(L('La nota dice: el mayor tesoro es viajar con los amigos.'), [S.send('final')]),
+                [S.recv('final'), S.xy(-30, -100)],
+                [S.recv('adios'), S.voice('TENOR'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Fin del cuento! ¡Hasta la próxima aventura!'))
+              ]
+            },
+            {
+              id: 'perro', x: 120, y: -70, hidden: true, sounds: ['Pop'], scripts: [
+                [F(), S.hide(), S.xy(120, -70), S.voice('SQUEAK')],
+                [S.recv('bosque'), S.xy(120, -70), S.show()],
+                [S.click(), S.iff(paso(3), [S.setv('paso', 4), S.send('elperro')])],
+                [S.recv('elperro'), S.voice('SQUEAK')].concat(L('¡Guau, guau! Yo conozco el camino. ¡Seguidme!'), [S.send('teide')]),
+                [S.recv('lamariposa'), S.hide()],
+                [S.recv('teide'), S.xy(40, -80)],
+                [S.recv('cueva'), S.xy(40, -95)],
+                [S.recv('final'), S.xy(70, -115)]
+              ]
+            },
+            {
+              id: 'mariposa', x: 150, y: 40, hidden: true, sounds: ['Pop'], scripts: [
+                [F(), S.hide(), S.xy(150, 40), S.voice('KITTEN')],
+                [S.recv('bosque'), S.xy(150, 40), S.show()],
+                [S.click(), S.iff(paso(3), [S.setv('paso', 4), S.send('lamariposa')])],
+                [S.recv('lamariposa'), S.voice('KITTEN')].concat(L('Volaré delante de vosotros. ¡Venid conmigo!'), [S.send('teide')]),
+                [S.recv('elperro'), S.hide()],
+                [S.recv('teide'), S.xy(40, 30)],
+                [S.recv('cueva'), S.xy(-10, 20)],
+                [S.recv('final'), S.xy(40, 20)],
+                [F(), S.forever([S.next(), S.wait(0.25)])]
+              ]
+            },
+            {
+              id: 'cofre', x: 110, y: -90, size: 90, hidden: true, sounds: ['Ta-chán'], scripts: [
+                [F(), S.hide(), S.costume('Cofre 1'), S.xy(110, -90)],
+                [S.recv('cueva'), S.costume('Cofre 1'), S.xy(110, -90), S.show()],
+                [S.click(), S.iff(paso(7), [S.setv('paso', 8), S.costume('Cofre 2'), S.sound('Ta-chán'), S.grow(20), S.wait(0.4), S.grow(-20), S.send('abrir')])],
+                [S.recv('final'), S.hide()]
+              ]
+            }
+          ]
+        });
+      }
+    },
+    {
+      id: 'viaje-luna', title: 'Viaje a la Luna', kind: 'cuento', voices: true, stars: 3, bg: 'luna', sprite: 'cohete',
+      desc: 'De la clase al espacio: enciende los motores, atrapa estrellas y lleva al robot hasta la bandera.',
+      challenge: 'Escucha y juega: toca al robot, toca el cohete tres veces, atrapa tres estrellas y, en la Luna, mueve al robot con las flechas hasta la bandera.',
+      openSprite: 'Cohete',
+      build() {
+        const L = S.talk;
+        const paso = (n) => S.eq(S.v('paso'), n);
+        const move = (k, dx, dy) => [S.key(k), S.iff(S.gt(S.v('paso'), 6), [dx ? S.dx(dx) : S.dy(dy)])];
+        return make({
+          backdrops: ['aula', 'noche', 'espacio', 'luna'],
+          messages: ['m1', 'm2', 'm3', 'noche', 'despegue', 'espacio', 'luna', 'l2', 'l3', 'final', 'f2'],
+          vars: [['paso', 0, false], ['motores', 0, false], ['estrellas', 0, false]],
+          stage: [
+            [F(), S.backdrop('aula'), S.setv('paso', 0), S.hidev('motores'), S.hidev('estrellas')],
+            [S.recv('noche'), S.backdrop('noche')],
+            [S.recv('espacio'), S.backdrop('espacio')],
+            [S.recv('luna'), S.backdrop('luna')]
+          ],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: -150, y: -80, sounds: ['Pop'], scripts: [
+                [F(), S.voice('KITTEN'), S.show(), S.xy(-150, -80)].concat(L('Hoy, en clase, vamos a hablar de la Luna.'), [S.send('m1')]),
+                [S.recv('m3'), S.voice('KITTEN')].concat(L('Entonces, ¡a la plataforma de lanzamiento! Toca al robot para ir.'), [S.setv('paso', 1)]),
+                [S.recv('noche'), S.voice('KITTEN'), S.xy(-185, -100), S.wait(0.8)].concat(L('Para encender los motores, toca el cohete tres veces.'), [S.setv('paso', 3), S.setv('motores', 0), S.showv('motores')]),
+                [S.recv('despegue'), S.hide()],
+                [S.recv('luna'), S.voice('KITTEN'), S.wait(2.2), S.xy(-5, -112), S.show()].concat(L('¡Hemos llegado a la Luna! ¡Mira qué bonita se ve la Tierra!'), [S.send('l2')]),
+                [S.recv('f2'), S.voice('KITTEN')].concat(L('Gracias por viajar con nosotros. ¡Fin del cuento!')),
+                [S.click(), S.voice('KITTEN')].concat(L('Hoy vamos a hablar de la Luna.'))
+              ]
+            },
+            {
+              id: 'yeray', x: -40, y: -80, scripts: [
+                [F(), S.voice('ALTO'), S.show(), S.xy(-40, -80)],
+                [S.recv('m1'), S.voice('ALTO')].concat(L('¡Yo quiero ir a la Luna! ¿Y tú, robot?'), [S.send('m2')]),
+                [S.recv('noche'), S.xy(-110, -100)],
+                [S.recv('despegue'), S.hide()],
+                [S.recv('luna'), S.wait(2.2), S.xy(65, -115), S.show()],
+                [S.recv('l2'), S.voice('ALTO'), S.rep(3, [S.dy(30), S.wait(0.15), S.dy(-30), S.wait(0.15)])].concat(L('¡Casi no peso nada! Mira cómo salto.'), [S.send('l3')]),
+                [S.click(), S.voice('ALTO')].concat(L('¡Yo quiero ir a la Luna!'))
+              ]
+            },
+            {
+              id: 'robot', x: 100, y: -80, sounds: ['Pop', 'Ta-chán'], scripts: [
+                [F(), S.voice('TENOR'), S.show(), S.xy(100, -80)],
+                [S.recv('m2'), S.voice('TENOR')].concat(L('Bip, bip. Mis baterías están cargadas. ¡Vamos!'), [S.send('m3')]),
+                [S.click(), S.ifelse(paso(1), [S.setv('paso', 2), S.send('noche')], [S.sound('Pop'), S.next()])],
+                [S.recv('noche'), S.xy(-35, -100)],
+                [S.recv('despegue'), S.hide()],
+                [S.recv('luna'), S.wait(2.2), S.xy(-75, -105), S.show()],
+                [S.recv('l3'), S.voice('TENOR')].concat(L('Bip. Con las flechas puedes moverme. ¡Llévame hasta la bandera!'), [S.setv('paso', 7)]),
+                move('left arrow', -15, 0), move('right arrow', 15, 0), move('up arrow', 0, 15), move('down arrow', 0, -15),
+                [S.recv('final'), S.voice('TENOR'), S.sound('Ta-chán'), S.setv('paso', 8)].concat(L('¡Bip, bip! ¡Misión cumplida!'), [S.send('f2')])
+              ]
+            },
+            {
+              id: 'cohete', x: 60, y: -60, hidden: true, sounds: ['Bocina', 'Pop'], scripts: [
+                [F(), S.hide(), S.xy(100, -60), S.dir(90), S.size(100), S.voice('SQUEAK')],
+                [S.recv('noche'), S.xy(100, -60), S.show()],
+                [S.click(), S.iff(paso(3), [
+                  S.chv('motores', 1), S.sound('Pop'),
+                  S.iff(S.eq(S.v('motores'), 1), S.talk('¡Uno!')),
+                  S.iff(S.eq(S.v('motores'), 2), S.talk('¡Dos!')),
+                  S.iff(S.eq(S.v('motores'), 3), [S.setv('paso', 4), S.hidev('motores')].concat(S.talk('¡Tres! ¡Motores encendidos!'), [S.send('despegue')]))
+                ])],
+                [S.recv('despegue'), S.sound('Bocina'), S.rep(16, [S.dy(14), S.wait(0.05)]), S.hide(), S.wait(0.3), S.send('espacio')],
+                [S.recv('espacio'), S.xy(-170, -110), S.size(70), S.show(), S.sound('Pop'), S.glide(2, -100, -30)],
+                [S.recv('luna'), S.glide(2, 150, -95), S.size(70)]
+              ]
+            },
+            {
+              id: 'estrella', x: 100, y: 80, size: 70, hidden: true, sounds: ['Magia'], scripts: [
+                [F(), S.hide(), S.voice('KITTEN')],
+                [S.recv('espacio'), S.wait(2.2), S.xy(100, 80), S.show(), S.voice('KITTEN')].concat(L('¡Hola, viajeros! Toca tres estrellas para llegar a la Luna.'), [S.setv('paso', 5), S.setv('estrellas', 0), S.showv('estrellas')]),
+                [S.click(), S.iff(paso(5), [
+                  S.chv('estrellas', 1), S.sound('Magia'), S.grow(30), S.wait(0.2), S.grow(-30),
+                  S.ifelse(S.eq(S.v('estrellas'), 3), [S.setv('paso', 6), S.hidev('estrellas'), S.hide(), S.send('luna')], [S.goto(S.rnd(-170, 170), S.rnd(-10, 120))])
+                ])]
+              ]
+            },
+            {
+              id: 'bandera', x: -170, y: -100, size: 80, hidden: true, sounds: ['Pop'], scripts: [
+                [F(), S.hide()],
+                [S.recv('luna'), S.xy(-170, -100), S.show(), S.waitUntil(S.and(S.gt(S.v('paso'), 6), S.touch('Robot'))), S.send('final')]
+              ]
+            }
+          ]
+        });
+      }
+    },
+    /* ---------- alimentación sana: se mueve con las flechas ---------- */
+    {
+      id: 'mercado-sano', title: 'El mercado de la comida sana', kind: 'cuento', voices: true, stars: 3, bg: 'mercado', sprite: 'manzana',
+      desc: 'Mueve a Lucía con las flechas, toca la comida para conocerla y entra en la manzana mágica para descubrir un mensaje escondido.',
+      challenge: 'Usa las flechas del teclado (o el mando de la pantalla) para mover a Lucía. Toca los alimentos, lee los carteles y busca la manzana mágica.',
+      openSprite: 'Lucía',
+      build() {
+        const L = S.talk;
+        const libre = () => S.eq(S.v('ocupado'), 0);
+        const mover = (k, dx, dy) => [S.key(k), S.iff(S.gt(S.v('paso'), 0), [dx ? S.dx(dx) : S.dy(dy)])];
+        /* cada alimento: espera a que Lucía lo toque, suma, avisa al cartel y desaparece */
+        const comida = (id, name, x, y, msg, sano) => ({
+          id, name, x, y, size: 55, sounds: ['Pop'], scripts: [
+            [F(), S.show(), S.xy(x, y), S.size(55),
+              S.waitUntil(S.and(S.touch('Lucía'), libre())), S.sound('Pop')]
+              .concat(sano ? [S.chv('Comida sana', 1)] : [], [S.send(msg), S.hide()]),
+            [S.recv('entrar'), S.hide()]
+          ]
+        });
+        const info = (msg, text) => [S.recv(msg), S.voice('ALTO'), S.setv('ocupado', 1), S.show()].concat(L(text), [S.hide(), S.setv('ocupado', 0)]);
+        return make({
+          backdrops: ['mercado', 'dentro-manzana'],
+          messages: ['manzana', 'zanahoria', 'platano', 'agua', 'caramelo', 'magica', 'entrar', 'tesoro', 'mensaje', 'fin'],
+          vars: [['Comida sana', 0, true], ['paso', 0, false], ['ocupado', 0, false]],
+          stage: [[F(), S.backdrop('mercado')], [S.recv('entrar'), S.backdrop('dentro-manzana')]],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: 0, y: -145, size: 70, sounds: ['Pop'], scripts: [
+                [F(), S.voice('ALTO'), S.show(), S.size(70), S.xy(0, -145), S.setv('paso', 0), S.setv('Comida sana', 0), S.setv('ocupado', 0)]
+                  .concat(L('¡Hola! Estoy en el mercado. Muéveme con las flechas del teclado y toca la comida para conocerla.'), [S.setv('paso', 1)]),
+                mover('left arrow', -18, 0), mover('right arrow', 18, 0), mover('up arrow', 0, 18), mover('down arrow', 0, -18),
+                [S.recv('entrar'), S.xy(-170, -110), S.size(55)],
+                [S.recv('fin'), S.voice('ALTO'), S.sound('Ta-chán'), S.rep(3, [S.dy(16), S.wait(0.1), S.dy(-16), S.wait(0.1)])]
+                  .concat(L('¡Lo he conseguido! Ahora sé cómo comer sano.'), [S.stopAll()]),
+                [S.click(), S.voice('ALTO')].concat(L('Muéveme con las flechas.'))
+              ]
+            },
+            comida('manzana', 'Manzana', -170, -60, 'manzana', true),
+            comida('zanahoria', 'Zanahoria', -80, -85, 'zanahoria', true),
+            comida('platano', 'Plátano', 60, -50, 'platano', true),
+            comida('agua', 'Vaso de agua', 130, -125, 'agua', true),
+            comida('caramelo', 'Caramelo', 190, -60, 'caramelo', false),
+            {
+              id: 'manzana', name: 'Manzana mágica', x: 150, y: 10, size: 170, hidden: true, sounds: ['Magia'], scripts: [
+                [F(), S.hide(), S.xy(150, 10), S.size(170), S.waitUntil(S.and(S.eq(S.v('Comida sana'), 4), libre())), S.show(), S.sound('Magia'), S.send('magica'),
+                  S.waitUntil(S.and(S.touch('Lucía'), libre())), S.sound('Magia'), S.hide(), S.send('entrar')]
+              ]
+            },
+            {
+              id: 'semilla', x: 130, y: -70, size: 60, hidden: true, sounds: ['Pop'], scripts: [
+                [F(), S.hide()],
+                [S.recv('entrar'), S.xy(130, -70), S.show(), S.waitUntil(S.touch('Lucía')), S.sound('Pop'), S.hide(), S.send('tesoro')]
+              ]
+            },
+            {
+              id: 'pergamino', x: 0, y: 0, size: 40, hidden: true, sounds: ['Ta-chán'], scripts: [
+                [F(), S.hide(), S.size(40)],
+                [S.recv('tesoro'), S.xy(0, 0), S.size(40), S.show(), S.sound('Ta-chán'), S.rep(6, [S.grow(12), S.wait(0.05)]), S.send('mensaje')]
+              ]
+            },
+            {
+              id: 'cartel', x: -150, y: 85, size: 80, hidden: true, sounds: ['Pop'], scripts: [
+                [F(), S.hide(), S.xy(-150, 85), S.setv('ocupado', 0)],
+                info('manzana', 'La manzana tiene vitaminas y fibra. ¡Es una merienda muy sana!'),
+                info('zanahoria', 'La zanahoria es crujiente y buena para la vista.'),
+                info('platano', 'Los plátanos de Canarias dan energía para jugar y correr.'),
+                info('agua', 'El agua es la mejor bebida. ¡Bebe agua a todas horas!'),
+                info('caramelo', 'Los caramelos tienen mucho azúcar. Solo de vez en cuando, y después, ¡a lavarse los dientes!'),
+                info('magica', '¡Mira! Ha aparecido una manzana mágica. ¡Tócala con Lucía para entrar!'),
+                [S.recv('entrar'), S.voice('ALTO'), S.xy(0, 110), S.setv('ocupado', 1), S.show()]
+                  .concat(L('Estás dentro de la manzana. Busca la semilla sonriente.'), [S.hide(), S.setv('ocupado', 0)]),
+                [S.recv('mensaje'), S.voice('ALTO'), S.xy(0, 120), S.size(90), S.show()]
+                  .concat(L('Has encontrado el mensaje escondido. Dice: come fruta y verdura cada día, bebe agua y muévete mucho. ¡Así creces fuerte y sano!'), [S.send('fin')])
+              ]
+            }
+          ]
+        });
+      }
+    },
+    /* ---------- juegos de movimiento ---------- */
+    {
+      id: 'penalti', title: '¡Penalti!', kind: 'reto', stars: 2, bg: 'estadio', sprite: 'balon',
+      desc: 'Elige hacia dónde chutar con las flechas y pulsa espacio. ¡El portero se tira al azar!',
+      challenge: 'Mueve la mira con las flechas izquierda y derecha y pulsa la tecla espacio para chutar. Tienes 5 tiros. ¿Cuántos goles marcas?',
+      openSprite: 'Portero',
+      build() {
+        const L = S.talk;
+        const libre = () => S.eq(S.v('listo'), 1);
+        const salto = (cond) => S.eq(S.v('salto'), cond);
+        return make({
+          backdrops: ['estadio'], messages: ['chuta', 'gol', 'parada', 'siguiente', 'reset', 'fin'],
+          vars: [['Goles', 0, true], ['Tiros', 5, true], ['listo', 0, false], ['tiro', 0, false], ['salto', 0, false]],
+          stage: [[F(), S.backdrop('estadio')]],
+          sprites: [
+            {
+              id: 'lucia', name: 'Lucía', x: -110, y: -125, size: 65, sounds: ['Pop'], scripts: [
+                [F(), S.voice('ALTO'), S.xy(-110, -125)].concat(L('¡Penalti! Mueve la mira con las flechas y pulsa espacio para chutar.'), [S.setv('listo', 1)]),
+                [S.recv('gol'), S.voice('ALTO'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Goooool!')),
+                [S.recv('parada'), S.voice('ALTO')].concat(L('¡Uy! ¡Qué parada!')),
+                [S.recv('fin'), S.voice('ALTO'), R('text2speech_speakAndWait', { WORDS: S.join('Se acabó. Has marcado ', S.join(S.v('Goles'), ' goles. ¡Pulsa la bandera para jugar otra vez!')) })]
+              ]
+            },
+            {
+              id: 'portero', x: 0, y: 62, size: 70, sounds: ['Pop'], scripts: [
+                [F(), S.xy(0, 62), S.dir(90), S.costume('Portero 1')],
+                [S.recv('chuta'),
+                  S.setv('salto', S.times(S.minus(S.rnd(1, 3), 2), 100)),
+                  S.ifelse(salto(-100), [S.dir(30), S.costume('Portero 2'), S.glide(0.4, -100, 62)], [S.ifelse(salto(100), [S.dir(150), S.costume('Portero 2'), S.glide(0.4, 100, 62)], [S.costume('Portero 2'), S.glide(0.4, 0, 90)])])],
+                [S.recv('reset'), S.xy(0, 62), S.dir(90), S.costume('Portero 1')]
+              ]
+            },
+            {
+              id: 'balon', x: 0, y: -110, size: 45, sounds: ['Pop', 'Ta-chán', 'Boing'], scripts: [
+                [F(), S.xy(0, -110), S.costume('Balón 1'), S.setv('Goles', 0), S.setv('Tiros', 5), S.setv('listo', 0), S.setv('tiro', 0)],
+                [S.key('space'), S.iff(libre(), [S.setv('listo', 0), S.send('chuta')])],
+                [S.recv('chuta'), S.sound('Pop'), S.chv('Tiros', -1), S.glide(0.45, S.v('tiro'), 62), S.next(), S.wait(0.3),
+                  S.ifelse(S.eq(S.v('tiro'), S.v('salto')), [S.send('parada')], [S.send('gol')])],
+                [S.recv('gol'), S.chv('Goles', 1), S.sound('Ta-chán'), S.wait(1.6), S.send('siguiente')],
+                [S.recv('parada'), S.sound('Boing'), S.wait(1.6), S.send('siguiente')],
+                [S.recv('siguiente'), S.ifelse(S.eq(S.v('Tiros'), 0), [S.send('fin')], [S.xy(0, -110), S.costume('Balón 1'), S.send('reset'), S.setv('listo', 1)])]
+              ]
+            },
+            {
+              id: 'mira', x: 0, y: 62, size: 55, sounds: ['Pop'], scripts: [
+                [F(), S.xy(0, 62), S.setv('tiro', 0)],
+                [S.key('left arrow'), S.iff(S.and(libre(), S.gt(S.xpos(), -90)), [S.dx(-100), S.setv('tiro', S.xpos())])],
+                [S.key('right arrow'), S.iff(S.and(libre(), S.lt(S.xpos(), 90)), [S.dx(100), S.setv('tiro', S.xpos())])],
+                [S.recv('reset'), S.xy(0, 62), S.setv('tiro', 0)]
+              ]
+            }
+          ]
+        });
+      }
+    },
+    {
+      id: 'atrapa-platanos', title: 'Atrapa los plátanos', kind: 'reto', stars: 1, bg: 'campo', sprite: 'lagarto',
+      desc: 'Mueve al lagarto con las flechas y come 10 plátanos. Cada vez aparece uno en un sitio nuevo.',
+      challenge: 'Mueve al lagarto con las flechas y atrapa los plátanos. ¿Puedes cambiar el número de plátanos para ganar o la velocidad?',
+      openSprite: 'Lagarto',
+      build() {
+        return make({
+          backdrops: ['campo'], messages: ['fin'], vars: [['Plátanos', 0, true]],
+          stage: [[F(), S.backdrop('campo')]],
+          sprites: [
+            {
+              id: 'lagarto', x: -140, y: -110, size: 75, sounds: ['Pop'], scripts: [
+                [F(), S.xy(-140, -110), S.voice('SQUEAK'), S.setv('Plátanos', 0)],
+                [S.key('right arrow'), S.dx(20), S.dir(90), S.next()],
+                [S.key('left arrow'), S.dx(-20), S.next()],
+                [S.key('up arrow'), S.dy(20), S.next()],
+                [S.key('down arrow'), S.dy(-20), S.next()],
+                [S.recv('fin'), S.voice('SQUEAK'), S.sound('Pop')].concat(S.talk('¡Qué rico! Me he comido diez plátanos.'), [S.stopAll()]),
+                [S.click(), S.voice('SQUEAK')].concat(S.talk('Muéveme con las flechas.'))
+              ]
+            },
+            {
+              id: 'platano', x: 100, y: -20, size: 60, sounds: ['Pop'], scripts: [
+                [F(), S.xy(100, -20), S.forever([
+                  S.iff(S.touch('Lagarto'), [S.chv('Plátanos', 1), S.sound('Pop'), S.goto(S.rnd(-170, 170), S.rnd(-120, 40)),
+                    S.iff(S.eq(S.v('Plátanos'), 10), [S.send('fin')]), S.wait(0.3)])
+                ])]
+              ]
+            }
+          ]
+        });
+      }
     }
+
   ];
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -4156,6 +4724,7 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
     if (opts.banner) showBanner(opts.banner);
     updateLevelBtn();
     renderAll();
+    if (PQ.padAuto) PQ.padAuto();
     dirty = false;
     if (!opts.noAuto) markDirty();
     $('#ws').scrollTop = 0; $('#ws').scrollLeft = 0;
@@ -4866,6 +5435,28 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
     if (k.length === 1) return k.toLowerCase();
     return null;
   }
+  /* mando en pantalla: simula las teclas de flecha y espacio con el dedo o el ratón */
+  function wirePad() {
+    const pad = $('#pad'), btn = $('#btnPad');
+    const show = (on) => { pad.hidden = !on; btn.setAttribute('aria-pressed', String(on)); };
+    btn.addEventListener('click', () => show(pad.hidden));
+    PQ.padAuto = function () {
+      let uses = false;
+      const walk = (arr) => (arr || []).forEach((b) => { if (b.op === 'event_whenkeypressed' && /arrow|space/.test(b.f.KEY_OPTION)) uses = true; walk(b.sub); walk(b.sub2); });
+      PQ.allTargets(S.project).forEach((t) => (t.scripts || []).forEach((sc) => walk(sc.blocks)));
+      if (uses && g.matchMedia && g.matchMedia('(pointer: coarse)').matches) show(true);
+    };
+    pad.querySelectorAll('.pk').forEach((el) => {
+      const k = el.dataset.k; let timer = null;
+      const up = () => { if (timer) { clearInterval(timer); timer = null; } RT.keys[k] = false; el.classList.remove('on'); };
+      el.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (x) { /* nada */ }
+        RT.keys[k] = true; el.classList.add('on'); RT.keyEvent(k);
+        if (k !== 'space') timer = setInterval(() => RT.keyEvent(k), 140);
+      });
+      ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((ev) => el.addEventListener(ev, up));
+    });
+  }
   function wireKeys() {
     window.addEventListener('keydown', (e) => {
       if (modalStack.length) return;
@@ -4882,6 +5473,7 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
     });
     window.addEventListener('keyup', (e) => { const k = keyName(e); if (k) RT.keys[k] = false; });
     window.addEventListener('blur', () => { RT.keys = {}; });
+    wirePad();
   }
 
   /* ============================ conexión de botones ============================ */

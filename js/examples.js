@@ -1064,6 +1064,7 @@
       openSprite: 'Casilla 1',
       build() {
         const NAMES = ['Canario', 'Lagarto', 'Tortuga', 'Mariposa'];
+        const VOZ = ['SQUEAK', 'TENOR', 'GIANT', 'ALTO'];
         const PERM = [[1, 2, 3, 4, 1, 2, 3, 4], [2, 4, 1, 3, 3, 1, 4, 2], [3, 1, 4, 2, 2, 4, 1, 3], [4, 3, 2, 1, 1, 2, 3, 4]];
         const XS = [-165, -55, 55, 165], YS = [55, -55];
         const carta = (i) => {
@@ -1073,30 +1074,33 @@
               [F(), S.voice('ALTO'), S.show(), S.size(80), S.costume('Carta 1'), S.setv(e, 0), S.wait(0.3)]
                 .concat([1, 2, 3, 4].map((k) => S.iff(S.eq(S.v('barajar'), k), [S.setv(f, PERM[k - 1][i])]))),
               [S.click(), S.iff(S.and(S.eq(S.v('bloqueo'), 0), S.eq(S.v(e), 0)), [
-                S.setv('bloqueo', 1), S.setv(e, 1), S.sound('Pop')]
-                .concat([1, 2, 3, 4].map((k) => S.iff(S.eq(S.v(f), k), [S.costume('Carta ' + (k + 1))].concat(S.talk(NAMES[k - 1])))))
+                S.setv('bloqueo', 1), S.setv(e, 1), S.sound('Pop'), S.setv('ultima', i + 1)]
+                .concat([1, 2, 3, 4].map((k) => S.iff(S.eq(S.v(f), k), [S.costume('Carta ' + (k + 1))])))
+                .concat([S.send('voz')])
                 .concat([S.ifelse(S.eq(S.v('abiertas'), 0),
                   [S.setv('abiertas', 1), S.setv('primera', S.v(f)), S.setv('bloqueo', 0)],
                   [S.ifelse(S.eq(S.v('primera'), S.v(f)),
-                    [S.sound('Ta-chán'), S.chv('Parejas', 1), S.send('acierto'), S.wait(0.5), S.setv('abiertas', 0),
+                    [S.sound('Ta-chán'), S.chv('Parejas', 1), S.send('acierto'), S.wait(0.35), S.setv('abiertas', 0),
                       S.ifelse(S.eq(S.v('Parejas'), 4), [S.send('fin')], [S.setv('bloqueo', 0)])],
-                    [S.wait(0.5), S.sound('Boing'), S.send('cerrar'), S.wait(0.4), S.setv('abiertas', 0), S.setv('bloqueo', 0)])])]))],
+                    [S.wait(0.7), S.sound('Boing'), S.send('cerrar'), S.wait(0.2), S.setv('abiertas', 0), S.setv('bloqueo', 0)])])]))],
+              [S.recv('voz'), S.iff(S.eq(S.v('ultima'), i + 1), [1, 2, 3, 4].map((k) => S.iff(S.eq(S.v(f), k), [S.voice(VOZ[k - 1])].concat(S.talk(NAMES[k - 1])))))],
               [S.recv('acierto'), S.iff(S.eq(S.v(e), 1), [S.setv(e, 2), S.size(95), S.wait(0.15), S.size(80), S.wait(0.15), S.size(95), S.wait(0.15), S.size(80)])],
               [S.recv('cerrar'), S.iff(S.eq(S.v(e), 1), [S.setv(e, 0), S.costume('Carta 1')])]
             ]
           };
         };
-        const vars = [['Parejas', 0, true], ['bloqueo', 0, false], ['abiertas', 0, false], ['primera', 0, false], ['barajar', 1, false]];
+        const vars = [['Parejas', 0, true], ['bloqueo', 0, false], ['abiertas', 0, false], ['primera', 0, false], ['barajar', 1, false], ['ultima', 0, false]];
         for (let i = 1; i <= 8; i++) { vars.push(['e' + i, 0, false]); vars.push(['f' + i, PERM[0][i - 1], false]); }
         return make({
-          backdrops: ['laurisilva'], messages: ['acierto', 'cerrar', 'fin'], vars,
+          backdrops: ['laurisilva'], messages: ['acierto', 'cerrar', 'voz', 'fin'], vars,
           stage: [[F(), S.backdrop('laurisilva')]],
           sprites: [
             {
               id: 'lucia', name: 'Lucía', x: -195, y: -150, size: 42, sounds: ['Pop'], scripts: [
                 [F(), S.voice('KITTEN'), S.show(), S.xy(-195, -150), S.setv('bloqueo', 0), S.setv('abiertas', 0), S.setv('Parejas', 0), S.setv('barajar', S.rnd(1, 4)), S.wait(0.6)]
-                  .concat(S.talk('Encuentra las parejas. Toca una carta y luego otra. Si son iguales, ¡pareja!')),
+                  .concat(S.talk('¡Encuentra las parejas!')),
                 [S.recv('acierto'), S.voice('KITTEN'), S.wait(0.2), S.iff(S.lt(S.v('Parejas'), 4), S.talk('¡Pareja!'))],
+                [S.recv('cerrar'), S.voice('KITTEN')].concat(S.talk('¡Casi! Prueba otra vez.')),
                 [S.recv('fin'), S.voice('KITTEN'), S.hide()].concat(S.talk('¡Muy bien! Has encontrado las cuatro parejas.'), [S.wait(1), S.stopAll()])
               ]
             }

@@ -177,6 +177,7 @@
       const fin = () => { h.done = true; };
       u.onend = fin; u.onerror = fin;
       setTimeout(fin, Math.min(30000, 2500 + text.length * 110));   // por si el navegador no avisa
+      if (synth.speaking && synth.pending) synth.cancel();   // evita colas largas de voces atrasadas
       synth.speak(u);
       PQ._lastUtter = { text, key };
     } catch (e) { h.done = true; }

@@ -1086,16 +1086,16 @@
             ]
           };
         };
-        const vars = [['Parejas', 0, true], ['bloqueo', 1, false], ['abiertas', 0, false], ['primera', 0, false], ['barajar', 1, false]];
-        for (let i = 1; i <= 8; i++) { vars.push(['e' + i, 0, false]); vars.push(['f' + i, 0, false]); }
+        const vars = [['Parejas', 0, true], ['bloqueo', 0, false], ['abiertas', 0, false], ['primera', 0, false], ['barajar', 1, false]];
+        for (let i = 1; i <= 8; i++) { vars.push(['e' + i, 0, false]); vars.push(['f' + i, PERM[0][i - 1], false]); }
         return make({
           backdrops: ['laurisilva'], messages: ['acierto', 'cerrar', 'fin'], vars,
           stage: [[F(), S.backdrop('laurisilva')]],
           sprites: [
             {
               id: 'lucia', name: 'Lucía', x: -195, y: -150, size: 42, sounds: ['Pop'], scripts: [
-                [F(), S.voice('KITTEN'), S.show(), S.xy(-195, -150), S.setv('bloqueo', 1), S.setv('abiertas', 0), S.setv('Parejas', 0), S.setv('barajar', S.rnd(1, 4)), S.wait(0.6)]
-                  .concat(S.talk('Encuentra las parejas. Toca una carta y luego otra. Si son iguales, ¡pareja!'), [S.setv('bloqueo', 0)]),
+                [F(), S.voice('KITTEN'), S.show(), S.xy(-195, -150), S.setv('bloqueo', 0), S.setv('abiertas', 0), S.setv('Parejas', 0), S.setv('barajar', S.rnd(1, 4)), S.wait(0.6)]
+                  .concat(S.talk('Encuentra las parejas. Toca una carta y luego otra. Si son iguales, ¡pareja!')),
                 [S.recv('acierto'), S.voice('KITTEN'), S.wait(0.2), S.iff(S.lt(S.v('Parejas'), 4), S.talk('¡Pareja!'))],
                 [S.recv('fin'), S.voice('KITTEN'), S.hide()].concat(S.talk('¡Muy bien! Has encontrado las cuatro parejas.'), [S.wait(1), S.stopAll()])
               ]

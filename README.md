@@ -26,6 +26,27 @@ Editor de programación por bloques para el alumnado de **Infantil y primer cicl
 - **En local**: abre `index.html` en Chrome, Edge o Firefox.
 - **En GitHub Pages**: *Settings ▸ Pages ▸ Deploy from a branch ▸ `main` / `(root)`*. La página quedará en `https://<usuario>.github.io/Pequebloques/`.
 
+## Pensamiento computacional (cuentos con voz)
+
+Seis cuentos de unos 10 minutos, pensados para alumnado que aún no lee ni escribe: Lucía y Yeray lo cuentan todo con voz y solo hay que tocar la pantalla. Están en «Cuentos, retos y tutoriales» → pestaña **Pensamiento computacional**, y se pueden abrir, modificar y exportar a .sb3 como cualquier otro proyecto.
+
+| Etapa | Cuento | Centro de interés | Pensamiento computacional |
+|---|---|---|---|
+| Infantil | Los contenedores de colores | Reciclaje | Secuencia, clasificación, patrones, depuración |
+| Infantil | La casa de Yeray y la energía limpia | Energías limpias | Pasos en orden, condicional «si… entonces…», bucle, depuración |
+| Infantil | Las estrellas de Lucía y Yeray | Universo | Patrones, ordenar, cuenta atrás, seguir instrucciones |
+| Primaria | Misión limpiaplayas: programa al robot | Reciclaje | Algoritmos con tarjetas, descomposición, depuración, bucle |
+| Primaria | La isla de la energía limpia | Energías limpias | Condicionales, variables, bucle de días, depuración |
+| Primaria | Misión Marte: programa al rover | Universo | Descomposición, obstáculos, prueba y error, bucle con límite de tarjetas |
+
+**Referencia curricular (orientativa, a confirmar por el equipo docente).** Verificada sobre los textos del BOC que se usaron para diseñarlos:
+- Decreto 196/2022 (Educación Infantil de Canarias), área *Descubrimiento y Exploración del Entorno*, competencia específica 2: criterios 2.1 (dividir retos en secuencias de actividades más sencillas) y 2.2 (destrezas del pensamiento computacional mediante la manipulación).
+- Decreto 211/2022 (Educación Primaria de Canarias), área *Conocimiento del Medio Natural, Social y Cultural*, competencia específica 3 (proyectos de diseño y pensamiento computacional): criterio 3.2 del primer ciclo («participar en la resolución guiada de problemas sencillos de programación») y criterio 3.2 del tercer ciclo (técnicas del pensamiento computacional: descomposición, patrones y algoritmos sencillos); saber básico «Proyectos de diseño y pensamiento computacional».
+
+Los cuentos son materiales originales de este proyecto, no recursos oficiales del programa Código Escuela 4.0.
+
+**Estado de las pruebas:** cada cuento se ha recorrido de principio a fin con un robot de pruebas en Chromium (voz simulada), los .sb3 exportados cargan y se ejecutan en `scratch-vm`. No se han probado con voces reales ni en tabletas físicas; la duración de 10 minutos es una estimación.
+
 ## Voces
 
 Las voces usan la síntesis del propio navegador (Web Speech API). Si el dispositivo no tiene voz en español instalada, el programa funciona igual pero no se oye. En Windows/Android/iOS/macOS suelen venir de serie; en Linux hay que instalar una (por ejemplo `espeak-ng` o `speech-dispatcher`).

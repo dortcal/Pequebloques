@@ -1,0 +1,32 @@
+import asyncio, time
+from pchelp import *
+async def main():
+    p,b,pg,g,errs=await session('pc-energia-infantil')
+    t0=time.time()
+    await pg.click('#btnFlag')
+    await g.waitvar('fase',1,60); await g.waitvar('bloqueo',0,30)
+    await g.click('Sol'); await g.waitvar('sol_ok',1,10)
+    await pg.wait_for_timeout(3500)
+    await g.click('Viento'); await g.waitvar('viento_ok',1,30)
+    await g.waitvar('fase',2,60); await pg.wait_for_timeout(500)
+    await pg.screenshot(path='/tmp/p2a.png')
+    await g.waitvar('bloqueo',0,30)
+    await g.click('Cable'); await pg.wait_for_timeout(900); print('paso tras cable (0)',await g.var('paso'))
+    for n in ['Sol','Panel solar','Cable','Bombilla']:
+        await g.waitvar('bloqueo',0,10); await g.click(n); await pg.wait_for_timeout(700)
+    print('paso',await g.var('paso'))
+    await g.waitvar('fase',3,60); await g.waitvar('resp',1,40); await g.waitvar('bloqueo',0,20); await pg.wait_for_timeout(2500)
+    await pg.screenshot(path='/tmp/p2b.png')
+    await g.click('Aerogenerador'); await pg.wait_for_timeout(900); print('hecho tras fallo',await g.var('hecho'))
+    await g.click('Panel solar'); await g.waitvar('resp',2,40); await g.waitvar('bloqueo',0,20); await pg.wait_for_timeout(1500)
+    await g.click('Aerogenerador'); await g.waitvar('fase',5,40)
+    await g.waitvar('bloqueo',0,20); await pg.wait_for_timeout(1500)
+    for i in range(3):
+        await g.waitvar('bloqueo',0,10); await g.click('Aerogenerador'); await pg.wait_for_timeout(900)
+    await g.waitvar('fase',4,40); await g.waitvar('bloqueo',0,30); await pg.wait_for_timeout(500)
+    await pg.screenshot(path='/tmp/p2c.png')
+    await g.click('Bombilla'); await pg.wait_for_timeout(800)
+    await g.click('Cable'); await g.waitvar('hecho',1,10)
+    await g.until(lambda: pg.evaluate('!PQ.RT.threads.length'),60,'fin')
+    print('fin %.1fs'%(time.time()-t0), errs); await b.close(); await p.stop()
+asyncio.run(main())

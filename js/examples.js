@@ -108,6 +108,9 @@
   }
 
   const F = D.flag, S = D;
+  S.or = (a, b) => { const x = mk('operator_or'); x.in = { OPERAND1: a, OPERAND2: b }; return x; };
+  S.yy = () => mk('motion_yposition');
+  PQ.EXH = { mk, R, S, F, make };
 
   PQ.EX = [
     /* 1 */

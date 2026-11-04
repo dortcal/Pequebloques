@@ -28,7 +28,7 @@ Editor de programación por bloques para el alumnado de **Infantil y primer cicl
 
 ## Pensamiento computacional (cuentos con voz)
 
-Seis cuentos de unos 10 minutos, pensados para alumnado que aún no lee ni escribe: Lucía y Yeray lo cuentan todo con voz y solo hay que tocar la pantalla. Están en «Cuentos, retos y tutoriales» → pestaña **Pensamiento computacional**, y se pueden abrir, modificar y exportar a .sb3 como cualquier otro proyecto.
+Siete cuentos con voz (seis de unos 10 minutos y uno más largo, de unos 20, para 2.º de Primaria), pensados para alumnado que aún no lee ni escribe: Lucía y Yeray lo cuentan todo con voz y solo hay que tocar la pantalla. Están en «Cuentos, retos y tutoriales» → pestaña **Pensamiento computacional**, y se pueden abrir, modificar y exportar a .sb3 como cualquier otro proyecto.
 
 | Etapa | Cuento | Centro de interés | Pensamiento computacional |
 |---|---|---|---|
@@ -38,14 +38,17 @@ Seis cuentos de unos 10 minutos, pensados para alumnado que aún no lee ni escri
 | Primaria | Misión limpiaplayas: programa al robot | Reciclaje | Algoritmos con tarjetas, descomposición, depuración, bucle |
 | Primaria | La isla de la energía limpia | Energías limpias | Condicionales, variables, bucle de días, depuración |
 | Primaria | Misión Marte: programa al rover | Universo | Descomposición, obstáculos, prueba y error, bucle con límite de tarjetas |
+| Primaria (2.º) | El cole recicla: clasifica y programa al robot | Reciclaje en el colegio | Condiciones «si… entonces», secuencia lógica, instrucciones de dirección relativa (avanzar, retroceder, girar a izquierda/derecha, como un Blue-Bot), obstáculos, dos objetivos en orden, depuración |
 
 **Referencia curricular (orientativa, a confirmar por el equipo docente).** Verificada sobre los textos del BOC que se usaron para diseñarlos:
 - Decreto 196/2022 (Educación Infantil de Canarias), área *Descubrimiento y Exploración del Entorno*, competencia específica 2: criterios 2.1 (dividir retos en secuencias de actividades más sencillas) y 2.2 (destrezas del pensamiento computacional mediante la manipulación).
 - Decreto 211/2022 (Educación Primaria de Canarias), área *Conocimiento del Medio Natural, Social y Cultural*, competencia específica 3 (proyectos de diseño y pensamiento computacional): criterio 3.2 del primer ciclo («participar en la resolución guiada de problemas sencillos de programación») y criterio 3.2 del tercer ciclo (técnicas del pensamiento computacional: descomposición, patrones y algoritmos sencillos); saber básico «Proyectos de diseño y pensamiento computacional».
 
+**El cole recicla (2.º de Primaria, unos 20 minutos).** Cuatro partes encadenadas: (1) clasificar ocho residuos en cinco contenedores (amarillo, azul, verde, marrón y gris) con pistas tras dos errores; (2) ordenar los cuatro pasos del viaje de un envase; (3) cuatro retos para aprender las tarjetas del robot de suelo (avanzar, retroceder, girar a la izquierda y a la derecha, que giran respecto al propio robot, no respecto a quien mira la pantalla); (4) tres misiones de llevar residuos a su contenedor —una con un contenedor trampa, una con obstáculos y otra con dos residuos y solo diez huecos— más un programa con un error que hay que depurar. Los niveles del robot se han comprobado con un solucionador (todos tienen solución dentro del límite de tarjetas). Los colores de los contenedores siguen el esquema habitual en España; algunos municipios usan otros (por ejemplo, sin contenedor marrón), así que conviene comentarlo con el grupo.
+
 Los cuentos son materiales originales de este proyecto, no recursos oficiales del programa Código Escuela 4.0.
 
-**Estado de las pruebas:** cada cuento se ha recorrido de principio a fin con un robot de pruebas en Chromium (voz simulada), los .sb3 exportados cargan y se ejecutan en `scratch-vm`. No se han probado con voces reales ni en tabletas físicas; la duración de 10 minutos es una estimación.
+**Estado de las pruebas:** cada cuento se ha recorrido de principio a fin con un robot de pruebas en Chromium (voz simulada), los .sb3 exportados cargan y se ejecutan en `scratch-vm`. No se han probado con voces reales ni en tabletas físicas; la duración (10 minutos; 20 en el de 2.º) es una estimación.
 
 ## Voces
 

@@ -129,6 +129,110 @@
   ]);
   sp('casilla', 'Casilla meta', [['casilla-a', svg(`<rect x="8" y="8" width="104" height="104" rx="16" fill="#FFE766" fill-opacity=".75" stroke="#F2A900" stroke-width="5" stroke-dasharray="10 7"/><path d="M42 24 V98" stroke="#C9D3DD" stroke-width="6" stroke-linecap="round"/><path d="M46 28 H88 L76 44 L88 60 H46 Z" fill="#FF3355" ${st(3)}/>`)]]);
 
+  /* ====================================================================
+   *  2.º DE PRIMARIA · El colegio recicla (residuos nuevos, contenedores
+   *  marrón y gris, camión, planta, robot de suelo con tarjetas relativas)
+   * ==================================================================== */
+  const platano = svg(`
+    <path d="M22 70 Q20 28 62 22 Q96 20 100 52 Q80 40 60 48 Q38 56 36 88 Z" fill="#FFE04A" ${st()}/>
+    <path d="M36 88 Q40 100 56 104 Q40 84 60 66 Q84 52 100 52" fill="#F2C318" ${st()}/>
+    <path d="M62 22 L66 10 L74 12" fill="none" stroke="#7A5A2B" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="48" cy="40" r="2.4" fill="#A9781E"/><circle cx="76" cy="38" r="2.4" fill="#A9781E"/>
+    ${face(58, 58, .9)}`);
+  const manzana = svg(`
+    <path d="M30 18 Q60 30 90 18 Q98 40 84 56 Q70 50 60 58 Q50 50 36 56 Q22 40 30 18 Z" fill="#E2554D" ${st()}/>
+    <path d="M36 56 Q50 50 60 58 Q70 50 84 56 L82 66 Q70 62 60 70 Q50 62 38 66 Z" fill="#FFF1D2" ${st()}/>
+    <path d="M38 66 Q50 62 60 70 Q70 62 82 66 Q98 82 86 98 Q70 106 60 94 Q50 106 34 98 Q22 82 38 66 Z" fill="#E2554D" ${st()}/>
+    <path d="M60 18 Q58 8 66 4" fill="none" stroke="#7A5A2B" stroke-width="5" stroke-linecap="round"/>
+    ${face(60, 84, .8)}`);
+  const lapiz = svg(`
+    <path d="M14 96 L26 62 L44 70 L36 100 Z" fill="#FFD21F" ${st()}/>
+    <path d="M26 62 L34 36 L52 44 L44 70 Z" fill="#FF8DB5" ${st()}/>
+    <path d="M44 66 L88 48 L96 60 L50 84 Z" fill="#FFD21F" ${st()}/>
+    <path d="M88 48 L108 40 L104 60 L96 60 Z" fill="#F2D2A0" ${st()}/><path d="M104 40 L108 40 L104 48 Z" fill="${O}"/>
+    <path d="M30 40 L28 24 L38 26 Z M52 44 L56 28" fill="none" stroke="${O}" stroke-width="3" stroke-linecap="round"/>
+    ${face(60, 74, .7)}`);
+  const bolsa = svg(`
+    <path d="M26 20 Q36 14 46 20 Q56 14 66 20 Q76 14 86 20 L92 100 Q60 112 28 100 Z" fill="#F29A2E" ${st()}/>
+    <path d="M26 20 L92 20 M28 98 L92 98" fill="none" ${st(2.4)}/>
+    <ellipse cx="60" cy="54" rx="22" ry="16" fill="#FFE766" ${st(2.6)}/>
+    <path d="M40 74 q20 14 40 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+    ${face(60, 52, .8)}`);
+  const botella = svg(`
+    <rect x="46" y="6" width="28" height="14" rx="4" fill="#3B82F6" ${st()}/>
+    <path d="M50 20 H70 V32 Q92 42 92 62 V100 Q92 110 82 110 H38 Q28 110 28 100 V62 Q28 42 50 32 Z" fill="#BFE8FF" fill-opacity=".85" ${st()}/>
+    <path d="M30 70 H90 V100 Q90 108 82 108 H38 Q30 108 30 100 Z" fill="#59B7FF" opacity=".6"/>
+    <path d="M38 52 V90" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+    ${face(62, 76, .95)}`);
+  const cuaderno = svg(`
+    <rect x="22" y="12" width="78" height="96" rx="8" fill="#5FA8FF" ${st()}/>
+    <rect x="34" y="12" width="66" height="96" rx="6" fill="#fff" ${st()}/>
+    <g fill="#8FA2B8"><circle cx="28" cy="26" r="3.4"/><circle cx="28" cy="46" r="3.4"/><circle cx="28" cy="66" r="3.4"/><circle cx="28" cy="86" r="3.4"/></g>
+    <path d="M44 28 H90 M44 38 H90 M44 48 H70" fill="none" stroke="#9AA3B2" stroke-width="3" stroke-linecap="round"/>
+    ${face(68, 78, .85)}`);
+  sp('residuoc', 'Residuo del cole', [
+    ['residuoc-a', lata], ['residuoc-b', brik], ['residuoc-c', periodico], ['residuoc-d', caja], ['residuoc-e', tarro],
+    ['residuoc-f', platano], ['residuoc-g', manzana], ['residuoc-h', lapiz], ['residuoc-i', bolsa], ['residuoc-j', botella], ['residuoc-k', cuaderno]
+  ]);
+  /* contenedores marrón (orgánico) y gris (resto) */
+  const marron = cont.costumes[0][1].replace(/#FFD21F/g, '#9C6B3C').replace(/#F2A900/g, '#6B4423');
+  const iconM = '<g fill="#fff" stroke="#3a2c4f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M60 52 Q76 52 76 70 Q76 90 60 90 Q44 90 44 70 Q44 52 60 52 Z"/><path d="M60 52 Q60 44 68 42" fill="none"/></g>';
+  cont.costumes.push(['contenedor-d', marron.replace(/<g fill="#fff"[\s\S]*?<\/g>/, iconM)]);
+  const gris = cont.costumes[0][1].replace(/#FFD21F/g, '#9AA3B2').replace(/#F2A900/g, '#6B7482');
+  const iconG = '<g fill="#fff" stroke="#3a2c4f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M46 56 H74 L71 92 H49 Z"/><path d="M42 56 H78 M54 50 H66"/><path d="M55 64 V84 M65 64 V84" fill="none"/></g>';
+  cont.costumes.push(['contenedor-e', gris.replace(/<g fill="#fff"[\s\S]*?<\/g>/, iconG)]);
+  /* reciclaje: camión, planta recicladora y lata nueva */
+  const camion = svg(`
+    <rect x="6" y="40" width="70" height="44" rx="8" fill="#34C26B" ${st()}/>
+    <path d="M76 52 H98 L110 68 V84 H76 Z" fill="#FFD21F" ${st()}/><path d="M84 58 H96 L104 68 H84 Z" fill="#BFE8FF" ${st(2.4)}/>
+    <path d="M16 54 q10-10 20 0 M26 48 l-4 -4 M26 48 l5 -3" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="30" cy="88" r="12" fill="#4B4458" ${st()}/><circle cx="30" cy="88" r="4.4" fill="#C9D3DD"/>
+    <circle cx="92" cy="88" r="12" fill="#4B4458" ${st()}/><circle cx="92" cy="88" r="4.4" fill="#C9D3DD"/>
+    ${face(50, 70, .9)}`);
+  const fabrica = svg(`
+    <path d="M8 104 V58 L38 76 V58 L68 76 V40 H102 V104 Z" fill="#B9C3CE" ${st()}/>
+    <rect x="76" y="14" width="14" height="28" fill="#E2554D" ${st()}/>
+    <g fill="#fff" opacity=".9"><circle cx="84" cy="10" r="6"/><circle cx="96" cy="4" r="5"/></g>
+    <rect x="18" y="82" width="14" height="14" fill="#FFE766" ${st(2.4)}/><rect x="46" y="82" width="14" height="14" fill="#FFE766" ${st(2.4)}/><rect x="78" y="62" width="14" height="14" fill="#FFE766" ${st(2.4)}/>
+    <path d="M70 104 V90 H96 V104" fill="#5FA8FF" ${st(2.4)}/>
+    <path d="M14 112 H106" stroke="${O}" stroke-width="4" stroke-linecap="round"/>`);
+  const latanueva = svg(`
+    <g fill="#FFD21F" ${st(2)}><path d="M20 24 l4 -10 l4 10 l10 4 l-10 4 l-4 10 l-4 -10 l-10 -4 Z"/><path d="M98 20 l3 -7 l3 7 l7 3 l-7 3 l-3 7 l-3 -7 l-7 -3 Z"/></g>
+    <ellipse cx="60" cy="30" rx="26" ry="9" fill="#EDF1F5" ${st()}/>
+    <path d="M34 30 V96 Q34 108 60 108 Q86 108 86 96 V30 Q86 40 60 40 Q34 40 34 30 Z" fill="#CFE9FF" ${st()}/>
+    <path d="M34 54 H86 V88 H34 Z" fill="#3FB27F" ${st(2.6)}/>
+    <path d="M44 36 V104" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".8"/>
+    ${face(62, 71, 1.05)}`);
+  sp('reciclado', 'Reciclaje', [['reciclado-a', camion], ['reciclado-b', fabrica], ['reciclado-c', latanueva]]);
+  /* tarjetas de dirección relativa (tipo robot de suelo) */
+  const giroI = '<path d="M80 100 V62 Q80 40 58 40 H34 M50 24 L32 40 L50 56" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>';
+  const giroD = '<path d="M40 100 V62 Q40 40 62 40 H86 M70 24 L88 40 L70 56" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>';
+  sp('tarjetar', 'Tarjeta de dirección', [
+    ['tarjetar-a', slot('')],
+    ['tarjetar-b', slot(arrow(0), '#59B7FF')], ['tarjetar-c', slot(arrow(180), '#FFA63D')],
+    ['tarjetar-d', slot(giroI, '#FF6FA8')], ['tarjetar-e', slot(giroD, '#5ED08A')]
+  ]);
+  /* robot de suelo visto desde arriba (mira hacia arriba) */
+  sp('robotsuelo', 'Robot de suelo', [['robotsuelo-a', svg(`<g transform="rotate(90 60 60)">
+    <rect x="14" y="30" width="12" height="34" rx="5" fill="#4B4458" ${st(2.6)}/><rect x="94" y="30" width="12" height="34" rx="5" fill="#4B4458" ${st(2.6)}/>
+    <rect x="14" y="70" width="12" height="30" rx="5" fill="#4B4458" ${st(2.6)}/><rect x="94" y="70" width="12" height="30" rx="5" fill="#4B4458" ${st(2.6)}/>
+    <rect x="22" y="10" width="76" height="102" rx="30" fill="#4C97FF" ${st()}/>
+    <rect x="34" y="52" width="52" height="48" rx="18" fill="#8EC1FF" ${st(2.6)}/>
+    <path d="M60 4 L78 24 H42 Z" fill="#FFD21F" ${st(3)}/>
+    <circle cx="46" cy="34" r="8" fill="#fff" ${st(2.6)}/><circle cx="74" cy="34" r="8" fill="#fff" ${st(2.6)}/>
+    <circle cx="46" cy="32" r="3.4" fill="${O}"/><circle cx="74" cy="32" r="3.4" fill="${O}"/>
+    <circle cx="60" cy="76" r="9" fill="#FF6FA8" ${st(2.6)}/></g>`)]]);
+  /* obstáculos del patio */
+  const cono = svg(`
+    <path d="M10 104 H110 V112 H10 Z" fill="#F2A900" ${st()}/>
+    <path d="M60 8 L92 104 H28 Z" fill="#FF7A1A" ${st()}/>
+    <path d="M50 38 H70 L74 52 H46 Z" fill="#fff" ${st(2.6)}/><path d="M41 68 H79 L83 82 H37 Z" fill="#fff" ${st(2.6)}/>`);
+  const charco = svg(`
+    <path d="M10 66 Q8 34 40 32 Q54 18 76 30 Q108 32 108 62 Q110 94 78 96 Q56 106 34 96 Q10 94 10 66 Z" fill="#5FB8F5" ${st()}/>
+    <path d="M30 56 q10-10 20 0 M64 70 q10-10 20 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".85"/>
+    <path d="M70 46 q6-5 12 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>`);
+  sp('obstaculoc', 'Obstáculo del patio', [['obstaculoc-a', cono], ['obstaculoc-b', charco]]);
+
   /* ---------- fondos ---------- */
   const B = (id, name, inner) => {
     const s = '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360" viewBox="0 0 480 360">' + inner + '</svg>';
@@ -170,5 +274,19 @@
     <rect width="480" height="360" fill="url(#c)"/>
     <g fill="#fff" opacity=".9"><circle cx="190" cy="30" r="1.8"/><circle cx="260" cy="320" r="1.8"/><circle cx="330" cy="70" r="1.4"/><circle cx="420" cy="300" r="1.8"/><circle cx="450" cy="40" r="1.8"/><circle cx="380" cy="190" r="1.4"/><circle cx="130" cy="340" r="1.4"/></g>
     <circle cx="-40" cy="180" r="120" fill="#FFB300"/><circle cx="-40" cy="180" r="150" fill="#FFB300" opacity=".25"/>`);
+  B('pc-cole', 'Patio del cole', `
+    <defs><linearGradient id="c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8EDBFF"/><stop offset="1" stop-color="#E8F8FF"/></linearGradient></defs>
+    <rect width="480" height="360" fill="url(#c)"/>
+    <rect x="30" y="70" width="420" height="120" fill="#FFE7B8" stroke="#3a2c4f" stroke-width="4"/>
+    <path d="M20 70 L240 20 L460 70 Z" fill="#D9573F" stroke="#3a2c4f" stroke-width="4" stroke-linejoin="round"/>
+    <g fill="#BFE8FF" stroke="#3a2c4f" stroke-width="3"><rect x="56" y="92" width="44" height="40"/><rect x="130" y="92" width="44" height="40"/><rect x="306" y="92" width="44" height="40"/><rect x="380" y="92" width="44" height="40"/></g>
+    <rect x="212" y="120" width="56" height="70" rx="6" fill="#A86A3A" stroke="#3a2c4f" stroke-width="3"/>
+    <path d="M440 20 V70" stroke="#3a2c4f" stroke-width="4"/><path d="M440 20 H468 V38 H440" fill="#34C26B" stroke="#3a2c4f" stroke-width="3"/>
+    <rect y="190" width="480" height="170" fill="#C9CFD8"/><rect y="190" width="480" height="10" fill="#9AA3B2"/>
+    <path d="M0 250 H480 M0 310 H480" stroke="#fff" stroke-width="4" stroke-dasharray="26 16" opacity=".7"/>`);
+  B('pc-cole-grid', 'Patio del cole con cuadrícula', `
+    <defs><linearGradient id="c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8EDBFF"/><stop offset="1" stop-color="#E8F8FF"/></linearGradient></defs>
+    <rect width="480" height="360" fill="url(#c)"/><rect y="150" width="480" height="210" fill="#B9C1CC"/>
+    ${grid('#D5DAE2', '#C6CCD6', '#6B7482')}${panelBg}`);
   PQ.PC_READY = true;
 })(typeof window !== 'undefined' ? window : globalThis);

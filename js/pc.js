@@ -882,6 +882,358 @@
     }
   });
 
+  /* ============================================================
+   *  PRIMARIA (2.º) · El cole recicla
+   *  1) Clasificar con 5 contenedores (condiciones «si… entonces»)
+   *  2) Ordenar el viaje de un envase (secuencia)
+   *  3) Programar un robot de suelo con tarjetas de dirección relativa
+   *     (avanzar, retroceder, girar a la izquierda / a la derecha), como un Blue-Bot
+   *  4) Misiones con obstáculos, dos residuos y depuración
+   * ============================================================ */
+  EX.push((function () {
+    const NS = 10;
+    const COLORES = ['', 'amarillo', 'azul', 'verde', 'marrón', 'gris'];
+    const BINX = [-190, -95, 0, 95, 190], BINY = -118;
+    const lvl = (k) => S.eq(v('nivel'), k);
+    /* residuos de las dos rondas: [nombre en pantalla, costume, contenedor, frase] */
+    const RONDAS = [
+      [['Lata', 1, 1, 'Una lata.'], ['Periódico', 3, 2, 'Un periódico.'], ['Tarro', 5, 3, 'Un tarro de cristal.'], ['Cáscara', 6, 4, 'Una cáscara de plátano.']],
+      [['Bolsa', 9, 1, 'Una bolsa de patatas.'], ['Cuaderno', 11, 2, 'Un cuaderno viejo.'], ['Lápiz', 8, 5, 'Un lápiz roto.'], ['Manzana', 7, 4, 'Un corazón de manzana.']]
+    ];
+    const BIEN = ['', '¡Muy bien! Los envases de plástico, las latas y los briks van al contenedor amarillo.',
+      '¡Muy bien! El papel y el cartón van al contenedor azul.',
+      '¡Muy bien! Los envases de vidrio van al contenedor verde.',
+      '¡Muy bien! Los restos de comida van al contenedor marrón y se convierten en abono.',
+      '¡Muy bien! Lo que no se puede reciclar en los otros contenedores va al gris.'];
+    const PISTA = ['', 'Ese va al contenedor amarillo. Mira cómo parpadea.', 'Ese va al contenedor azul. Mira cómo parpadea.',
+      'Ese va al contenedor verde. Mira cómo parpadea.', 'Ese va al contenedor marrón. Mira cómo parpadea.', 'Ese va al contenedor gris. Mira cómo parpadea.'];
+    const sprites = [];
+    const sortOn = () => S.and(S.eq(v('fase'), 1), S.eq(v('bloqueo'), 0));
+    const seqOn = () => S.and(S.eq(v('fase'), 2), S.eq(v('bloqueo'), 0));
+
+    /* ---------- FASE 1 · residuos y contenedores ---------- */
+    for (let k = 1; k <= 4; k++) {
+      const x = -150 + 100 * (k - 1);
+      const setRonda = (r) => [S.recv('r' + r), S.setv('t' + k, RONDAS[r - 1][k - 1][2]), S.costume('Residuo del cole ' + RONDAS[r - 1][k - 1][1]), S.xy(x, -30), S.size(56), S.show()];
+      sprites.push({
+        id: 'residuoc', name: 'Residuo ' + k, x, y: -30, size: 56, hidden: true, sounds: ['Pop', 'Boing'], scripts: [
+          [F(), S.hide(), S.size(56)],
+          setRonda(1), setRonda(2),
+          [S.click(), S.iff(sortOn(), [S.send('quita'), S.setv('sel', v('t' + k)), S.setv('selk', k), S.setv('err', 0), S.size(70), S.sound('Pop')]
+            .concat(RONDAS.map((rr, ri) => S.iff(S.eq(v('ronda'), ri + 1), T('ALTO', rr[k - 1][3]))))) ],
+          [S.recv('quita'), S.size(56)],
+          [S.recv('bien'), S.iff(S.eq(v('selk'), k), [S.setv('selk', 0)]
+            .concat([1, 2, 3, 4, 5].map((t) => S.iff(S.eq(v('sel'), t), [S.glide(0.5, BINX[t - 1], BINY + 42)])), [S.setv('sel', 0), S.hide(), S.chv('restan', -1)]))],
+          [S.recv('mal'), S.iff(S.eq(v('selk'), k), [S.sound('Boing'), S.rep(2, [S.dx(10), S.wait(0.05), S.dx(-10), S.wait(0.05)]), S.size(70)])]
+        ]
+      });
+    }
+    for (let t = 1; t <= 5; t++) sprites.push({
+      id: 'contenedor', name: 'Contenedor ' + COLORES[t], x: BINX[t - 1], y: BINY, size: 52, hidden: true, sounds: ['Pop', 'Ta-chán', 'Boing'], scripts: [
+        [F(), S.hide(), S.size(52), S.costume('Contenedor ' + t)],
+        [S.recv('r1'), S.show()],
+        [S.recv('ocultaF1'), S.hide()],
+        [S.recv('b' + t), S.rep(3, [S.grow(14), S.wait(0.1), S.grow(-14), S.wait(0.1)])],
+        [S.click(), S.iff(sortOn(), [S.ifelse(S.eq(v('sel'), 0), T('ALTO', 'Primero toca un residuo.'),
+          [S.ifelse(S.eq(v('sel'), t),
+            [S.send('bien'), S.sound('Ta-chán'), S.rep(2, [S.grow(12), S.wait(0.06), S.grow(-12), S.wait(0.06)])].concat(T('ALTO', BIEN[t])),
+            [S.send('mal'), S.chv('err', 1), S.ifelse(S.lt(v('err'), 2),
+              T('ALTO', 'Ese no es. Piensa de qué está hecho el residuo.'),
+              flat([1, 2, 3, 4, 5].map((q) => [S.iff(S.eq(v('sel'), q), [S.send('b' + q)].concat(T('ALTO', PISTA[q])))])))])])])]
+      ]
+    });
+
+    /* ---------- FASE 2 · el viaje del envase ---------- */
+    const PASOS = [
+      { id: 'residuoc', cost: 'Residuo del cole 1', px: 50, say: 'Paso uno. Alguien tira la lata al contenedor.' },
+      { id: 'contenedor', cost: 'Contenedor 1', px: -150, say: 'Paso dos. La lata se queda en el contenedor amarillo con otros envases.' },
+      { id: 'reciclado', cost: 'Reciclaje 1', px: 150, say: 'Paso tres. El camión recoge los envases y los lleva a la planta.' },
+      { id: 'reciclado', cost: 'Reciclaje 2', px: -50, say: 'Paso cuatro. En la planta de reciclaje separan los materiales y los preparan para fabricar cosas nuevas.' }
+    ];
+    PASOS.forEach((p, i) => {
+      const k = i + 1, fx = -200 + 100 * i;
+      sprites.push({
+        id: p.id, name: 'Paso ' + k, x: p.px, y: 10, size: 56, hidden: true, sounds: ['Pop', 'Boing'], scripts: [
+          [F(), S.hide(), S.size(56), S.costume(p.cost)],
+          [S.recv('seq'), S.size(56), S.xy(p.px, 10), S.show()],
+          [S.recv('ocultaF2'), S.hide()],
+          [S.click(), S.iff(seqOn(), [S.ifelse(S.eq(v('sig'), k),
+            [S.setv('sig', k + 1), S.setv('err', 0), S.sound('Pop'), S.glide(0.5, fx, -95), S.send('o' + k)].concat(T('ALTO', p.say)),
+            [S.chv('err', 1), S.sound('Boing'), S.rep(2, [S.dx(10), S.wait(0.05), S.dx(-10), S.wait(0.05)]),
+              S.ifelse(S.lt(v('err'), 2), T('ALTO', 'Ese paso va más tarde. Piensa qué pasa primero.'), [S.send('pistaS')].concat(T('ALTO', 'Mira cuál parpadea: ese es el siguiente.')))])])],
+          [S.recv('pistaS'), S.iff(S.eq(v('sig'), k), [S.rep(3, [S.grow(14), S.wait(0.12), S.grow(-14), S.wait(0.12)])])]
+        ]
+      });
+      sprites.push({
+        id: 'numero', name: 'Orden ' + k, x: fx, y: -150, size: 30, hidden: true, sounds: [], scripts: [
+          [F(), S.hide(), S.size(30), S.costume('Número ' + k)],
+          [S.recv('o' + k), S.show()],
+          [S.recv('ocultaF2'), S.hide()]
+        ]
+      });
+    });
+    sprites.push({
+      id: 'reciclado', name: 'Lata nueva', x: 200, y: -95, size: 56, hidden: true, sounds: ['Magia'], scripts: [
+        [F(), S.hide(), S.size(56), S.costume('Reciclaje 3')],
+        [S.recv('nueva'), S.show(), S.sound('Magia'), S.rep(4, [S.grow(14), S.wait(0.08), S.grow(-14), S.wait(0.08)])],
+        [S.recv('ocultaF2'), S.hide()]
+      ]
+    });
+
+    /* ---------- FASE 3-5 · robot de suelo con tarjetas de dirección relativa ---------- */
+    const LV = [
+      { // T1 avanzar
+        start: [0, 4], h: 0, goal: [0, 1], items: [], bins: [], obst: [], cap: 5, preset: null,
+        intro: [['Y', 'Mira al robot: tiene una cara, y por ahí es por donde mira. La tarjeta azul, con la flecha hacia arriba, es avanzar: el robot da un paso hacia delante, hacia donde mira.'],
+          ['L', 'Primera prueba. El robot tiene que llegar a la bandera. Cuenta las casillas, toca la tarjeta azul las veces necesarias y pulsa el botón verde.']],
+        win: [['R', '¡He llegado a la bandera!'], ['L', 'Cada tarjeta es una instrucción. Varias tarjetas en fila forman un programa.']]
+      },
+      { // T2 giro derecha
+        start: [0, 4], h: 0, goal: [3, 4], items: [], bins: [], obst: [], cap: 6, preset: null,
+        intro: [['Y', 'Ahora la bandera está a un lado. La tarjeta verde gira al robot hacia su derecha. Cuando gira, no se mueve de su casilla: solo cambia hacia dónde mira.'],
+          ['L', 'Primero gira, y después avanza. ¡Tú puedes!']],
+        win: [['R', '¡Giro perfecto!'], ['Y', 'Girar y avanzar. Con solo dos tarjetas distintas ya podemos ir a muchos sitios.']]
+      },
+      { // T3 giro izquierda relativo
+        start: [4, 0], h: 3, goal: [4, 2], items: [], bins: [], obst: [], cap: 6, preset: null,
+        intro: [['L', 'Ahora el robot mira hacia la izquierda de la pantalla. La tarjeta rosa lo gira hacia la izquierda del robot, no hacia la tuya.'],
+          ['Y', 'Piensa que eres el robot. Si miras hacia la izquierda y giras a tu izquierda, ¿hacia dónde vas a mirar? Prueba y lo verás.']],
+        win: [['R', '¡Ahora miro hacia abajo!'], ['Y', 'La izquierda y la derecha del robot dependen de hacia dónde mire. Por eso hay que ponerse en su lugar.']]
+      },
+      { // T4 retroceder
+        start: [1, 1], h: 0, goal: [1, 3], items: [], bins: [], obst: [], cap: 4, preset: null,
+        intro: [['L', 'Queda una tarjeta: la naranja, con la flecha hacia abajo. Es retroceder. El robot va hacia atrás sin girarse.'],
+          ['Y', 'La bandera está detrás del robot. ¿Cuántas veces habrá que retroceder?']],
+        win: [['R', '¡Marcha atrás completada!'], ['L', 'Ya conoces las cuatro tarjetas: avanzar, retroceder, girar a la izquierda y girar a la derecha.']]
+      },
+      { // M1 primera misión de reciclaje
+        start: [0, 4], h: 0, goal: null, items: [[0, 2, 4, 6]], bins: [[3, 2, 4], [3, 4, 2]], obst: [], cap: 8, preset: null,
+        intro: [['L', 'Misión de reciclaje. Hay una cáscara de plátano en el patio. El robot la recoge pasando por encima y después la lleva a su contenedor.'],
+          ['Y', 'En la esquina de la derecha verás lo que lleva el robot. Cuidado: uno de los dos contenedores no es el correcto. Si el robot va al contenedor equivocado, la misión falla.'],
+          ['L', 'Piensa: ¿dónde van los restos de comida? Haz el camino con el dedo antes de poner las tarjetas.']],
+        win: [['R', '¡Cáscara entregada!'], ['L', 'La cáscara va al contenedor marrón y se convierte en abono para las plantas. ¡Bien hecho!']]
+      },
+      { // D1 depurar
+        start: [1, 4], h: 0, goal: null, items: [[1, 2, 1, 9]], bins: [[4, 2, 1], [0, 2, 2]], obst: [], cap: 8, preset: [1, 1, 3, 1, 1, 1],
+        intro: [['L', 'El robot de otra clase ha escrito este programa, pero tiene un error. Un error en un programa se llama bug, y arreglarlo se llama depurar.'],
+          ['Y', 'Pulsa el botón verde y observa muy bien qué hace el robot. La bolsa de patatas es un envase: ¿a qué contenedor tiene que ir?'],
+          ['L', 'Después quita tarjetas con el botón naranja y pon las correctas. Pista: hay una tarjeta que gira hacia el lado equivocado.']],
+        win: [['R', '¡Programa arreglado!'], ['Y', 'Has probado, has encontrado el error y lo has corregido. Los programadores lo hacen todos los días.']]
+      },
+      { // M2 obstáculos
+        start: [0, 4], h: 0, goal: null, items: [[3, 3, 1, 10]], bins: [[4, 3, 1], [2, 2, 3]], obst: [[3, 2, 1], [2, 3, 2], [0, 3, 1]], cap: 10, preset: null,
+        intro: [['L', 'Ahora hay conos y un charco en el patio. El robot no puede pasar por encima: se tropezaría o se mojaría. Hay que rodearlos.'],
+          ['Y', 'Tiene que recoger una botella de agua y llevarla a su contenedor. Mira bien los tres contenedores y los obstáculos, y planea el camino antes de poner tarjetas.'],
+          ['L', 'Fíjate en hacia dónde mira el robot al empezar. ¡Mucho ánimo!']],
+        win: [['R', '¡Botella entregada sin mojarme!'], ['L', 'Has encontrado un camino que esquiva los obstáculos. Planear antes de programar ahorra errores.']]
+      },
+      { // M3 dos residuos
+        start: [0, 4], h: 0, goal: null, items: [[2, 2, 1, 10], [2, 4, 4, 6]], bins: [[2, 1, 1], [1, 4, 4], [3, 4, 5]], obst: [[0, 3, 1], [3, 2, 2]], cap: 10, preset: null,
+        intro: [['L', 'Último reto, el más difícil. Hay dos residuos, y cada uno va a un contenedor distinto. El robot solo puede llevar un residuo a la vez.'],
+          ['Y', 'Piensa en el orden: primero uno, lo entregas, y después el otro. Solo tienes diez huecos para las tarjetas. A veces retroceder ahorra tarjetas.'],
+          ['L', 'Cuando lo tengas pensado, pon las tarjetas. Y si falla, no pasa nada: se prueba, se corrige y se vuelve a intentar.']],
+        win: [['R', '¡Patio limpio!'], ['L', 'Has resuelto un problema con dos partes: eso es descomponer. ¡Eres un gran programador o programadora!']]
+      }
+    ];
+    const nL = LV.length;
+    const LVm = (fn) => LV.map(fn).filter(Boolean);
+    const VZ = { L: LUC, Y: YER, R: ROB };
+    const sayC = (list) => flat(list.map((t) => T(VZ[t[0]], t[1])));
+    const TXT = {
+      choque: '¡Ay! El robot ha chocado con un obstáculo. Pulsa el botón rojo para borrar y busca otro camino.',
+      salida: 'El robot se ha salido del patio. Quita las últimas tarjetas con el botón naranja.',
+      corto: 'El robot no ha llegado a la bandera. Mira tus tarjetas y busca qué falla.',
+      faltan: 'Faltan residuos por llevar a su contenedor. Revisa tu programa.',
+      sinentrega: 'El robot lleva un residuo, pero no ha llegado a su contenedor. Revisa tu programa.',
+      equivocado: 'Ese no es el contenedor de este residuo. Piensa de qué material es y busca el color correcto.',
+      lleno: 'No caben más tarjetas. ¿Se puede conseguir lo mismo con menos?',
+      vacio: 'Primero pon alguna tarjeta. Toca las tarjetas de arriba.'
+    };
+    const maxObst = 3, maxItems = 2, maxBins = 3;
+    /* robot */
+    const fwd = (sign) => [[0, S.dy, 14], [1, S.dx, 14], [2, S.dy, -14], [3, S.dx, -14]].map((m) => S.iff(S.eq(v('h'), m[0]), [S.rep(4, [m[1](m[2] * sign), S.wait(0.05)])]));
+    const snap = [0, 1, 2, 3].map((q) => S.iff(S.eq(v('h'), q), [S.dir(90 * q)]));
+    const mvR = [].concat(
+      [S.iff(S.eq(v('c'), 1), fwd(1)), S.iff(S.eq(v('c'), 2), fwd(-1))],
+      [S.iff(S.eq(v('c'), 3), [S.rep(6, [S.left(15), S.wait(0.03)]), S.chv('h', -1), S.iff(S.lt(v('h'), 0), [S.setv('h', 3)])].concat(snap))],
+      [S.iff(S.eq(v('c'), 4), [S.rep(6, [S.right(15), S.wait(0.03)]), S.chv('h', 1), S.iff(S.gt(v('h'), 3), [S.setv('h', 0)])].concat(snap))],
+      Array.from({ length: maxObst }, (_, i) => S.iff(S.touch('Obstáculo ' + (i + 1)), [S.setv('fallo', 1)])),
+      [S.iff(S.or(S.or(S.lt(S.xpos(), -215), S.gt(S.xpos(), 35)), S.or(S.gt(S.yy(), 145), S.lt(S.yy(), -110))), [S.setv('fallo', 2)])],
+      [S.ifelse(S.eq(v('fallo'), 0), [S.send('coge'), S.wait(0.2)], [S.sound('Boing'), S.iff(S.eq(v('fallo'), 1), [S.send('choque')])])]);
+    const goStart = LVm((l, k) => S.iff(lvl(k + 1), [S.xy(cx(l.start[0]), cy(l.start[1])), S.setv('h', l.h), S.dir(90 * l.h)]));
+    const exito = [S.setv('hecho', 1), S.sound('Ta-chán'), S.rep(3, [S.grow(15), S.wait(0.08), S.grow(-15), S.wait(0.08)])];
+    const retry = [S.wait(1.4), S.send('lay'), S.setv('modo', 0)];
+    sprites.push({
+      id: 'robotsuelo', name: 'Robot', x: cx(0), y: cy(4), size: 40, hidden: true, sounds: ['Pop', 'Boing', 'Ta-chán'], scripts: [
+        [F(), S.hide(), S.size(40)],
+        [S.recv('lay'), S.show(), S.setv('carry', 0), S.setv('carrycost', 0), S.setv('entregados', 0), S.send('carga')].concat(goStart),
+        [S.recv('ocultaR'), S.hide()],
+        [S.recv('ir'), S.setv('modo', 1), S.setv('fallo', 0), S.setv('i', 0), S.send('lay'), S.wait(0.4), S.sound('Pop'),
+          S.rep(NS, [S.iff(S.and(S.eq(v('fallo'), 0), S.lt(v('i'), v('n'))), [S.chv('i', 1), S.send('paso')]
+            .concat(chain('i', NS, (k) => [S.setv('c', v('p' + k))]), mvR))]),
+          S.send('refresca'), S.wait(0.3),
+          S.ifelse(S.eq(v('fallo'), 0),
+            [S.ifelse(S.eq(v('tot'), 0),
+              [S.ifelse(S.touch('Meta'), exito, [S.send('corto')].concat(retry))],
+              [S.ifelse(S.eq(v('entregados'), v('tot')), exito,
+                [S.ifelse(S.gt(v('carry'), 0), [S.send('sinentrega')], [S.send('faltan')])].concat(retry))])],
+            [S.iff(S.eq(v('fallo'), 2), [S.send('salida')]), S.iff(S.eq(v('fallo'), 3), [S.send('equivocado')])].concat(retry))]
+      ]
+    });
+    /* residuos, contenedores y obstáculos del mapa (se colocan según el nivel) */
+    for (let i = 0; i < maxItems; i++) sprites.push({
+      id: 'residuoc', name: 'Residuo mapa ' + (i + 1), x: 0, y: 0, size: 34, hidden: true, sounds: ['Pop'], scripts: [
+        [F(), S.hide(), S.size(34)],
+        [S.recv('lay'), S.hide()].concat(LVm((l, k) => l.items[i] ? S.iff(lvl(k + 1), [S.costume('Residuo del cole ' + l.items[i][3]), S.xy(cx(l.items[i][0]), cy(l.items[i][1])), S.show()]) : S.iff(lvl(k + 1), [S.hide()]))),
+        [S.recv('ocultaR'), S.hide()],
+        [S.recv('coge'), S.iff(S.and(S.touch('Robot'), S.eq(v('carry'), 0)), [S.hide(), S.sound('Pop')]
+          .concat(LVm((l, k) => l.items[i] ? S.iff(lvl(k + 1), [S.setv('carry', l.items[i][2]), S.setv('carrycost', l.items[i][3])]) : null), [S.send('carga')]))]
+      ]
+    });
+    for (let i = 0; i < maxBins; i++) sprites.push({
+      id: 'contenedor', name: 'Contenedor mapa ' + (i + 1), x: 0, y: 0, size: 40, hidden: true, sounds: ['Ta-chán', 'Boing'], scripts: [
+        [F(), S.hide(), S.size(40)],
+        [S.recv('lay'), S.hide()].concat(LVm((l, k) => l.bins[i] ? S.iff(lvl(k + 1), [S.costume('Contenedor ' + l.bins[i][2]), S.xy(cx(l.bins[i][0]), cy(l.bins[i][1])), S.show()]) : S.iff(lvl(k + 1), [S.hide()]))),
+        [S.recv('ocultaR'), S.hide()],
+        [S.recv('coge'), S.iff(S.and(S.touch('Robot'), S.gt(v('carry'), 0)), LVm((l, k) => l.bins[i] ? S.iff(lvl(k + 1), [S.ifelse(S.eq(v('carry'), l.bins[i][2]),
+          [S.setv('carry', 0), S.setv('carrycost', 0), S.chv('entregados', 1), S.sound('Ta-chán'), S.send('carga'), S.rep(2, [S.grow(12), S.wait(0.06), S.grow(-12), S.wait(0.06)])],
+          [S.setv('fallo', 3)])]) : null))]
+      ]
+    });
+    for (let i = 0; i < maxObst; i++) sprites.push({
+      id: 'obstaculoc', name: 'Obstáculo ' + (i + 1), x: 0, y: 0, size: 38, hidden: true, sounds: [], scripts: [
+        [F(), S.hide(), S.size(38)],
+        [S.recv('lay'), S.hide()].concat(LVm((l, k) => l.obst[i] ? S.iff(lvl(k + 1), [S.costume('Obstáculo del patio ' + l.obst[i][2]), S.xy(cx(l.obst[i][0]), cy(l.obst[i][1])), S.show()]) : S.iff(lvl(k + 1), [S.hide()]))),
+        [S.recv('ocultaR'), S.hide()]
+      ]
+    });
+    sprites.push({
+      id: 'casilla', name: 'Meta', x: 0, y: 0, size: 48, hidden: true, sounds: [], scripts: [
+        [F(), S.hide(), S.size(48)],
+        [S.recv('lay'), S.hide()].concat(LVm((l, k) => l.goal ? S.iff(lvl(k + 1), [S.xy(cx(l.goal[0]), cy(l.goal[1])), S.show()]) : null)),
+        [S.recv('ocultaR'), S.hide()]
+      ]
+    });
+    /* lo que lleva el robot */
+    sprites.push({
+      id: 'residuoc', name: 'Carga', x: 146, y: -38, size: 36, hidden: true, sounds: [], scripts: [
+        [F(), S.hide(), S.size(36)],
+        [S.recv('carga'), S.ifelse(S.gt(v('carry'), 0), [S.show()].concat(Array.from({ length: 11 }, (_, q) => S.iff(S.eq(v('carrycost'), q + 1), [S.costume('Residuo del cole ' + (q + 1))]))), [S.hide()])],
+        [S.recv('ocultaR'), S.hide()]
+      ]
+    });
+    /* tarjetas en la barra de abajo */
+    for (let k = 1; k <= NS; k++) sprites.push({
+      id: 'tarjetar', name: 'Hueco ' + k, x: -207 + 46 * (k - 1), y: -152, size: 34, hidden: true, sounds: [], scripts: [
+        [F(), S.hide(), S.size(34)],
+        [S.recv('refresca'), S.size(34), S.ifelse(S.gt(v('max'), k - 1),
+          [S.show(), S.ifelse(S.gt(v('n'), k - 1), [1, 2, 3, 4].map((c) => S.iff(S.eq(v('p' + k), c), [S.costume('Tarjeta de dirección ' + (c + 1))])), [S.costume('Tarjeta de dirección 1')])],
+          [S.hide()])],
+        [S.recv('paso'), S.iff(S.eq(v('i'), k), [S.size(44)]), S.iff(S.gt(v('i'), k), [S.size(34)])],
+        [S.recv('ocultaR'), S.hide()]
+      ]
+    });
+    /* botones */
+    const BTN = [[1, 'Tarjeta avanzar', 146, 140], [2, 'Tarjeta retroceder', 146, 52], [3, 'Tarjeta girar izquierda', 100, 96], [4, 'Tarjeta girar derecha', 192, 96]];
+    const flat1 = (x) => [].concat.apply([], x);
+    BTN.forEach((b) => sprites.push({
+      id: 'tarjetar', name: b[1], x: b[2], y: b[3], size: 46, hidden: true, sounds: ['Pop', 'Boing'], scripts: [
+        [F(), S.hide(), S.size(46), S.costume('Tarjeta de dirección ' + (b[0] + 1))],
+        [S.recv('lay'), S.show()],
+        [S.recv('ocultaR'), S.hide()],
+        [S.click(), S.iff(S.eq(v('modo'), 0), [S.ifelse(S.lt(v('n'), v('max')),
+          [S.chv('n', 1)].concat(chain('n', NS, (k) => [S.setv('p' + k, b[0])]), [S.send('refresca'), S.sound('Pop'), S.rep(2, [S.grow(10), S.wait(0.04), S.grow(-10), S.wait(0.04)])]),
+          [S.sound('Boing'), S.send('lleno')])])]
+      ]
+    }));
+    [['Botón Ir', 100, 2, 'Botón 1'], ['Botón Quitar', 146, 2, 'Botón 3'], ['Botón Borrar', 192, 2, 'Botón 2']].forEach((b, bi) => sprites.push({
+      id: 'boton', name: b[0], x: b[1], y: b[2], size: 46, hidden: true, sounds: ['Pop'], scripts: [
+        [F(), S.hide(), S.size(46), S.costume(b[3])],
+        [S.recv('lay'), S.show()],
+        [S.recv('ocultaR'), S.hide()],
+        bi === 0 ? [S.click(), S.iff(S.eq(v('modo'), 0), [S.ifelse(S.gt(v('n'), 0), [S.send('ir')], [S.send('vacio')])])]
+          : bi === 1 ? [S.click(), S.iff(S.and(S.eq(v('modo'), 0), S.gt(v('n'), 0)), [S.chv('n', -1), S.send('refresca'), S.sound('Pop')])]
+            : [S.click(), S.iff(S.eq(v('modo'), 0), [S.setv('n', 0), S.send('refresca'), S.sound('Pop')])]
+      ]
+    }));
+
+    /* ---------- narradores y guion ---------- */
+    const progLevels = flat(LVm((l, k) => {
+      const setup = [S.setv('nivel', k + 1), S.setv('hecho', 0), S.setv('modo', 0), S.setv('max', l.cap), S.setv('tot', l.items.length), S.setv('n', l.preset ? l.preset.length : 0)]
+        .concat((l.preset || []).map((c, j) => S.setv('p' + (j + 1), c)), [S.send('lay'), S.send('refresca')]);
+      const antes = k === 0 ? [S.setv('modo', 1)] : [S.setv('modo', 1)];
+      return [].concat(antes, setup, sayC(l.intro), [S.setv('modo', l.preset ? 0 : 0), S.waitUntil(S.eq(v('hecho'), 1)), S.wait(1.2), S.send('bien2')], sayC(l.win), [S.wait(0.4)]);
+    }));
+    const MX = [['L', '¡Hola! Soy Lucía y este es mi colegio.'], ['Y', 'Yo soy Yeray. Hoy vamos a ser los guardianes del reciclaje del cole.'],
+      ['R', 'Y yo soy el robot del patio. No sé casi nada, pero aprendo rápido.'],
+      ['L', 'En el recreo se genera mucha basura. Si cada cosa va a su contenedor, se puede reciclar y se cuida el planeta. ¡Vamos a ayudar!']];
+    sprites.push({
+      id: 'lucia', name: 'Lucía', x: -215, y: 148, size: 34, sounds: ['Pop'], scripts: [
+        [F(), S.show(), S.setv('fase', 0), S.setv('bloqueo', 1), S.setv('sel', 0), S.setv('selk', 0), S.setv('err', 0), S.setv('modo', 1), S.setv('nivel', 0), S.setv('hecho', 0), S.wait(0.6)]
+          .concat(sayC(MX),
+            /* fase 1 */
+            [S.setv('fase', 1), S.setv('ronda', 1), S.setv('restan', 4), S.send('r1')],
+            sayC([['L', 'Primero vamos a clasificar. Toca un residuo para ver qué es y después toca el contenedor donde va.'],
+              ['Y', 'El amarillo es para envases de plástico, latas y briks. El azul, para papel y cartón. El verde, para vidrio. El marrón, para restos de comida. Y el gris, para todo lo demás.']]),
+            [S.setv('bloqueo', 0), S.waitUntil(S.eq(v('restan'), 0)), S.setv('bloqueo', 1), S.wait(1.5)],
+            sayC([['L', '¡Primera ronda completada! Pero ahora vienen residuos más difíciles.']]),
+            [S.setv('ronda', 2), S.setv('restan', 4), S.setv('sel', 0), S.send('r2'), S.setv('bloqueo', 0), S.waitUntil(S.eq(v('restan'), 0)), S.setv('bloqueo', 1), S.wait(1.5)],
+            sayC([['Y', 'Has clasificado ocho residuos. Para hacerlo has usado una regla: si es de este material, entonces va a este contenedor. En informática, a eso se le llama condición.']]),
+            /* fase 2 */
+            [S.send('ocultaF1'), S.setv('fase', 2), S.setv('sig', 1), S.setv('err', 0)],
+            sayC([['L', 'Y ahora una pregunta: ¿qué pasa con una lata después de tirarla al contenedor amarillo? Tiene un viaje con cuatro pasos.'],
+              ['Y', 'Toca los dibujos en el orden correcto, del primero al último. Ordenar los pasos es crear una secuencia.']]),
+            [S.send('seq'), S.setv('bloqueo', 0), S.waitUntil(S.eq(v('sig'), 5)), S.setv('bloqueo', 1), S.wait(2.5), S.send('nueva')],
+            sayC([['L', 'Y con ese material se fabrican latas nuevas, bicicletas y muchas cosas más. ¡El viaje empieza otra vez!'],
+              ['Y', 'Si cambiamos el orden de los pasos, el resultado cambia. Los robots también necesitan que sus órdenes estén en el orden correcto.']]),
+            [S.wait(1)],
+            /* fase 3: robot */
+            [S.send('ocultaF2'), S.send('grid'), S.xy(108, -105), S.send('moverY'), S.setv('fase', 3), S.setv('nivel', 1), S.setv('max', 5), S.setv('n', 0), S.setv('tot', 0), S.send('refresca')],
+            sayC([['L', 'Vamos al patio. Allí hay un robot de suelo que nos ayudará a llevar los residuos a su contenedor.'],
+              ['R', 'Hola otra vez. Solo entiendo cuatro tarjetas. Las tarjetas se colocan abajo, en orden, y yo las hago de izquierda a derecha.']]),
+            [S.send('lay'), S.send('refresca')],
+            progLevels,
+            sayC([['L', 'Hoy has clasificado con reglas, has ordenado una secuencia, has programado un robot con instrucciones de dirección y has depurado un error.'],
+              ['Y', 'Pensar en pasos pequeños, probar y corregir: eso es pensamiento computacional.'],
+              ['R', '¡Gracias por enseñarme! Cuidemos el planeta.'],
+              ['L', 'Y recuerda: en el cole y en casa, cada residuo a su contenedor. ¡Buen trabajo!']]),
+            [S.send('fin'), S.wait(1.5), S.stopAll()]),
+        [S.recv('choque')].concat(sayC([['L', TXT.choque]])),
+        [S.recv('salida')].concat(sayC([['L', TXT.salida]])),
+        [S.recv('corto')].concat(sayC([['L', TXT.corto]])),
+        [S.recv('faltan')].concat(sayC([['L', TXT.faltan]])),
+        [S.recv('sinentrega')].concat(sayC([['L', TXT.sinentrega]])),
+        [S.recv('equivocado')].concat(sayC([['L', TXT.equivocado]])),
+        [S.recv('lleno')].concat(sayC([['L', TXT.lleno]])),
+        [S.recv('vacio')].concat(sayC([['L', TXT.vacio]]))
+      ]
+    });
+    sprites.push({
+      id: 'yeray', name: 'Yeray', x: -170, y: 148, size: 34, sounds: ['Pop'], scripts: [
+        [F(), S.show()],
+        [S.recv('moverY'), S.xy(168, -105)]
+      ]
+    });
+    sprites.push(bravo(0, 20, 40));
+    const vnames = ['fase', 'bloqueo', 'hecho', 'ronda', 'restan', 'sel', 'selk', 'err', 'sig', 't1', 't2', 't3', 't4', 'nivel', 'modo', 'n', 'max', 'tot', 'entregados', 'carry', 'carrycost', 'fallo', 'i', 'c', 'h'].concat(Array.from({ length: NS }, (_, k) => 'p' + (k + 1)));
+    return {
+      id: 'pc-cole-primaria', pc: 'primaria', title: 'El cole recicla: clasifica y programa al robot', kind: 'cuento', voices: true, stars: 3, bg: 'pc-cole', sprite: 'robotsuelo',
+      desc: 'Clasifica residuos en cinco contenedores, ordena el viaje de un envase y programa a un robot de suelo con tarjetas de avanzar, retroceder y girar (como un Blue-Bot). Unos 20 minutos, con voz, sin leer.',
+      challenge: 'Escucha a Lucía y a Yeray. Toca los dibujos y las tarjetas que te pidan.',
+      openSprite: 'Lucía',
+      build() {
+        return make({
+          backdrops: ['pc-cole', 'pc-cole-grid'],
+          messages: ['r1', 'r2', 'quita', 'bien', 'mal', 'b1', 'b2', 'b3', 'b4', 'b5', 'ocultaF1', 'seq', 'o1', 'o2', 'o3', 'o4', 'pistaS', 'nueva', 'ocultaF2', 'grid', 'moverY', 'lay', 'refresca', 'ir', 'paso', 'coge', 'carga', 'ocultaR',
+            'choque', 'salida', 'corto', 'faltan', 'sinentrega', 'equivocado', 'lleno', 'vacio', 'bien2', 'fin'],
+          vars: vnames.map((nm) => [nm, nm === 'modo' ? 1 : 0, false]),
+          stage: [[F(), S.backdrop('pc-cole')], [S.recv('grid'), S.backdrop('pc-cole-grid')]],
+          sprites
+        });
+      }
+    };
+  })());
+
   /* ---------- registro ---------- */
   EX.forEach((e) => PQ.EX.push(e));
 

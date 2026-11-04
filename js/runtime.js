@@ -660,7 +660,8 @@
       case 'text2speech_speakAndWait': {
         const words = fmt(A('WORDS'));
         if (!words) break;
-        const bub = t.isStage ? null : { text: words, think: false };
+        /* con voz no hace falta bocadillo (como en Scratch); solo se muestra si el dispositivo no puede hablar */
+        const bub = (t.isStage || (g.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined')) ? null : { text: words, think: false };
         if (bub) { t._say = bub; RT.dirty = true; }
         const h = utter(words, t._voice || defaultVoice(t));
         yield;

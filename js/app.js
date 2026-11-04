@@ -848,6 +848,39 @@
     m = ui.modal({ title: 'Cuentos, retos y tutoriales', body, buttons: [{ label: 'Cerrar' }] });
     draw();
   }
+  /* Aviso al abrir un cuento con voz: parpadea sobre la bandera verde y sobre el botón de pantalla grande */
+  let hintOff = null;
+  function startHint() {
+    if (hintOff) hintOff();
+    const spec = [['#btnFlag', 'Pulsa la bandera verde para empezar', 'flag'], ['#btnFull', 'Pantalla grande', 'full']];
+    const wrap = h('div', ''); wrap.id = 'starthint'; document.body.appendChild(wrap);
+    const calls = spec.map((x) => { const d = h('div', 'hint ' + x[2]); d.textContent = x[1]; const a = h('i', 'ar'); d.appendChild(a); wrap.appendChild(d); return { d, a, sel: x[0] }; });
+    let place = () => calls.forEach((c) => {
+      const b = $(c.sel); const r = b && b.getBoundingClientRect();
+      if (!r || !r.width) { c.d.hidden = true; return; }
+      c.d.hidden = false;
+      const w = c.d.offsetWidth, cxm = r.left + r.width / 2;
+      const left = PQ.clamp(cxm - w / 2, 8, window.innerWidth - w - 8);
+      c.d.style.left = left + 'px'; c.d.style.top = (r.bottom + 12) + 'px';
+      c.a.style.left = PQ.clamp(cxm - left - 8, 10, w - 26) + 'px';
+    });
+    const place0 = place;
+    place = () => { place0(); const a = calls[0].d, b2 = calls[1].d; if (!a.hidden && !b2.hidden && b2.offsetLeft < a.offsetLeft + a.offsetWidth + 6) b2.style.top = (a.offsetTop + a.offsetHeight + 8) + 'px'; };
+    const btns = spec.map((x) => $(x[0])).filter(Boolean);
+    btns.forEach((b) => b.classList.add('blink'));
+    place(); const t0 = setInterval(place, 400);
+    const end = setTimeout(() => hintOff && hintOff(), 16000);
+    const stop = () => hintOff && hintOff();
+    ['btnFlag', 'btnFull', 'btnStop'].forEach((id) => { const b = $('#' + id); if (b) b.addEventListener('click', stop, { once: true }); });
+    window.addEventListener('resize', place);
+    hintOff = () => { clearInterval(t0); clearTimeout(end); window.removeEventListener('resize', place); btns.forEach((b) => b.classList.remove('blink')); wrap.remove(); hintOff = null; };
+    if (PQ.guideVoiceOn && PQ.guideVoiceOn() && PQ.utter) {
+      try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+      PQ.utter('Pulsa la bandera verde para empezar. Si quieres, puedes hacer la pantalla grande con el botón de la derecha.', 'KITTEN');
+    }
+  }
+  PQ.startHint = startHint;
+
   function openExample(id) {
     const ex = PQ.EX.find((x) => x.id === id);
     if (!ex) return;
@@ -855,7 +888,7 @@
     p.title = ex.title;
     p.noPad = !!ex.nopad;
     loadProject(p, { banner: ex.challenge });
-    PQ.say(ex.challenge);
+    if (ex.voices) startHint(); else PQ.say(ex.challenge);
     if (ex.openSprite) { const s = p.sprites.find((x) => x.name === ex.openSprite); if (s) { S.target = s; renderAll(); } }
   }
   PQ.openExample = openExample;

@@ -524,6 +524,16 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 /* navegadores algo antiguos (iPadOS 14): sin la propiedad «inset» */
 .modal-back,#dropveil,#rotate,#stagebox.pfull{top:0;left:0;right:0;bottom:0}
 
+/* aviso de inicio de los cuentos con voz */
+#starthint{position:fixed;inset:0;pointer-events:none;z-index:900}
+#starthint .hint{position:absolute;max-width:230px;padding:9px 12px;border-radius:14px;background:#FFD43B;color:#3a2a00;font-weight:800;font-size:16px;line-height:1.15;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.28);animation:hintblink 1s ease-in-out infinite}
+#starthint .hint[hidden]{display:none}
+#starthint .hint .ar{position:absolute;top:-8px;width:16px;height:16px;background:#FFD43B;transform:rotate(45deg);border-radius:3px}
+@keyframes hintblink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.06)}}
+.sbtn.blink{animation:btnblink 1s ease-in-out infinite;outline:4px solid #FFD43B;outline-offset:2px}
+@keyframes btnblink{0%,100%{box-shadow:0 0 0 0 rgba(255,212,59,.95)}50%{box-shadow:0 0 0 10px rgba(255,212,59,0)}}
+@media (prefers-reduced-motion:reduce){#starthint .hint,.sbtn.blink{animation:none}}
+
 </style>
 </head>
 <body>
@@ -7269,6 +7279,39 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     m = ui.modal({ title: 'Cuentos, retos y tutoriales', body, buttons: [{ label: 'Cerrar' }] });
     draw();
   }
+  /* Aviso al abrir un cuento con voz: parpadea sobre la bandera verde y sobre el botón de pantalla grande */
+  let hintOff = null;
+  function startHint() {
+    if (hintOff) hintOff();
+    const spec = [['#btnFlag', 'Pulsa la bandera verde para empezar', 'flag'], ['#btnFull', 'Pantalla grande', 'full']];
+    const wrap = h('div', ''); wrap.id = 'starthint'; document.body.appendChild(wrap);
+    const calls = spec.map((x) => { const d = h('div', 'hint ' + x[2]); d.textContent = x[1]; const a = h('i', 'ar'); d.appendChild(a); wrap.appendChild(d); return { d, a, sel: x[0] }; });
+    let place = () => calls.forEach((c) => {
+      const b = $(c.sel); const r = b && b.getBoundingClientRect();
+      if (!r || !r.width) { c.d.hidden = true; return; }
+      c.d.hidden = false;
+      const w = c.d.offsetWidth, cxm = r.left + r.width / 2;
+      const left = PQ.clamp(cxm - w / 2, 8, window.innerWidth - w - 8);
+      c.d.style.left = left + 'px'; c.d.style.top = (r.bottom + 12) + 'px';
+      c.a.style.left = PQ.clamp(cxm - left - 8, 10, w - 26) + 'px';
+    });
+    const place0 = place;
+    place = () => { place0(); const a = calls[0].d, b2 = calls[1].d; if (!a.hidden && !b2.hidden && b2.offsetLeft < a.offsetLeft + a.offsetWidth + 6) b2.style.top = (a.offsetTop + a.offsetHeight + 8) + 'px'; };
+    const btns = spec.map((x) => $(x[0])).filter(Boolean);
+    btns.forEach((b) => b.classList.add('blink'));
+    place(); const t0 = setInterval(place, 400);
+    const end = setTimeout(() => hintOff && hintOff(), 16000);
+    const stop = () => hintOff && hintOff();
+    ['btnFlag', 'btnFull', 'btnStop'].forEach((id) => { const b = $('#' + id); if (b) b.addEventListener('click', stop, { once: true }); });
+    window.addEventListener('resize', place);
+    hintOff = () => { clearInterval(t0); clearTimeout(end); window.removeEventListener('resize', place); btns.forEach((b) => b.classList.remove('blink')); wrap.remove(); hintOff = null; };
+    if (PQ.guideVoiceOn && PQ.guideVoiceOn() && PQ.utter) {
+      try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+      PQ.utter('Pulsa la bandera verde para empezar. Si quieres, puedes hacer la pantalla grande con el botón de la derecha.', 'KITTEN');
+    }
+  }
+  PQ.startHint = startHint;
+
   function openExample(id) {
     const ex = PQ.EX.find((x) => x.id === id);
     if (!ex) return;
@@ -7276,7 +7319,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     p.title = ex.title;
     p.noPad = !!ex.nopad;
     loadProject(p, { banner: ex.challenge });
-    PQ.say(ex.challenge);
+    if (ex.voices) startHint(); else PQ.say(ex.challenge);
     if (ex.openSprite) { const s = p.sprites.find((x) => x.name === ex.openSprite); if (s) { S.target = s; renderAll(); } }
   }
   PQ.openExample = openExample;

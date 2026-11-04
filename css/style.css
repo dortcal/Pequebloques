@@ -505,3 +505,13 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 
 /* navegadores algo antiguos (iPadOS 14): sin la propiedad «inset» */
 .modal-back,#dropveil,#rotate,#stagebox.pfull{top:0;left:0;right:0;bottom:0}
+
+/* aviso de inicio de los cuentos con voz */
+#starthint{position:fixed;inset:0;pointer-events:none;z-index:900}
+#starthint .hint{position:absolute;max-width:230px;padding:9px 12px;border-radius:14px;background:#FFD43B;color:#3a2a00;font-weight:800;font-size:16px;line-height:1.15;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.28);animation:hintblink 1s ease-in-out infinite}
+#starthint .hint[hidden]{display:none}
+#starthint .hint .ar{position:absolute;top:-8px;width:16px;height:16px;background:#FFD43B;transform:rotate(45deg);border-radius:3px}
+@keyframes hintblink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.06)}}
+.sbtn.blink{animation:btnblink 1s ease-in-out infinite;outline:4px solid #FFD43B;outline-offset:2px}
+@keyframes btnblink{0%,100%{box-shadow:0 0 0 0 rgba(255,212,59,.95)}50%{box-shadow:0 0 0 10px rgba(255,212,59,0)}}
+@media (prefers-reduced-motion:reduce){#starthint .hint,.sbtn.blink{animation:none}}

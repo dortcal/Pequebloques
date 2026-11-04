@@ -154,11 +154,56 @@
   PQ.stopSounds = stopSounds;
 
   /* ---------- voz (síntesis del navegador) ---------- */
-  const VOICE_STYLE = { ALTO: [1.15, 1.0], TENOR: [0.7, 0.95], SQUEAK: [1.45, 1.1], GIANT: [0.35, 0.85], KITTEN: [1.65, 1.05] };
-  const VOICE_KEYS = ['ALTO', 'TENOR', 'SQUEAK', 'GIANT', 'KITTEN'];
+  /* Voces de personaje: cada clave de Scratch representa un tipo de personaje.
+   *   KITTEN = niña · ALTO = niño · TENOR = robot · SQUEAK = animal pequeño · GIANT = animal grande
+   * [tono, velocidad, género de voz preferido]. El navegador no dice el género de sus voces, así que se
+   * deduce por el nombre (Mónica, Paulina, Helena… / Jorge, Diego, Pablo…). Si el dispositivo solo tiene
+   * una voz, los personajes se distinguen por tono y velocidad. */
+  const VOICE_STYLE = { KITTEN: [1.55, 1.05, 'f'], ALTO: [1.2, 1.0, 'm'], TENOR: [0.45, 0.8, 'm'], SQUEAK: [1.8, 1.12, 'f'], GIANT: [0.12, 0.78, 'm'] };
+  const FEM = /m[oó]nica|paulina|helena|laura|luc[ií]a|elvira|sabina|esperanza|marisol|isabella|camila|lupe|dalia|paloma|salom[eé]|marina|ximena|lia\b|female|mujer|google espa/i;
+  const MAS = /jorge|diego|pablo|[aá]lvaro|enrique|juan|carlos|miguel|ra[uú]l|tom[aá]s|pedro|jaime|alonso|arnau|sa[uú]l|gonzalo|ramiro|male\b|hombre|tony/i;
   function esVoices() {
-    try { return (g.speechSynthesis.getVoices() || []).filter((v) => /^es/i.test(v.lang)); } catch (e) { return []; }
+    try {
+      const all = (g.speechSynthesis.getVoices() || []).filter((v) => /^es/i.test(v.lang));
+      return all.sort((a, b) => (/^es[-_]ES/i.test(b.lang) ? 1 : 0) - (/^es[-_]ES/i.test(a.lang) ? 1 : 0));
+    } catch (e) { return []; }
   }
+  const isFem = (v) => FEM.test(v.name) && !MAS.test(v.name);
+  const isMas = (v) => MAS.test(v.name) && !FEM.test(v.name);
+  /* variación estable por palabra para que dos animales distintos no suenen idénticos */
+  const hash = (t) => { let h = 7; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 997; return h / 997; };
+  function voiceFor(key, text) {
+    const st = VOICE_STYLE[key] || VOICE_STYLE.ALTO;
+    let pitch = st[0], rate = st[1], voice = null;
+    const vs = esVoices();
+    if (vs.length) {
+      const want = st[2];
+      const fem = vs.filter(isFem), mas = vs.filter(isMas);
+      const own = want === 'f' ? fem : mas, other = want === 'f' ? mas : fem;
+      if (own.length) voice = own[0];
+      else if (other.length) { voice = other[0]; if (want === 'f') pitch = Math.min(2, pitch + 0.2); else pitch = Math.max(0, pitch - 0.25); }
+      else {
+        voice = vs[0];                                   // voces sin género reconocible
+        if (key === 'ALTO') pitch = 0.95;                // el niño suena más grave que la niña
+      }
+    }
+    if (key === 'SQUEAK' || key === 'GIANT') {          // cada animal, un timbre propio
+      const j = hash(text); pitch = PQ.clamp(pitch + (j - 0.5) * (key === 'SQUEAK' ? 0.3 : 0.2), 0, 2); rate *= 0.92 + j * 0.16;
+    }
+    return { voice, pitch, rate };
+  }
+  /* voz por defecto de un personaje según su nombre (y el de su primer disfraz) */
+  function defaultVoice(t) {
+    if (!t || t.isStage) return 'ALTO';
+    const n = String(t.name || '') + ' ' + String((t.costumes && t.costumes[0] && t.costumes[0].name) || '');
+    if (/robot|rover|androide|m[aá]quina/i.test(n)) return 'TENOR';
+    if (/luc[ií]a|ni[ñn]a|chica|abuela|mam[aá]|maestra|profesora|reina|princesa|hada|bruja/i.test(n)) return 'KITTEN';
+    if (/yeray|ni[ñn]o|chico|abuelo|pap[aá]|maestro|profesor|rey|pr[ií]ncipe|pirata|astronauta/i.test(n)) return 'ALTO';
+    if (/ballena|tortuga|delf[ií]n|tibur[oó]n|elefante|oso|vaca|caballo|drag[oó]n|gigante/i.test(n)) return 'GIANT';
+    if (/canario|cangrejo|lagarto|mariposa|paloma|pez|perro|gato|ardilla|p[aá]jaro|abeja|rat[oó]n|conejo|gaviota|mosca|pollito|pato|rana|cohete/i.test(n)) return 'SQUEAK';
+    return 'ALTO';
+  }
+  PQ.defaultVoice = defaultVoice;
   /* Devuelve {done} y se completa al terminar de hablar. */
   function utter(text, key) {
     const h = { done: false };
@@ -170,23 +215,22 @@
     }
     try {
       const u = new SpeechSynthesisUtterance(text);
-      const st = VOICE_STYLE[key] || VOICE_STYLE.ALTO;
-      u.lang = 'es-ES'; u.pitch = st[0]; u.rate = st[1] * 0.92;
-      const vs = esVoices();
-      if (vs.length) u.voice = vs[Math.max(0, VOICE_KEYS.indexOf(key)) % vs.length];
+      const vf = voiceFor(key, text);
+      u.lang = 'es-ES'; u.pitch = vf.pitch; u.rate = vf.rate * 0.92;
+      if (vf.voice) u.voice = vf.voice;
       const fin = () => { h.done = true; };
       u.onend = fin; u.onerror = fin;
       setTimeout(fin, Math.min(30000, 2500 + text.length * 110));   // por si el navegador no avisa
       if (synth.speaking && synth.pending) synth.cancel();   // evita colas largas de voces atrasadas
       synth.speak(u);
-      PQ._lastUtter = { text, key };
+      PQ._lastUtter = { text, key, voice: vf.voice && vf.voice.name, pitch: vf.pitch };
     } catch (e) { h.done = true; }
     return h;
   }
   PQ.utter = utter;
   function speakBubble(text, t) {
     if (!PQ.settings || !PQ.settings.voice) return { done: true };
-    return utter(text, t && t._voice);
+    return utter(text, (t && t._voice) || defaultVoice(t));
   }
 
   /* ---------- Runtime ---------- */
@@ -618,7 +662,7 @@
         if (!words) break;
         const bub = t.isStage ? null : { text: words, think: false };
         if (bub) { t._say = bub; RT.dirty = true; }
-        const h = utter(words, t._voice);
+        const h = utter(words, t._voice || defaultVoice(t));
         yield;
         while (!h.done && !th.dead) yield;
         if (bub && t._say === bub) { t._say = null; RT.dirty = true; }

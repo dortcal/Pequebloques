@@ -884,4 +884,29 @@
 
   /* ---------- registro ---------- */
   EX.forEach((e) => PQ.EX.push(e));
+
+  /* ---------- voces coherentes en TODOS los cuentos y juegos ----------
+   * niña = KITTEN, niño = ALTO, robot = TENOR, animal pequeño = SQUEAK, animal grande = GIANT.
+   * Se corrige por nombre de personaje al construir cada ejemplo (los cuentos de «pensamiento
+   * computacional» ya usan estas voces y se dejan tal cual). */
+  const walkB = (list, fn) => (list || []).forEach((b) => { fn(b); walkB(b.sub, fn); walkB(b.sub2, fn); });
+  const ROLE = (name) => {
+    if (/^Casilla/.test(name)) return 'SQUEAK';                      // tarjetas del juego de los animales
+    if (/^(Luc[ií]a|Yeray|Robot|Rover|Canario|Cangrejo|Lagarto|Mariposa|Paloma|Perro|Pez|Ballena|Tortuga)\b/.test(name)) return PQ.defaultVoice({ name });
+    return null;
+  };
+  PQ.EX.forEach((e) => {
+    if (e.pc) return;
+    const build = e.build;
+    e.build = function () {
+      const pr = build.apply(this, arguments);
+      pr.sprites.forEach((sp) => {
+        const role = ROLE(sp.name || '');
+        if (!role) return;
+        (sp.scripts || []).forEach((sc) => walkB(sc.blocks, (b) => { if (b.op === 'text2speech_setVoice' && !(/^Casilla/.test(sp.name) && b.f.VOICE === 'GIANT')) b.f.VOICE = role; }));
+        sp._voice = role;
+      });
+      return pr;
+    };
+  });;
 })(typeof window !== 'undefined' ? window : globalThis);

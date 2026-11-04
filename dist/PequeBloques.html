@@ -1104,7 +1104,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   def('pen_changePenSizeBy', 'pen', 'stack', 'pen', 'cambiar tamaño del lápiz por %SIZE', { SIZE: num(1) }, 2, { ext: 'pen', sprite: true });
   def('pen_setPenSizeTo', 'pen', 'stack', 'pen', 'fijar tamaño del lápiz a %SIZE', { SIZE: num(4) }, 2, { ext: 'pen', sprite: true });
 
-  PQ.VOICES = [['ALTO', 'normal'], ['TENOR', 'grave'], ['SQUEAK', 'ardilla'], ['GIANT', 'gigante'], ['KITTEN', 'gatito']];
+  PQ.VOICES = [['KITTEN', 'niña'], ['ALTO', 'niño'], ['TENOR', 'robot'], ['SQUEAK', 'animal pequeño'], ['GIANT', 'animal grande']];
   PQ.COLORS = ['#000000', '#7a7a7a', '#ffffff', '#E64040', '#FF8A4D', '#FFD91A', '#59D98E', '#2FB37D', '#4C97FF', '#9966FF', '#FF6FA8', '#8A5A32'];
   /* ¿tiene el bloque algún hueco que admita un reportero? */
   PQ.slotNames = (op) => Object.keys(B[op].args).filter((n) => B[op].args[n].k === 'prim');
@@ -2622,11 +2622,56 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   PQ.stopSounds = stopSounds;
 
   /* ---------- voz (síntesis del navegador) ---------- */
-  const VOICE_STYLE = { ALTO: [1.15, 1.0], TENOR: [0.7, 0.95], SQUEAK: [1.45, 1.1], GIANT: [0.35, 0.85], KITTEN: [1.65, 1.05] };
-  const VOICE_KEYS = ['ALTO', 'TENOR', 'SQUEAK', 'GIANT', 'KITTEN'];
+  /* Voces de personaje: cada clave de Scratch representa un tipo de personaje.
+   *   KITTEN = niña · ALTO = niño · TENOR = robot · SQUEAK = animal pequeño · GIANT = animal grande
+   * [tono, velocidad, género de voz preferido]. El navegador no dice el género de sus voces, así que se
+   * deduce por el nombre (Mónica, Paulina, Helena… / Jorge, Diego, Pablo…). Si el dispositivo solo tiene
+   * una voz, los personajes se distinguen por tono y velocidad. */
+  const VOICE_STYLE = { KITTEN: [1.55, 1.05, 'f'], ALTO: [1.2, 1.0, 'm'], TENOR: [0.45, 0.8, 'm'], SQUEAK: [1.8, 1.12, 'f'], GIANT: [0.12, 0.78, 'm'] };
+  const FEM = /m[oó]nica|paulina|helena|laura|luc[ií]a|elvira|sabina|esperanza|marisol|isabella|camila|lupe|dalia|paloma|salom[eé]|marina|ximena|lia\b|female|mujer|google espa/i;
+  const MAS = /jorge|diego|pablo|[aá]lvaro|enrique|juan|carlos|miguel|ra[uú]l|tom[aá]s|pedro|jaime|alonso|arnau|sa[uú]l|gonzalo|ramiro|male\b|hombre|tony/i;
   function esVoices() {
-    try { return (g.speechSynthesis.getVoices() || []).filter((v) => /^es/i.test(v.lang)); } catch (e) { return []; }
+    try {
+      const all = (g.speechSynthesis.getVoices() || []).filter((v) => /^es/i.test(v.lang));
+      return all.sort((a, b) => (/^es[-_]ES/i.test(b.lang) ? 1 : 0) - (/^es[-_]ES/i.test(a.lang) ? 1 : 0));
+    } catch (e) { return []; }
   }
+  const isFem = (v) => FEM.test(v.name) && !MAS.test(v.name);
+  const isMas = (v) => MAS.test(v.name) && !FEM.test(v.name);
+  /* variación estable por palabra para que dos animales distintos no suenen idénticos */
+  const hash = (t) => { let h = 7; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 997; return h / 997; };
+  function voiceFor(key, text) {
+    const st = VOICE_STYLE[key] || VOICE_STYLE.ALTO;
+    let pitch = st[0], rate = st[1], voice = null;
+    const vs = esVoices();
+    if (vs.length) {
+      const want = st[2];
+      const fem = vs.filter(isFem), mas = vs.filter(isMas);
+      const own = want === 'f' ? fem : mas, other = want === 'f' ? mas : fem;
+      if (own.length) voice = own[0];
+      else if (other.length) { voice = other[0]; if (want === 'f') pitch = Math.min(2, pitch + 0.2); else pitch = Math.max(0, pitch - 0.25); }
+      else {
+        voice = vs[0];                                   // voces sin género reconocible
+        if (key === 'ALTO') pitch = 0.95;                // el niño suena más grave que la niña
+      }
+    }
+    if (key === 'SQUEAK' || key === 'GIANT') {          // cada animal, un timbre propio
+      const j = hash(text); pitch = PQ.clamp(pitch + (j - 0.5) * (key === 'SQUEAK' ? 0.3 : 0.2), 0, 2); rate *= 0.92 + j * 0.16;
+    }
+    return { voice, pitch, rate };
+  }
+  /* voz por defecto de un personaje según su nombre (y el de su primer disfraz) */
+  function defaultVoice(t) {
+    if (!t || t.isStage) return 'ALTO';
+    const n = String(t.name || '') + ' ' + String((t.costumes && t.costumes[0] && t.costumes[0].name) || '');
+    if (/robot|rover|androide|m[aá]quina/i.test(n)) return 'TENOR';
+    if (/luc[ií]a|ni[ñn]a|chica|abuela|mam[aá]|maestra|profesora|reina|princesa|hada|bruja/i.test(n)) return 'KITTEN';
+    if (/yeray|ni[ñn]o|chico|abuelo|pap[aá]|maestro|profesor|rey|pr[ií]ncipe|pirata|astronauta/i.test(n)) return 'ALTO';
+    if (/ballena|tortuga|delf[ií]n|tibur[oó]n|elefante|oso|vaca|caballo|drag[oó]n|gigante/i.test(n)) return 'GIANT';
+    if (/canario|cangrejo|lagarto|mariposa|paloma|pez|perro|gato|ardilla|p[aá]jaro|abeja|rat[oó]n|conejo|gaviota|mosca|pollito|pato|rana|cohete/i.test(n)) return 'SQUEAK';
+    return 'ALTO';
+  }
+  PQ.defaultVoice = defaultVoice;
   /* Devuelve {done} y se completa al terminar de hablar. */
   function utter(text, key) {
     const h = { done: false };
@@ -2638,23 +2683,22 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     }
     try {
       const u = new SpeechSynthesisUtterance(text);
-      const st = VOICE_STYLE[key] || VOICE_STYLE.ALTO;
-      u.lang = 'es-ES'; u.pitch = st[0]; u.rate = st[1] * 0.92;
-      const vs = esVoices();
-      if (vs.length) u.voice = vs[Math.max(0, VOICE_KEYS.indexOf(key)) % vs.length];
+      const vf = voiceFor(key, text);
+      u.lang = 'es-ES'; u.pitch = vf.pitch; u.rate = vf.rate * 0.92;
+      if (vf.voice) u.voice = vf.voice;
       const fin = () => { h.done = true; };
       u.onend = fin; u.onerror = fin;
       setTimeout(fin, Math.min(30000, 2500 + text.length * 110));   // por si el navegador no avisa
       if (synth.speaking && synth.pending) synth.cancel();   // evita colas largas de voces atrasadas
       synth.speak(u);
-      PQ._lastUtter = { text, key };
+      PQ._lastUtter = { text, key, voice: vf.voice && vf.voice.name, pitch: vf.pitch };
     } catch (e) { h.done = true; }
     return h;
   }
   PQ.utter = utter;
   function speakBubble(text, t) {
     if (!PQ.settings || !PQ.settings.voice) return { done: true };
-    return utter(text, t && t._voice);
+    return utter(text, (t && t._voice) || defaultVoice(t));
   }
 
   /* ---------- Runtime ---------- */
@@ -3086,7 +3130,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
         if (!words) break;
         const bub = t.isStage ? null : { text: words, think: false };
         if (bub) { t._say = bub; RT.dirty = true; }
-        const h = utter(words, t._voice);
+        const h = utter(words, t._voice || defaultVoice(t));
         yield;
         while (!h.done && !th.dead) yield;
         if (bub && t._say === bub) { t._say = null; RT.dirty = true; }
@@ -3465,7 +3509,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     const r = el.getBoundingClientRect();
     bub.style.left = Math.max(6, Math.min(innerWidth - 120, r.left)) + 'px'; bub.style.top = Math.max(6, r.top - 44) + 'px';
     setTimeout(() => bub.remove(), 2400);
-    if (PQ.settings && PQ.settings.voice && PQ.utter && v !== '') PQ.utter(v, 'ALTO');
+    if (PQ.settings && PQ.settings.voice && PQ.utter && v !== '') PQ.utter(v, 'KITTEN');
   };
   ED.highlight = function (op) {
     document.querySelectorAll('#pal .block.pulse').forEach((e) => e.classList.remove('pulse'));
@@ -3700,7 +3744,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
         if (isR) ED.showValue(be, b);
         else {
           if (kk !== 'hat' && PQ.RT) PQ.RT.runBlock(S.target, b);
-          if (PQ.settings && PQ.settings.voice && PQ.utter) { try { speechSynthesis.cancel(); } catch (e) { /* nada */ } PQ.utter(PQ.blockText(b), 'ALTO'); }
+          if (PQ.settings && PQ.settings.voice && PQ.utter) { try { speechSynthesis.cancel(); } catch (e) { /* nada */ } PQ.utter(PQ.blockText(b), 'KITTEN'); }
         }
         flash(be);
       } else if (isR) {
@@ -3943,11 +3987,11 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch (e) { /* sin almacenamiento */ }
   PQ.guideVoiceOn = () => !muted && !!g.speechSynthesis;
   PQ.setGuideMute = (m) => { muted = !!m; try { localStorage.setItem(MUTE_KEY, m ? '1' : '0'); } catch (e) { /* nada */ } if (m) { try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ } } };
-  /* Pipo habla siempre con la misma voz (la del «gatito»: clara y amable). */
+  /* Pipo habla siempre con la misma voz (criatura pequeña: voz de animal pequeño). */
   PQ.say = function (text, force) {
     if (!force && !PQ.guideVoiceOn()) return;
     try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
-    if (PQ.utter) PQ.utter(String(text).replace(/«|»/g, ''), 'KITTEN');
+    if (PQ.utter) PQ.utter(String(text).replace(/«|»/g, ''), 'SQUEAK');
   };
   PQ.hasSpanishVoice = () => { try { return g.speechSynthesis.getVoices().some((v) => /^es/i.test(v.lang)); } catch (e) { return false; } };
 
@@ -5162,19 +5206,19 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
             },
             {
               id: 'contenedor', name: 'Contenedor amarillo', x: 60, y: -100, size: 70, hidden: true, sounds: ['Ta-chán', 'Pop'], scripts: [
-                [F(), S.hide(), S.costume('Contenedor 1'), S.voice('TENOR')],
+                [F(), S.hide(), S.costume('Contenedor 1'), S.voice('ALTO')],
                 [S.recv('conts'), S.xy(60, -100), S.show(), S.sound('Pop')],
                 [S.click(), S.iff(S.and(paso(5), libre()), [
-                  S.setv('paso', 6), S.setv('ocupado', 1), S.voice('TENOR'), S.sound('Ta-chán'), S.send('ok'), S.wait(1.1)]
+                  S.setv('paso', 6), S.setv('ocupado', 1), S.voice('ALTO'), S.sound('Ta-chán'), S.send('ok'), S.wait(1.1)]
                   .concat(L('¡Muy bien! El plástico va al contenedor amarillo.'), [S.hide(), S.setv('ocupado', 0), S.send('tarde')]))]
               ]
             },
             {
               id: 'contenedor', name: 'Contenedor azul', x: 165, y: -100, size: 70, hidden: true, sounds: ['Boing', 'Pop'], scripts: [
-                [F(), S.hide(), S.costume('Contenedor 2'), S.voice('TENOR')],
+                [F(), S.hide(), S.costume('Contenedor 2'), S.voice('ALTO')],
                 [S.recv('conts'), S.xy(165, -100), S.show(), S.sound('Pop')],
                 [S.recv('tarde'), S.hide()],
-                [S.click(), S.iff(S.and(paso(5), libre()), [S.setv('ocupado', 1), S.voice('TENOR'), S.sound('Boing')]
+                [S.click(), S.iff(S.and(paso(5), libre()), [S.setv('ocupado', 1), S.voice('ALTO'), S.sound('Boing')]
                   .concat(L('Ese es el contenedor azul. Es para el papel y el cartón. ¡Prueba con el amarillo!'), [S.setv('ocupado', 0)]))]
               ]
             },
@@ -6205,6 +6249,31 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 
   /* ---------- registro ---------- */
   EX.forEach((e) => PQ.EX.push(e));
+
+  /* ---------- voces coherentes en TODOS los cuentos y juegos ----------
+   * niña = KITTEN, niño = ALTO, robot = TENOR, animal pequeño = SQUEAK, animal grande = GIANT.
+   * Se corrige por nombre de personaje al construir cada ejemplo (los cuentos de «pensamiento
+   * computacional» ya usan estas voces y se dejan tal cual). */
+  const walkB = (list, fn) => (list || []).forEach((b) => { fn(b); walkB(b.sub, fn); walkB(b.sub2, fn); });
+  const ROLE = (name) => {
+    if (/^Casilla/.test(name)) return 'SQUEAK';                      // tarjetas del juego de los animales
+    if (/^(Luc[ií]a|Yeray|Robot|Rover|Canario|Cangrejo|Lagarto|Mariposa|Paloma|Perro|Pez|Ballena|Tortuga)\b/.test(name)) return PQ.defaultVoice({ name });
+    return null;
+  };
+  PQ.EX.forEach((e) => {
+    if (e.pc) return;
+    const build = e.build;
+    e.build = function () {
+      const pr = build.apply(this, arguments);
+      pr.sprites.forEach((sp) => {
+        const role = ROLE(sp.name || '');
+        if (!role) return;
+        (sp.scripts || []).forEach((sc) => walkB(sc.blocks, (b) => { if (b.op === 'text2speech_setVoice' && !(/^Casilla/.test(sp.name) && b.f.VOICE === 'GIANT')) b.f.VOICE = role; }));
+        sp._voice = role;
+      });
+      return pr;
+    };
+  });;
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>

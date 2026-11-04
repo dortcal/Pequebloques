@@ -164,7 +164,7 @@
   def('pen_changePenSizeBy', 'pen', 'stack', 'pen', 'cambiar tamaño del lápiz por %SIZE', { SIZE: num(1) }, 2, { ext: 'pen', sprite: true });
   def('pen_setPenSizeTo', 'pen', 'stack', 'pen', 'fijar tamaño del lápiz a %SIZE', { SIZE: num(4) }, 2, { ext: 'pen', sprite: true });
 
-  PQ.VOICES = [['ALTO', 'normal'], ['TENOR', 'grave'], ['SQUEAK', 'ardilla'], ['GIANT', 'gigante'], ['KITTEN', 'gatito']];
+  PQ.VOICES = [['KITTEN', 'niña'], ['ALTO', 'niño'], ['TENOR', 'robot'], ['SQUEAK', 'animal pequeño'], ['GIANT', 'animal grande']];
   PQ.COLORS = ['#000000', '#7a7a7a', '#ffffff', '#E64040', '#FF8A4D', '#FFD91A', '#59D98E', '#2FB37D', '#4C97FF', '#9966FF', '#FF6FA8', '#8A5A32'];
   /* ¿tiene el bloque algún hueco que admita un reportero? */
   PQ.slotNames = (op) => Object.keys(B[op].args).filter((n) => B[op].args[n].k === 'prim');

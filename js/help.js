@@ -23,11 +23,11 @@
   try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch (e) { /* sin almacenamiento */ }
   PQ.guideVoiceOn = () => !muted && !!g.speechSynthesis;
   PQ.setGuideMute = (m) => { muted = !!m; try { localStorage.setItem(MUTE_KEY, m ? '1' : '0'); } catch (e) { /* nada */ } if (m) { try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ } } };
-  /* Pipo habla siempre con la misma voz (la del «gatito»: clara y amable). */
+  /* Pipo habla siempre con la misma voz (criatura pequeña: voz de animal pequeño). */
   PQ.say = function (text, force) {
     if (!force && !PQ.guideVoiceOn()) return;
     try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
-    if (PQ.utter) PQ.utter(String(text).replace(/«|»/g, ''), 'KITTEN');
+    if (PQ.utter) PQ.utter(String(text).replace(/«|»/g, ''), 'SQUEAK');
   };
   PQ.hasSpanishVoice = () => { try { return g.speechSynthesis.getVoices().some((v) => /^es/i.test(v.lang)); } catch (e) { return false; } };
 

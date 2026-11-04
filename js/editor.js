@@ -314,7 +314,7 @@
     const r = el.getBoundingClientRect();
     bub.style.left = Math.max(6, Math.min(innerWidth - 120, r.left)) + 'px'; bub.style.top = Math.max(6, r.top - 44) + 'px';
     setTimeout(() => bub.remove(), 2400);
-    if (PQ.settings && PQ.settings.voice && PQ.utter && v !== '') PQ.utter(v, 'ALTO');
+    if (PQ.settings && PQ.settings.voice && PQ.utter && v !== '') PQ.utter(v, 'KITTEN');
   };
   ED.highlight = function (op) {
     document.querySelectorAll('#pal .block.pulse').forEach((e) => e.classList.remove('pulse'));
@@ -549,7 +549,7 @@
         if (isR) ED.showValue(be, b);
         else {
           if (kk !== 'hat' && PQ.RT) PQ.RT.runBlock(S.target, b);
-          if (PQ.settings && PQ.settings.voice && PQ.utter) { try { speechSynthesis.cancel(); } catch (e) { /* nada */ } PQ.utter(PQ.blockText(b), 'ALTO'); }
+          if (PQ.settings && PQ.settings.voice && PQ.utter) { try { speechSynthesis.cancel(); } catch (e) { /* nada */ } PQ.utter(PQ.blockText(b), 'KITTEN'); }
         }
         flash(be);
       } else if (isR) {

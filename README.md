@@ -51,6 +51,9 @@ Los cuentos son materiales originales de este proyecto, no recursos oficiales de
 
 Las voces usan la síntesis del propio navegador (Web Speech API). Si el dispositivo no tiene voz en español instalada, el programa funciona igual pero no se oye. En Windows/Android/iOS/macOS suelen venir de serie; en Linux hay que instalar una (por ejemplo `espeak-ng` o `speech-dispatcher`).
 
+**Voces de personaje.** El menú «usar voz» ofrece: niña, niño, robot, animal pequeño y animal grande (equivalen a las cinco voces de Scratch). Lucía habla con voz de niña, Yeray de niño, los robots con voz de robot y los animales con voz de animal pequeño (canario, cangrejo, lagarto, mariposa, perro…) o grande (ballena, tortuga); cada animal tiene un timbre algo distinto. Un personaje sin voz elegida usa la que le corresponde por su nombre.
+El navegador no indica si una voz es masculina o femenina, así que el programa lo deduce por el nombre (Mónica, Helena, Google español… / Jorge, Pablo, Diego…) y elige una voz femenina para niña y animal pequeño y una masculina para niño, robot y animal grande. Si el dispositivo solo tiene una voz en español, las diferencias se hacen con el tono y la velocidad: el efecto es menor, pero se distinguen.
+
 ## Compatibilidad con Scratch
 
 Se importan y exportan los bloques que existen en PequeBloques. Al abrir un .sb3 de Scratch, los bloques que no existen aquí (listas, clones, efectos gráficos, música y otras extensiones, «Mis bloques») se omiten y se avisa. El archivo original no se modifica.

@@ -1032,19 +1032,19 @@
             },
             {
               id: 'contenedor', name: 'Contenedor amarillo', x: 60, y: -100, size: 70, hidden: true, sounds: ['Ta-chán', 'Pop'], scripts: [
-                [F(), S.hide(), S.costume('Contenedor 1'), S.voice('TENOR')],
+                [F(), S.hide(), S.costume('Contenedor 1'), S.voice('ALTO')],
                 [S.recv('conts'), S.xy(60, -100), S.show(), S.sound('Pop')],
                 [S.click(), S.iff(S.and(paso(5), libre()), [
-                  S.setv('paso', 6), S.setv('ocupado', 1), S.voice('TENOR'), S.sound('Ta-chán'), S.send('ok'), S.wait(1.1)]
+                  S.setv('paso', 6), S.setv('ocupado', 1), S.voice('ALTO'), S.sound('Ta-chán'), S.send('ok'), S.wait(1.1)]
                   .concat(L('¡Muy bien! El plástico va al contenedor amarillo.'), [S.hide(), S.setv('ocupado', 0), S.send('tarde')]))]
               ]
             },
             {
               id: 'contenedor', name: 'Contenedor azul', x: 165, y: -100, size: 70, hidden: true, sounds: ['Boing', 'Pop'], scripts: [
-                [F(), S.hide(), S.costume('Contenedor 2'), S.voice('TENOR')],
+                [F(), S.hide(), S.costume('Contenedor 2'), S.voice('ALTO')],
                 [S.recv('conts'), S.xy(165, -100), S.show(), S.sound('Pop')],
                 [S.recv('tarde'), S.hide()],
-                [S.click(), S.iff(S.and(paso(5), libre()), [S.setv('ocupado', 1), S.voice('TENOR'), S.sound('Boing')]
+                [S.click(), S.iff(S.and(paso(5), libre()), [S.setv('ocupado', 1), S.voice('ALTO'), S.sound('Boing')]
                   .concat(L('Ese es el contenedor azul. Es para el papel y el cartón. ¡Prueba con el amarillo!'), [S.setv('ocupado', 0)]))]
               ]
             },

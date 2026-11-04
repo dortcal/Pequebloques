@@ -204,7 +204,60 @@
     return 'ALTO';
   }
   PQ.defaultVoice = defaultVoice;
-  /* Devuelve {done} y se completa al terminar de hablar. */
+  /* ---------- reproductor de locuciones ----------
+   * Cada locución se interpreta con PQ.prosody (ver prosody.js) y se reproduce por oraciones: los trozos de una
+   * oración se encolan seguidos en el motor y entre oraciones se deja la pausa de su puntuación.
+   * Las locuciones se hacen en cola; si ya hay una sonando y otra esperando, se descartan las atrasadas. */
+  const Q = { cur: null, wait: [] };
+  const PROSODY = { on: true };
+  PQ.prosodySetting = PROSODY;
+  function jobEnd(job) {
+    if (job.over) return;
+    job.over = true; job.h.done = true; clearTimeout(job.timer);
+    if (Q.cur === job) { Q.cur = null; const nx = Q.wait.shift(); if (nx) jobStart(nx); }
+  }
+  function jobStart(job) {
+    Q.cur = job;
+    const est = job.units.reduce((n, u) => n + 3000 + u.segs.reduce((m, sg) => m + sg.t.length * 130, 0) + u.pause * 1000, 0);
+    job.timer = setTimeout(() => jobEnd(job), Math.min(60000, est));
+    playUnit(job, 0);
+  }
+  function playUnit(job, i) {
+    if (job.over || job.dead) return;
+    if (i >= job.units.length) { jobEnd(job); return; }
+    const synth = g.speechSynthesis, unit = job.units[i];
+    let left = unit.segs.length, moved = false;
+    const next = () => {
+      if (moved) return; moved = true; clearTimeout(unitTimer);
+      if (job.over || job.dead) return;
+      setTimeout(() => playUnit(job, i + 1), unit.pause * 1000);
+    };
+    const unitTimer = setTimeout(next, 2500 + unit.segs.reduce((m, sg) => m + sg.t.length * 130, 0));
+    unit.segs.forEach((sg) => {
+      const u = new SpeechSynthesisUtterance(sg.t);
+      u.lang = 'es-ES';
+      u.pitch = PQ.clamp(job.base.pitch * sg.p, 0, 2);
+      u.rate = PQ.clamp(job.base.rate * sg.r, 0.5, 2);
+      u.volume = sg.v;
+      if (job.base.voice) u.voice = job.base.voice;
+      u.onend = () => { if (--left <= 0) next(); };
+      u.onerror = (e) => {
+        if (job.over || job.dead) return;
+        if (e && (e.error === 'canceled' || e.error === 'interrupted')) { jobEnd(job); return; }   // alguien paró la voz
+        if (--left <= 0) next();
+      };
+      synth.speak(u);
+    });
+  }
+  /* si algún sitio de la aplicación llama a speechSynthesis.cancel(), la locución en curso termina limpiamente */
+  try {
+    const synth0 = g.speechSynthesis;
+    if (synth0 && !synth0.__pqWrapped) {
+      const c0 = synth0.cancel.bind(synth0);
+      synth0.cancel = function () { if (Q.cur) { Q.cur.dead = true; jobEnd(Q.cur); } c0(); };
+      synth0.__pqWrapped = true;
+    }
+  } catch (e) { /* sin voz */ }
   function utter(text, key) {
     const h = { done: false };
     text = String(text);
@@ -214,19 +267,22 @@
       return h;
     }
     try {
-      const u = new SpeechSynthesisUtterance(text);
       const vf = voiceFor(key, text);
-      u.lang = 'es-ES'; u.pitch = vf.pitch; u.rate = vf.rate * 0.92;
-      if (vf.voice) u.voice = vf.voice;
-      const fin = () => { h.done = true; };
-      u.onend = fin; u.onerror = fin;
-      setTimeout(fin, Math.min(30000, 2500 + text.length * 110));   // por si el navegador no avisa
-      if (synth.speaking && synth.pending) synth.cancel();   // evita colas largas de voces atrasadas
-      synth.speak(u);
-      PQ._lastUtter = { text, key, voice: vf.voice && vf.voice.name, pitch: vf.pitch };
+      const base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * 0.92 };
+      const units = (PROSODY.on && PQ.prosody) ? PQ.prosody.plan(text, key) : PQ.prosody.flat(text);
+      if (!units.length) { h.done = true; return h; }
+      const job = { h, units, base, over: false, dead: false, timer: 0 };
+      if (Q.cur && Q.wait.length >= 1) {                    // evita colas largas de voces atrasadas
+        const old = Q.wait.splice(0); old.forEach((j) => { j.over = true; j.h.done = true; });
+        const cur = Q.cur; cur.dead = true; jobEnd(cur); Q.cur = null;
+        try { c0cancel(synth); } catch (e) { /* nada */ }
+      }
+      if (Q.cur) Q.wait.push(job); else jobStart(job);
+      PQ._lastUtter = { text, key, voice: vf.voice && vf.voice.name, pitch: vf.pitch, units };
     } catch (e) { h.done = true; }
     return h;
   }
+  const c0cancel = (synth) => { synth.cancel(); };
   PQ.utter = utter;
   function speakBubble(text, t) {
     if (!PQ.settings || !PQ.settings.voice) return { done: true };

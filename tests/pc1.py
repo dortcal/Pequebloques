@@ -7,6 +7,7 @@ async def main():
     await g.waitvar('fase',1,60); await g.waitvar('bloqueo',0,30)
     print('fase1 en %.1fs'%(time.time()-t0))
     await g.until(lambda: g.var('sel') if False else asyncio.sleep(0) , 1) if False else None
+    await g.until(lambda: pg.evaluate('PQ.S.project.sprites.find(s=>s.name=="Botella").visible'),30); await pg.wait_for_timeout(300)
     await g.click('Botella'); await g.waitvar('sel',1,10)
     await g.click('Contenedor amarillo'); await g.waitvar('fase',2,40)
     print('fase2 en %.1fs'%(time.time()-t0), await g.var('restan'))
@@ -22,6 +23,7 @@ async def main():
     await g.click('Contenedor amarillo'); await g.waitvar('resp',3,60); await g.waitvar('bloqueo',0,20)
     await g.click('Contenedor verde'); await g.waitvar('fase',4,60)
     await g.waitvar('bloqueo',0,20); await pg.wait_for_timeout(1500)
+    await g.until(lambda: pg.evaluate('PQ.S.project.sprites.find(s=>s.name=="Brik").visible'),40); await g.waitvar('bloqueo',0,20); await pg.wait_for_timeout(500)
     await g.click('Brik'); await pg.wait_for_timeout(800); print('brik sel',await g.var('sel'))
     await g.click('Lata'); await g.waitvar('sel',1,10); await g.click('Contenedor amarillo')
     await g.waitvar('restan',0,20)

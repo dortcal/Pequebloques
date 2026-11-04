@@ -869,7 +869,7 @@
     const btns = spec.map((x) => $(x[0])).filter(Boolean);
     btns.forEach((b) => b.classList.add('blink'));
     place(); const t0 = setInterval(place, 400);
-    const end = setTimeout(() => hintOff && hintOff(), 16000);
+    const end = setTimeout(() => hintOff && hintOff(), 25000);
     const stop = () => hintOff && hintOff();
     ['btnFlag', 'btnFull', 'btnStop'].forEach((id) => { const b = $('#' + id); if (b) b.addEventListener('click', stop, { once: true }); });
     window.addEventListener('resize', place);

@@ -529,7 +529,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 #starthint .hint{position:absolute;max-width:230px;padding:9px 12px;border-radius:14px;background:#FFD43B;color:#3a2a00;font-weight:800;font-size:16px;line-height:1.15;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.28);animation:hintblink 1s ease-in-out infinite}
 #starthint .hint[hidden]{display:none}
 #starthint .hint .ar{position:absolute;top:-8px;width:16px;height:16px;background:#FFD43B;transform:rotate(45deg);border-radius:3px}
-@keyframes hintblink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.06)}}
+@keyframes hintblink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.08)}}
 .sbtn.blink{animation:btnblink 1s ease-in-out infinite;outline:4px solid #FFD43B;outline-offset:2px}
 @keyframes btnblink{0%,100%{box-shadow:0 0 0 0 rgba(255,212,59,.95)}50%{box-shadow:0 0 0 10px rgba(255,212,59,0)}}
 @media (prefers-reduced-motion:reduce){#starthint .hint,.sbtn.blink{animation:none}}
@@ -7319,7 +7319,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     p.title = ex.title;
     p.noPad = !!ex.nopad;
     loadProject(p, { banner: ex.challenge });
-    if (ex.voices) startHint(); else PQ.say(ex.challenge);
+    startHint(); if (!ex.voices) PQ.say(ex.challenge);
     if (ex.openSprite) { const s = p.sprites.find((x) => x.name === ex.openSprite); if (s) { S.target = s; renderAll(); } }
   }
   PQ.openExample = openExample;

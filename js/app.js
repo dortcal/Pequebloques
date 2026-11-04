@@ -888,7 +888,7 @@
     p.title = ex.title;
     p.noPad = !!ex.nopad;
     loadProject(p, { banner: ex.challenge });
-    if (ex.voices) startHint(); else PQ.say(ex.challenge);
+    startHint(); if (!ex.voices) PQ.say(ex.challenge);
     if (ex.openSprite) { const s = p.sprites.find((x) => x.name === ex.openSprite); if (s) { S.target = s; renderAll(); } }
   }
   PQ.openExample = openExample;

@@ -4952,7 +4952,8 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
                 S.sayFor('Hoy voy a volar hasta el Teide.', 2),
                 S.rep(10, [S.move(10), S.next(), S.wait(0.1)]), S.send('teide')],
               [S.recv('teide'), S.backdrop('teide'), S.xy(-150, -60), S.sound('Ta-chán'),
-                S.rep(8, [S.move(15), S.next(), S.wait(0.1)]), S.sayFor('¡Qué bonito se ve desde aquí!', 3)]
+                S.rep(8, [S.move(15), S.next(), S.wait(0.1)]), S.sayFor('¡Qué bonito se ve desde aquí!', 3),
+                S.sayFor('Poco a poco, con ganas, ¡se llega muy lejos!', 4)]
             ]
           }]
         });
@@ -4972,7 +4973,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
               id: 'lagarto', x: -160, y: -70, scripts: [
                 [F(), S.show(), S.xy(-160, -70), S.say('¡Tengo mucha hambre!'), S.wait(2),
                   S.say('Voy a por ese plátano…'), S.rep(12, [S.move(10), S.next(), S.wait(0.15)]), S.say('')],
-                [S.recv('comer'), S.sound('Pop'), S.sayFor('¡Ñam, ñam! ¡Qué rico!', 3)]
+                [S.recv('comer'), S.sound('Pop'), S.sayFor('¡Ñam, ñam! ¡Qué rico!', 3), S.sayFor('Con calma y esfuerzo, todo se consigue.', 4)]
               ]
             },
             {
@@ -5004,7 +5005,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
             {
               id: 'ballena', x: 100, y: -20, size: 120, sounds: ['Pop', 'Chapuzón'], scripts: [
                 [F(), S.xy(100, -20)],
-                [S.recv('saluda'), S.sound('Chapuzón'), S.next(), S.sayFor('¡Hola, pececito! ¿Quieres jugar?', 3), S.next()]
+                [S.recv('saluda'), S.sound('Chapuzón'), S.next(), S.sayFor('¡Hola, pececito! ¿Quieres jugar?', 3), S.sayFor('Jugar juntos es mucho más divertido.', 3), S.next()]
               ]
             },
             {
@@ -5048,7 +5049,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
             {
               id: 'lucia', x: -110, y: -50, scripts: [
                 [F(), S.sayFor('¡Hola, Yeray! ¿Vienes a la fiesta?', 3), S.send('turno-yeray')],
-                [S.recv('turno-lucia'), S.sayFor('¡Genial! Nos vemos allí.', 3)]
+                [S.recv('turno-lucia'), S.sayFor('¡Genial! Nos vemos allí.', 3), S.sayFor('Esperar tu turno y escuchar es de buenos amigos.', 4)]
               ]
             },
             {
@@ -5140,7 +5141,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
             {
               id: 'lucia', name: 'Lucía', x: -185, y: 30, size: 75, scripts: [
                 [F(), S.voice('KITTEN'), S.xy(-185, 30)].concat(L('Hoy hay una carrera en el campo.'), [S.send('lagarto')]),
-                [S.recv('fin'), S.voice('KITTEN')].concat(L('Y así terminó la carrera. ¡Qué divertido!')),
+                [S.recv('fin'), S.voice('KITTEN')].concat(L('Y así terminó la carrera. ¡Qué divertido!'), L('Llegar el primero no es lo más importante. Lo importante es llegar hasta el final y no rendirse.')),
                 [S.click(), S.voice('KITTEN')].concat(L('Hoy hay una carrera en el campo.'))
               ]
             },
@@ -5156,7 +5157,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
               id: 'tortuga', x: -130, y: -125, size: 85, scripts: [
                 [F(), S.xy(-130, -125), S.voice('GIANT')],
                 [S.recv('tortuga'), S.voice('GIANT')].concat(L('Despacito y con buena letra. Vamos a correr.'), [S.send('carrera')]),
-                [S.recv('carrera'), S.rep(12, [S.dx(5), S.next(), S.wait(0.3)]), S.voice('GIANT')].concat(L('Yo llegaré… un poquito más tarde.'), [S.send('fin')]),
+                [S.recv('carrera'), S.rep(12, [S.dx(5), S.next(), S.wait(0.3)]), S.voice('GIANT')].concat(L('Yo llegaré… un poquito más tarde.'), [S.rep(31, [S.dx(5), S.next(), S.wait(0.2)])], L('¡Ya he llegado! Despacito, pero sin parar.'), [S.send('fin')]),
                 [S.click(), S.voice('GIANT')].concat(L('Despacito y con buena letra.'))
               ]
             }
@@ -5185,7 +5186,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
               id: 'yeray', x: -60, y: -70, scripts: [
                 [F(), S.voice('SQUEAK'), S.xy(-60, -70)],
                 [S.recv('yeray'), S.voice('SQUEAK')].concat(L('¡Qué grande es! ¿Será simpática?'), [S.send('ballena')]),
-                [S.recv('final'), S.voice('SQUEAK'), S.rep(3, [S.dy(12), S.wait(0.1), S.dy(-12), S.wait(0.1)])].concat(L('¡Qué día más bonito!')),
+                [S.recv('final'), S.voice('SQUEAK'), S.rep(3, [S.dy(12), S.wait(0.1), S.dy(-12), S.wait(0.1)])].concat(L('¡Qué día más bonito!'), L('Ser amable nos regala nuevos amigos, aunque sean muy diferentes a nosotros.')),
                 [S.click(), S.voice('SQUEAK')].concat(L('¡Qué grande es! ¿Será simpática?'))
               ]
             },
@@ -5208,7 +5209,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       build() {
         const L = S.talk;
         return make({
-          backdrops: ['noche'], messages: ['estrella', 'cohete', 'subir', 'viaje'],
+          backdrops: ['noche'], messages: ['estrella', 'cohete', 'subir', 'viaje', 'moral'],
           sprites: [
             {
               id: 'robot', x: -150, y: -80, scripts: [
@@ -5221,6 +5222,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
               id: 'estrella', x: 140, y: 100, scripts: [
                 [F(), S.xy(140, 100), S.voice('KITTEN')],
                 [S.recv('estrella'), S.voice('KITTEN'), S.grow(30), S.wait(0.3), S.grow(-30)].concat(L('Yo te ayudo. Voy a llamar al cohete.'), [S.send('cohete')]),
+                [S.recv('moral'), S.voice('KITTEN')].concat(L('Con amigos que te ayudan, los sueños se cumplen. ¡Buen viaje, robot!')),
                 [S.click(), S.voice('KITTEN')].concat(L('Yo te ayudo.'))
               ]
             },
@@ -5228,7 +5230,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
               id: 'cohete', x: 60, y: -90, size: 70, sounds: ['Bocina'], scripts: [
                 [F(), S.show(), S.xy(60, -90), S.voice('SQUEAK')],
                 [S.recv('cohete'), S.voice('SQUEAK')].concat(L('¡Sube, robot! Te estoy esperando.'), [S.send('subir')]),
-                [S.recv('viaje'), S.voice('SQUEAK')].concat(L('¡Tres, dos, uno, despegue!'), [S.sound('Bocina'), S.rep(20, [S.dy(10), S.wait(0.05)]), S.hide()]),
+                [S.recv('viaje'), S.voice('SQUEAK')].concat(L('¡Tres, dos, uno, despegue!'), [S.sound('Bocina'), S.rep(20, [S.dy(10), S.wait(0.05)]), S.hide(), S.send('moral')]),
                 [S.click(), S.voice('SQUEAK')].concat(L('¡Tres, dos, uno, despegue!'))
               ]
             }
@@ -5283,7 +5285,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
                 [S.recv('c2'), S.voice('SQUEAK')].concat(L('¡Un cofre! Está cerrado. ¡Toca el cofre para abrirlo!'), [S.setv('paso', 7)]),
                 [S.recv('a2'), S.voice('SQUEAK')].concat(L('La nota dice: el mayor tesoro es viajar con los amigos.'), [S.send('final')]),
                 [S.recv('final'), S.xy(-30, -100)],
-                [S.recv('adios'), S.voice('SQUEAK'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Fin del cuento! ¡Hasta la próxima aventura!'))
+                [S.recv('adios'), S.voice('SQUEAK'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('Lo que más vale no es el oro: es compartir con los amigos. ¡Fin del cuento!'))
               ]
             },
             {
@@ -5349,7 +5351,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
                 [S.recv('noche'), S.voice('KITTEN'), S.xy(-185, -100), S.wait(0.8)].concat(L('Para encender los motores, toca el cohete tres veces.'), [S.setv('paso', 3), S.setv('motores', 0), S.showv('motores')]),
                 [S.recv('despegue'), S.hide()],
                 [S.recv('luna'), S.voice('KITTEN'), S.wait(2.2), S.xy(-5, -112), S.show()].concat(L('¡Hemos llegado a la Luna! ¡Mira qué bonita se ve la Tierra!'), [S.send('l2')]),
-                [S.recv('f2'), S.voice('KITTEN')].concat(L('Gracias por viajar con nosotros. ¡Fin del cuento!')),
+                [S.recv('f2'), S.voice('KITTEN')].concat(L('Con curiosidad y trabajando en equipo, se puede llegar hasta la Luna.'), L('Gracias por viajar con nosotros. ¡Fin del cuento!')),
                 [S.click(), S.voice('KITTEN')].concat(L('Hoy vamos a hablar de la Luna.'))
               ]
             },
@@ -5444,7 +5446,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
                 [F(), S.forever(S.walk(4, () => S.gt(S.v('paso'), 0)))],
                 [S.recv('entrar'), S.xy(-170, -110), S.size(55)],
                 [S.recv('fin'), S.voice('KITTEN'), S.sound('Ta-chán'), S.rep(3, [S.dy(16), S.wait(0.1), S.dy(-16), S.wait(0.1)])]
-                  .concat(L('¡Lo he conseguido! Ahora sé cómo comer sano.'), [S.stopAll()]),
+                  .concat(L('¡Lo he conseguido! Ahora sé cómo comer sano.'), L('Cuidar lo que comemos es cuidarnos a nosotros mismos.'), [S.stopAll()]),
                 [S.click(), S.voice('KITTEN')].concat(L('Muéveme con las flechas.'))
               ]
             },
@@ -5595,7 +5597,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
                 [F(), S.voice('KITTEN'), S.show(), S.xy(-140, -100), S.hidev('botellas')].concat(L('¡Qué playa tan bonita! Pero mira, hay botellas de plástico.'), [S.send('m1')]),
                 [S.recv('m2'), S.voice('KITTEN')].concat(L('Toca las botellas para recogerlas. ¡Son tres!'), [S.setv('paso', 1), S.setv('botellas', 0), S.showv('botellas')]),
                 [S.recv('mar'), S.voice('KITTEN'), S.xy(-170, 60)].concat(L('¡Qué limpio está el mar! Mira cuántos amigos.'), [S.send('m3')]),
-                [S.recv('final'), S.voice('KITTEN'), S.xy(-110, -100), S.wait(0.6)].concat(L('¡Qué playa tan limpia! Cuidemos el mar entre todos.'), [S.send('adios')]),
+                [S.recv('final'), S.voice('KITTEN'), S.xy(-110, -100), S.wait(0.6)].concat(L('¡Qué playa tan limpia! Cuidemos el mar entre todos.'), L('Aunque seamos pequeños, si todos ayudamos, podemos cambiar el mundo.'), [S.send('adios')]),
                 [S.click(), S.voice('KITTEN')].concat(L('¡Qué playa tan bonita!'))
               ]
             },
@@ -5676,7 +5678,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
               id: 'yeray', x: 150, y: -20, size: 85, hidden: true, scripts: [
                 [F(), S.hide(), S.voice('SQUEAK'), S.xy(150, -20)],
                 [S.recv('cosecha'), S.xy(40, -140), S.show()],
-                [S.recv('fin'), S.voice('SQUEAK'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Qué rica! La zanahoria es buena para la vista. ¡Fin del cuento!'))
+                [S.recv('fin'), S.voice('SQUEAK'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Qué rica! La zanahoria es buena para la vista.'), L('Con paciencia y cuidado, todo crece. ¡Fin del cuento!'))
               ]
             },
             {
@@ -5826,7 +5828,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
                 [S.recv('b2'), S.voice('KITTEN')].concat(L('Los animales se han asustado. Toca la botella para recogerla.'), [S.setv('paso', 3)]),
                 [S.recv('conts'), S.voice('KITTEN'), S.wait(0.6)].concat(L('Una botella de plástico no se tira al suelo. ¿Dónde va? Toca el contenedor correcto.'), [S.setv('paso', 5)]),
                 [S.recv('t3'), S.voice('KITTEN')].concat(L('Los árboles de la laurisilva beben el agua de la niebla. Si los cuidamos, siempre habrá agua.'), [S.send('fin')]),
-                [S.recv('fin'), S.voice('KITTEN'), S.hide()].concat(L('¡Fin del cuento! Gracias por ayudar al bosque.'), [S.wait(1), S.stopAll()]),
+                [S.recv('fin'), S.voice('KITTEN'), S.hide()].concat(L('Si cuidamos la naturaleza, ella nos cuida a nosotros.'), L('¡Fin del cuento! Gracias por ayudar al bosque.'), [S.wait(1), S.stopAll()]),
                 [S.click(), S.voice('KITTEN'), S.iff(libre(), L('¡Qué bonito es el bosque!'))]
               ]
             },

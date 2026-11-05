@@ -1082,9 +1082,9 @@
         win: [['R', '¡Bucle arreglado!'], ['Y', 'Un bucle repite lo que tiene delante, así que hay que colocarlo con cuidado. Has depurado un bucle, ¡qué bien!']]
       },
       { // B4 reto final
-        start: [0, 4], h: 0, goal: null, items: [[2, 1, 1, 10], [4, 2, 5, 8]], bins: [[3, 1, 1], [4, 1, 5], [4, 3, 3]], obst: [[1, 4, 1], [1, 2, 2]], cap: 10, preset: null,
+        start: [0, 4], h: 0, goal: null, items: [[2, 1, 1, 10], [4, 2, 5, 8]], bins: [[3, 1, 1], [4, 1, 5], [4, 3, 3]], obst: [[1, 4, 1], [1, 2, 2]], cap: 9, preset: null,
         intro: [['L', 'Reto final del cole. Hay dos residuos: una botella y un lápiz roto. Cada uno va a su contenedor, y hay un contenedor trampa.'],
-          ['Y', 'Con bucles, la solución cabe en nueve tarjetas. Piensa dónde conviene repetir, y recuerda que se puede retroceder.'],
+          ['Y', 'Solo tienes nueve huecos, y sin bucles no cabe la solución. Piensa dónde conviene repetir, y recuerda que se puede retroceder.'],
           ['L', 'Si algo falla, observa dónde se detiene el robot, depura y vuelve a probar.']],
         win: [['R', '¡Colegio limpio!'], ['L', 'Has usado todo lo aprendido: instrucciones, giros, bucles y depuración. ¡Eres un gran programador o programadora!']]
       }

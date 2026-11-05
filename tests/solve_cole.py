@@ -47,7 +47,7 @@ LV.update({
  'B1':dict(start=(0,4),h=0,goal=(0,1),cap=2),
  'B2':dict(start=(0,4),h=0,items=[(1,1,2)],bins=[(3,1,2),(4,3,3)],obst=[(0,0),(2,4)],cap=5),
  'B3':dict(start=(4,4),h=0,goal=(1,1),cap=6),
- 'B4':dict(start=(0,4),h=0,items=[(2,1,1),(4,2,5)],bins=[(3,1,1),(4,1,5),(4,3,3)],obst=[(1,4),(1,2)],cap=10),
+ 'B4':dict(start=(0,4),h=0,items=[(2,1,1),(4,2,5)],bins=[(3,1,1),(4,1,5),(4,3,3)],obst=[(1,4),(1,2)],cap=9),
 })
 if __name__=='__main__':
     for k,L in LV.items(): print(k,minsol(L,L['cap']))

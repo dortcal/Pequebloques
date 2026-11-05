@@ -1237,7 +1237,7 @@
     sprites.push(bravo(0, 20, 40));
     const vnames = ['fase', 'bloqueo', 'hecho', 'ronda', 'restan', 'sel', 'selk', 'err', 'sig', 't1', 't2', 't3', 't4', 'nivel', 'modo', 'n', 'max', 'tot', 'entregados', 'carry', 'carrycost', 'fallo', 'i', 'c', 'h'].concat(Array.from({ length: NS }, (_, k) => 'p' + (k + 1)));
     return {
-      id: 'pc-cole-primaria', pc: 'primaria', title: 'El cole recicla: clasifica y programa al robot', kind: 'cuento', voices: true, stars: 3, bg: 'pc-cole', sprite: 'robotsuelo',
+      id: 'pc-cole-primaria', pc: 'primaria', natural: true, title: 'El cole recicla: clasifica y programa al robot', kind: 'cuento', voices: true, stars: 3, bg: 'pc-cole', sprite: 'robotsuelo',
       desc: 'Clasifica residuos en cinco contenedores, ordena el viaje de un envase y programa a un robot de suelo con tarjetas de avanzar, retroceder y girar (como un Blue-Bot). Unos 20 minutos, con voz, sin leer.',
       challenge: 'Escucha a Lucía y a Yeray. Toca los dibujos y las tarjetas que te pidan.',
       openSprite: 'Lucía',

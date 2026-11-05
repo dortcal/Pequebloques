@@ -197,6 +197,7 @@
   function loadProject(p, opts) {
     opts = opts || {};
     if (PQ.removeReadIcon) PQ.removeReadIcon();
+    PQ.voiceNatural = false;
     RT.stopAll();
     if (g.speechSynthesis) try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
     p.messages = p.messages && p.messages.length ? p.messages : ['mensaje1'];
@@ -925,7 +926,7 @@
     p.noPad = !!ex.nopad;
     loadProject(p, { banner: ex.challenge });
     startHint(); if (!ex.voices) PQ.say(ex.challenge);
-    PQ._log = []; if (ex.pc) addReadIcon();
+    PQ._log = []; PQ.voiceNatural = !!ex.natural; if (ex.pc) addReadIcon();
     if (ex.openSprite) { const s = p.sprites.find((x) => x.name === ex.openSprite); if (s) { S.target = s; renderAll(); } }
   }
   PQ.openExample = openExample;

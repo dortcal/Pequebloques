@@ -160,20 +160,23 @@
    * deduce por el nombre (Mónica, Paulina, Helena… / Jorge, Diego, Pablo…). Si el dispositivo solo tiene
    * una voz, los personajes se distinguen por tono y velocidad. */
   const VOICE_STYLE = { KITTEN: [1.55, 1.05, 'f'], ALTO: [1.2, 1.0, 'm'], TENOR: [0.45, 0.8, 'm'], SQUEAK: [1.8, 1.12, 'f'], GIANT: [0.12, 0.78, 'm'] };
-  const FEM = /m[oó]nica|paulina|helena|laura|luc[ií]a|elvira|sabina|esperanza|marisol|isabella|camila|lupe|dalia|paloma|salom[eé]|marina|ximena|lia\b|female|mujer|google espa/i;
-  const MAS = /jorge|diego|pablo|[aá]lvaro|enrique|juan|carlos|miguel|ra[uú]l|tom[aá]s|pedro|jaime|alonso|arnau|sa[uú]l|gonzalo|ramiro|male\b|hombre|tony/i;
+  const FEM = /m[oó]nica|paulina|helena|laura|luc[ií]a|elvira|elena|dalia|abril|ximena|vera|sabina|esperanza|marisol|isabella|camila|lupe|dalia|paloma|salom[eé]|marina|ximena|lia\b|female|mujer|google espa/i;
+  const MAS = /jorge|diego|pablo|[aá]lvaro|alvaro|arnau|[aá]lvaro|enrique|juan|carlos|miguel|ra[uú]l|tom[aá]s|pedro|jaime|alonso|arnau|sa[uú]l|gonzalo|ramiro|male\b|hombre|tony/i;
   function esVoices() {
     try {
       const all = (g.speechSynthesis.getVoices() || []).filter((v) => /^es/i.test(v.lang));
-      return all.sort((a, b) => (/^es[-_]ES/i.test(b.lang) ? 1 : 0) - (/^es[-_]ES/i.test(a.lang) ? 1 : 0));
+      const q = (v) => (/natural|neural|online|premium|enhanced|siri|mejorada/i.test(v.name) ? 3 : 0) + (/google/i.test(v.name) ? 1 : 0) - (/espeak|compact|festival|mbrola/i.test(v.name) ? 3 : 0) + (/^es[-_]ES/i.test(v.lang) ? 1.5 : 0);
+      return all.map((v, i) => [v, q(v) - i * 0.001]).sort((a, b) => b[1] - a[1]).map((x) => x[0]);
     } catch (e) { return []; }
   }
   const isFem = (v) => FEM.test(v.name) && !MAS.test(v.name);
   const isMas = (v) => MAS.test(v.name) && !FEM.test(v.name);
   /* variación estable por palabra para que dos animales distintos no suenen idénticos */
   const hash = (t) => { let h = 7; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 997; return h / 997; };
+  /* perfil «natural»: tonos cercanos a 1 (un tono muy forzado suena a robot) y voz más suave */
+  const NAT_STYLE = { KITTEN: [1.12, 1.0, 'f'], ALTO: [0.98, 1.0, 'm'], TENOR: [0.78, 0.96, 'm'], SQUEAK: [1.4, 1.08, 'f'], GIANT: [0.4, 0.85, 'm'] };
   function voiceFor(key, text) {
-    const st = VOICE_STYLE[key] || VOICE_STYLE.ALTO;
+    const st = (PQ.voiceNatural ? NAT_STYLE[key] : null) || VOICE_STYLE[key] || VOICE_STYLE.ALTO;
     let pitch = st[0], rate = st[1], voice = null;
     const vs = esVoices();
     if (vs.length) {
@@ -233,7 +236,13 @@
       setTimeout(() => playUnit(job, i + 1), unit.pause * 1000);
     };
     const unitTimer = setTimeout(next, 2500 + unit.segs.reduce((m, sg) => m + sg.t.length * 130, 0));
-    unit.segs.forEach((sg) => {
+    /* modo natural: la oración entera en una sola locución (el motor pone su propia entonación) y con variaciones suaves */
+    const segsToPlay = job.natural ? (() => {
+      const n = unit.segs.length, avg = (k) => unit.segs.reduce((a, sg) => a + sg[k], 0) / n;
+      return [{ t: unit.segs.map((sg) => sg.t).join(' '), p: 1 + (avg('p') - 1) * 0.5, r: 1 + (avg('r') - 1) * 0.5, v: Math.max(0.95, avg('v')) }];
+    })() : unit.segs;
+    left = segsToPlay.length;
+    segsToPlay.forEach((sg) => {
       const u = new SpeechSynthesisUtterance(sg.t);
       u.lang = 'es-ES';
       u.pitch = PQ.clamp(job.base.pitch * sg.p, 0, 2);
@@ -269,10 +278,10 @@
     }
     try {
       const vf = voiceFor(key, text);
-      const base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * 0.92 };
+      const base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * (PQ.voiceNatural ? 0.95 : 0.92) };
       const units = (PROSODY.on && PQ.prosody) ? PQ.prosody.plan(text, key) : PQ.prosody.flat(text);
       if (!units.length) { h.done = true; return h; }
-      const job = { h, units, base, over: false, dead: false, timer: 0 };
+      const job = { h, units, base, over: false, dead: false, timer: 0, natural: !!PQ.voiceNatural };
       if (Q.cur && Q.wait.length >= 1) {                    // evita colas largas de voces atrasadas
         const old = Q.wait.splice(0); old.forEach((j) => { j.over = true; j.h.done = true; });
         const cur = Q.cur; cur.dead = true; jobEnd(cur); Q.cur = null;

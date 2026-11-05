@@ -473,7 +473,7 @@
                 [S.recv('elperro'), S.voice('SQUEAK')].concat(L('¡Guau, guau! Yo conozco el camino. ¡Seguidme!'), [S.send('teide')]),
                 [S.recv('lamariposa'), S.hide()],
                 [S.recv('teide'), S.xy(40, -80)],
-                [S.recv('cueva'), S.xy(40, -95)],
+                [S.recv('cueva'), S.xy(35, -95)],
                 [S.recv('final'), S.xy(70, -115)]
               ]
             },
@@ -491,9 +491,9 @@
               ]
             },
             {
-              id: 'cofre', x: 110, y: -90, size: 90, hidden: true, sounds: ['Ta-chán'], scripts: [
-                [F(), S.hide(), S.costume('Cofre 1'), S.xy(110, -90)],
-                [S.recv('cueva'), S.costume('Cofre 1'), S.xy(110, -90), S.show()],
+              id: 'cofre', x: 160, y: -90, size: 90, hidden: true, sounds: ['Ta-chán'], scripts: [
+                [F(), S.hide(), S.costume('Cofre 1'), S.xy(160, -90)],
+                [S.recv('cueva'), S.costume('Cofre 1'), S.xy(160, -90), S.show()],
                 [S.click(), S.iff(paso(7), [S.setv('paso', 8), S.costume('Cofre 2'), S.sound('Ta-chán'), S.grow(20), S.wait(0.4), S.grow(-20), S.send('abrir')])],
                 [S.recv('final'), S.hide()]
               ]

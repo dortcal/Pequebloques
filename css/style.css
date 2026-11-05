@@ -528,3 +528,17 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 #readbtn:not(.on){animation:readpulse 1.4s ease-in-out 4}
 @keyframes readpulse{0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.35)}50%{box-shadow:0 0 0 9px rgba(255,212,59,.9)}}
 @media (prefers-reduced-motion:reduce){#readbtn{animation:none!important}}
+
+/* ---- ajustes de voz ---- */
+.modal.lg{max-width:640px}
+.vset{display:flex;flex-direction:column;gap:14px;font-size:16px}
+.vstate{background:#F3F0FF;border-radius:14px;padding:10px 14px;font-size:14px;line-height:1.45;color:#3b3170}
+.vrow{display:flex;flex-direction:column;gap:6px}
+.vrow>label{font-weight:800;color:#3b3170}
+.vseg{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.vseg select{font:inherit;padding:9px 10px;border-radius:12px;border:2px solid #cfd6f5;min-height:46px;max-width:100%}
+.vseg .btn[aria-pressed="true"]{outline:3px solid #3b3170}
+.vrange{display:flex;align-items:center;gap:12px}
+.vrange input{flex:1;min-width:0;height:34px;accent-color:#8B5CF6}
+.vrange output{min-width:9.5em;text-align:right;font-weight:700;color:#3b3170}
+.vnote{margin:0;font-size:13.5px;color:#5f5a86;line-height:1.4}

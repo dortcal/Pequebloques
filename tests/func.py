@@ -18,7 +18,7 @@ async def main():
         errs=[]
         pg.on('console', lambda m: errs.append(m.text) if m.type=='error' else None)
         pg.on('pageerror', lambda e: errs.append('PAGEERR '+str(e)))
-        await pg.goto('file://' + __import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__),'..','index.html')) + '')
+        await pg.goto('file://' + __import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__),'..','index.html')) + '?voz=dispositivo')
         await pg.wait_for_timeout(800)
         ws = await pg.locator('#ws').bounding_box()
         x0,y0 = ws['x']+60, ws['y']+60

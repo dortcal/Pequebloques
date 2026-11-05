@@ -112,7 +112,7 @@
     stop(silent) {
       if (!cur) return;
       cur = null; if (!silent || true) render();
-      try { if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+      try { if (PQ.stopVoice) PQ.stopVoice(); else if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
       if (PQ.Help) { PQ.Help.isOpen() && PQ.Help.close(); }
     },
     check() {

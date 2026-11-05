@@ -199,7 +199,7 @@
     if (PQ.removeReadIcon) PQ.removeReadIcon();
     PQ.voiceNatural = false;
     RT.stopAll();
-    if (g.speechSynthesis) try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+    try { if (PQ.stopVoice) PQ.stopVoice(); else if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
     p.messages = p.messages && p.messages.length ? p.messages : ['mensaje1'];
     PQ.allTargets(p).forEach((t) => { if (!t.costumes.length) t.costumes.push(PQ.mkCostume('disfraz1', '<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"></svg>', 'svg', 1, 1)); });
     S.project = p;
@@ -877,7 +877,7 @@
     window.addEventListener('resize', place);
     hintOff = () => { clearInterval(t0); clearTimeout(end); window.removeEventListener('resize', place); btns.forEach((b) => b.classList.remove('blink')); wrap.remove(); hintOff = null; };
     if (PQ.guideVoiceOn && PQ.guideVoiceOn() && PQ.utter) {
-      try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+      try { if (PQ.stopVoice) PQ.stopVoice(); else g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
       PQ.utter('Pulsa la bandera verde para empezar. Si quieres, puedes hacer la pantalla grande con el botón de la derecha.', 'KITTEN');
     }
   }
@@ -913,7 +913,7 @@
     btn.addEventListener('click', () => toggle(panel.hidden));
     txt.addEventListener('click', () => toggle(false));
     ear.addEventListener('click', () => {
-      try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+      try { if (PQ.stopVoice) PQ.stopVoice(); else g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
       if (PQ.utter && PQ.guideVoiceOn && PQ.guideVoiceOn()) PQ.utter(txt.textContent, 'KITTEN');
     });
   }
@@ -1090,8 +1090,8 @@
     $('#btnVoice').addEventListener('click', () => {
       PQ.settings.voice = !PQ.settings.voice;
       $('#btnVoice').setAttribute('aria-pressed', String(PQ.settings.voice));
-      if (PQ.settings.voice) { try { const u = new SpeechSynthesisUtterance('Voz activada'); u.lang = 'es-ES'; g.speechSynthesis.speak(u); } catch (e) { ui.toast('Este navegador no tiene voz.'); } }
-      else if (g.speechSynthesis) g.speechSynthesis.cancel();
+      if (PQ.settings.voice) { if (PQ.voiceAvailable && !PQ.voiceAvailable()) ui.toast('Este dispositivo no tiene voz en español. Se verá el texto en los bocadillos.'); else PQ.utter('Voz activada.', 'PIPO'); }
+      else if (PQ.stopVoice) PQ.stopVoice();
     });
     $('#btnZoomIn').addEventListener('click', () => ED.setZoom(S.zoom + 0.12));
     $('#btnZoomOut').addEventListener('click', () => ED.setZoom(S.zoom - 0.12));

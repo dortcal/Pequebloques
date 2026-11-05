@@ -7,7 +7,7 @@ async def main():
         pg = await ctx.new_page(); errs=[]
         pg.on('console', lambda m: errs.append(m.text) if m.type=='error' else None)
         pg.on('pageerror', lambda e: errs.append('PAGEERR '+str(e)))
-        await pg.goto('file://' + __import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__),'..','index.html')) + ''); await pg.wait_for_timeout(600)
+        await pg.goto('file://' + __import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__),'..','index.html')) + '?voz=dispositivo'); await pg.wait_for_timeout(600)
         ids = await pg.evaluate('PQ.EX.map(e=>e.id)')
         for i,id in enumerate(ids):
             await pg.evaluate(f'PQ.openExample("{id}")'); await pg.wait_for_timeout(300)

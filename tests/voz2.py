@@ -19,7 +19,7 @@ async def main():
         await ctx.add_init_script(STUB)
         pg = await ctx.new_page(); errs=[]
         pg.on('pageerror', lambda e: errs.append(str(e)))
-        await pg.goto('file://'+os.path.abspath('../dist/PequeBloques.html')); await pg.wait_for_timeout(500)
+        await pg.goto('file://'+os.path.abspath('../dist/PequeBloques.html') + '?voz=dispositivo'); await pg.wait_for_timeout(500)
         # 1) reproducción secuencial completa con pausas
         await pg.evaluate("window.__log=[]; window.__h=PQ.utter('¡Increíble! Lo has conseguido. ¿Estás preparado para comenzar?','KITTEN')")
         await pg.wait_for_timeout(300); print('done a los 300ms:', await pg.evaluate('__h.done'))

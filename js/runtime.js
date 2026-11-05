@@ -159,14 +159,15 @@
    * [tono, velocidad, género de voz preferido]. El navegador no dice el género de sus voces, así que se
    * deduce por el nombre (Mónica, Paulina, Helena… / Jorge, Diego, Pablo…). Si el dispositivo solo tiene
    * una voz, los personajes se distinguen por tono y velocidad. */
-  const VOICE_STYLE = { KITTEN: [1.55, 1.05, 'f'], ALTO: [1.2, 1.0, 'm'], TENOR: [0.45, 0.8, 'm'], SQUEAK: [1.8, 1.12, 'f'], GIANT: [0.12, 0.78, 'm'] };
-  const FEM = /m[oó]nica|paulina|helena|laura|luc[ií]a|elvira|elena|dalia|abril|ximena|vera|sabina|esperanza|marisol|isabella|camila|lupe|dalia|paloma|salom[eé]|marina|ximena|lia\b|female|mujer|google espa/i;
-  const MAS = /jorge|diego|pablo|[aá]lvaro|alvaro|arnau|[aá]lvaro|enrique|juan|carlos|miguel|ra[uú]l|tom[aá]s|pedro|jaime|alonso|arnau|sa[uú]l|gonzalo|ramiro|male\b|hombre|tony/i;
+  const VOICE_STYLE = { KITTEN: [1.55, 1.05, 'f'], ALTO: [1.2, 1.0, 'm'], TENOR: [0.45, 0.8, 'm'], SQUEAK: [1.8, 1.12, 'f'], GIANT: [0.12, 0.78, 'm'], PIPO: [1.3, 1.0, 'f'], PIPOM: [0.95, 1.0, 'm'] };
+  const FEM = /m[oó]nica|paulina|helena|laura|luc[ií]a|elvira|elena|dalia|abril|ximena|vera|sabina|esperanza|marisol|isabella|camila|lupe|dalia|paloma|salom[eé]|marina|ximena|lia\b|female|mujer|google espa|abril|estrella|triana|elena|sonia|carmen|mar[ií]a/i;
+  const MAS = /jorge|diego|pablo|[aá]lvaro|alvaro|arnau|[aá]lvaro|enrique|juan|carlos|miguel|ra[uú]l|tom[aá]s|pedro|jaime|alonso|arnau|sa[uú]l|gonzalo|ramiro|male\b|hombre|tony|dar[ií]o|xavier|ernesto|andr[eé]s|alberto/i;
+  /* solo voces en español, las de España primero y, dentro de ellas, las más naturales (ver tts.js) */
   function esVoices() {
     try {
+      if (PQ.tts && PQ.tts.deviceVoices) { const v = PQ.tts.deviceVoices(), pick = PQ.tts.chosenDevice(); return pick ? [pick].concat(v.filter((x) => x !== pick)) : v; }
       const all = (g.speechSynthesis.getVoices() || []).filter((v) => /^es/i.test(v.lang));
-      const q = (v) => (/natural|neural|online|premium|enhanced|siri|mejorada/i.test(v.name) ? 3 : 0) + (/google/i.test(v.name) ? 1 : 0) - (/espeak|compact|festival|mbrola/i.test(v.name) ? 3 : 0) + (/^es[-_]ES/i.test(v.lang) ? 1.5 : 0);
-      return all.map((v, i) => [v, q(v) - i * 0.001]).sort((a, b) => b[1] - a[1]).map((x) => x[0]);
+      return all.sort((a, b) => (/^es[-_]ES/i.test(b.lang) ? 1 : 0) - (/^es[-_]ES/i.test(a.lang) ? 1 : 0));
     } catch (e) { return []; }
   }
   const isFem = (v) => FEM.test(v.name) && !MAS.test(v.name);
@@ -217,10 +218,25 @@
   function jobEnd(job) {
     if (job.over) return;
     job.over = true; job.h.done = true; clearTimeout(job.timer);
+    if (job.stop) { try { job.stop(); } catch (e) { /* nada */ } }
     if (Q.cur === job) { Q.cur = null; const nx = Q.wait.shift(); if (nx) jobStart(nx); }
   }
   function jobStart(job) {
     Q.cur = job;
+    if (job.clips) {                                       // voz neuronal pregrabada (tts.js)
+      job.timer = setTimeout(() => jobEnd(job), 120000);
+      PQ.tts.play(job, () => jobEnd(job), () => {          // si el audio no se puede reproducir: respaldo con la voz del dispositivo
+        if (job.over || job.dead) return;
+        clearTimeout(job.timer); job.clips = null; job.stop = null;
+        if (!PQ.tts.deviceOK()) { jobEnd(job); return; }
+        const vf = voiceFor(job.key, job.text);              // respaldo: se construye el plan de la voz del dispositivo
+        job.base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * 0.92 };
+        job.units = (PROSODY.on && PQ.prosody) ? PQ.prosody.plan(job.text, job.key) : PQ.prosody.flat(job.text);
+        if (!job.units.length) { jobEnd(job); return; }
+        jobStart(job);
+      });
+      return;
+    }
     const est = job.units.reduce((n, u) => n + 3000 + u.segs.reduce((m, sg) => m + sg.t.length * 130, 0) + u.pause * 1000, 0);
     job.timer = setTimeout(() => jobEnd(job), Math.min(60000, est));
     playUnit(job, 0);
@@ -246,8 +262,8 @@
       const u = new SpeechSynthesisUtterance(sg.t);
       u.lang = 'es-ES';
       u.pitch = PQ.clamp(job.base.pitch * sg.p, 0, 2);
-      u.rate = PQ.clamp(job.base.rate * sg.r, 0.5, 2);
-      u.volume = sg.v;
+      u.rate = PQ.clamp(job.base.rate * sg.r * ((PQ.voiceCfg && PQ.voiceCfg.rate) || 1), 0.5, 2);
+      u.volume = PQ.clamp(sg.v * (PQ.voiceCfg ? PQ.voiceCfg.volume : 1), 0, 1);
       if (job.base.voice) u.voice = job.base.voice;
       u.onend = () => { if (--left <= 0) next(); };
       u.onerror = (e) => {
@@ -267,33 +283,46 @@
       synth0.__pqWrapped = true;
     }
   } catch (e) { /* sin voz */ }
-  function utter(text, key) {
+  function utter(text, key, opt) {
     const h = { done: false };
     text = String(text);
-    (PQ._log = PQ._log || []).push(text); if (PQ._log.length > 4) PQ._log.shift();   // para el icono «leer»
+    const neural = (!opt || opt.engine !== 'device') && PQ.tts ? PQ.tts.plan(text, key) : null;
     const synth = g.speechSynthesis;
-    if (!synth || typeof SpeechSynthesisUtterance === 'undefined') {
+    const devOK = !!synth && typeof SpeechSynthesisUtterance !== 'undefined' && (!PQ.tts || PQ.tts.deviceOK());
+    if (!neural && !devOK) {                              // nadie puede hablar: se espera lo que tardaría y se sigue (el bocadillo ya muestra el texto)
       setTimeout(() => { h.done = true; }, Math.min(8000, 400 + text.length * 70));
       return h;
     }
     try {
-      const vf = voiceFor(key, text);
-      const base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * (PQ.voiceNatural ? 0.95 : 0.92) };
-      const units = (PROSODY.on && PQ.prosody) ? PQ.prosody.plan(text, key) : PQ.prosody.flat(text);
-      if (!units.length) { h.done = true; return h; }
-      const job = { h, units, base, over: false, dead: false, timer: 0, natural: !!PQ.voiceNatural };
+      let job;
+      if (neural) {
+        job = { h, units: [], clips: neural, base: {}, over: false, dead: false, timer: 0, text, key };
+        PQ._lastUtter = { text, key, engine: 'neural', clips: neural.map((c) => c.k) };
+      } else {
+        const vf = voiceFor(key, text);
+        const base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * 0.92 };
+        const units = (PROSODY.on && PQ.prosody) ? PQ.prosody.plan(text, key) : PQ.prosody.flat(text);
+        if (!units.length) { h.done = true; return h; }
+        job = { h, units, base, over: false, dead: false, timer: 0 };
+        PQ._lastUtter = { text, key, engine: 'device', voice: vf.voice && vf.voice.name, pitch: vf.pitch, units };
+      }
       if (Q.cur && Q.wait.length >= 1) {                    // evita colas largas de voces atrasadas
         const old = Q.wait.splice(0); old.forEach((j) => { j.over = true; j.h.done = true; });
         const cur = Q.cur; cur.dead = true; jobEnd(cur); Q.cur = null;
-        try { c0cancel(synth); } catch (e) { /* nada */ }
+        try { if (synth) c0cancel(synth); } catch (e) { /* nada */ }
       }
       if (Q.cur) Q.wait.push(job); else jobStart(job);
-      PQ._lastUtter = { text, key, voice: vf.voice && vf.voice.name, pitch: vf.pitch, units };
     } catch (e) { h.done = true; }
     return h;
   }
   const c0cancel = (synth) => { synth.cancel(); };
   PQ.utter = utter;
+  /* parar toda la voz (neuronal y del dispositivo) y vaciar la cola */
+  PQ.stopVoice = function () {
+    Q.wait.splice(0).forEach((j) => { j.over = true; j.h.done = true; });
+    if (Q.cur) { Q.cur.dead = true; jobEnd(Q.cur); }
+    try { if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+  };
   function speakBubble(text, t) {
     if (!PQ.settings || !PQ.settings.voice) return { done: true };
     return utter(text, (t && t._voice) || defaultVoice(t));
@@ -508,7 +537,7 @@
     RT.threads.forEach((th) => { th.dead = true; });
     RT.threads = [];
     stopSounds();
-    try { if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+    try { if (PQ.stopVoice) PQ.stopVoice(); else if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
     if (RT.project && !keepBubbles) RT.project.sprites.forEach((s) => { s._say = null; });
     RT.dirty = true;
     if (RT.onChange) RT.onChange();
@@ -727,7 +756,7 @@
         const words = fmt(A('WORDS'));
         if (!words) break;
         /* con voz no hace falta bocadillo (como en Scratch); solo se muestra si el dispositivo no puede hablar */
-        const bub = (t.isStage || (g.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined')) ? null : { text: words, think: false };
+        const bub = (t.isStage || (PQ.tts ? PQ.tts.canSpeak(words, t._voice || defaultVoice(t)) : (g.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined'))) ? null : { text: words, think: false };
         if (bub) { t._say = bub; RT.dirty = true; }
         const h = utter(words, t._voice || defaultVoice(t));
         yield;

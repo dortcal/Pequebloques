@@ -6,7 +6,7 @@ async def main():
         ctx = await b.new_context(viewport={'width':1280,'height':800}, accept_downloads=True)
         pg = await ctx.new_page(); errs=[]
         pg.on('pageerror', lambda e: errs.append('PAGEERR '+str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type=='error' else None)
-        await pg.goto('file://' + __import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__),'..','index.html')) + ''); await pg.wait_for_timeout(500)
+        await pg.goto('file://' + __import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__),'..','index.html')) + '?voz=dispositivo'); await pg.wait_for_timeout(500)
         # import roundtrip
         await pg.set_input_files('#fileOpen','/tmp/ex2.sb3'); await pg.wait_for_timeout(1200)
         print('import', await pg.evaluate('[PQ.S.project.sprites.map(s=>s.name+":"+s.scripts.length), PQ.S.project.stage.costumes.length, PQ.S.project.messages]'))

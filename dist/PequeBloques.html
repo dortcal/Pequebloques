@@ -547,6 +547,20 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 @keyframes readpulse{0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.35)}50%{box-shadow:0 0 0 9px rgba(255,212,59,.9)}}
 @media (prefers-reduced-motion:reduce){#readbtn{animation:none!important}}
 
+/* ---- ajustes de voz ---- */
+.modal.lg{max-width:640px}
+.vset{display:flex;flex-direction:column;gap:14px;font-size:16px}
+.vstate{background:#F3F0FF;border-radius:14px;padding:10px 14px;font-size:14px;line-height:1.45;color:#3b3170}
+.vrow{display:flex;flex-direction:column;gap:6px}
+.vrow>label{font-weight:800;color:#3b3170}
+.vseg{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.vseg select{font:inherit;padding:9px 10px;border-radius:12px;border:2px solid #cfd6f5;min-height:46px;max-width:100%}
+.vseg .btn[aria-pressed="true"]{outline:3px solid #3b3170}
+.vrange{display:flex;align-items:center;gap:12px}
+.vrange input{flex:1;min-width:0;height:34px;accent-color:#8B5CF6}
+.vrange output{min-width:9.5em;text-align:right;font-weight:700;color:#3b3170}
+.vnote{margin:0;font-size:13.5px;color:#5f5a86;line-height:1.4}
+
 </style>
 </head>
 <body>
@@ -587,6 +601,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   <div class="menuright">
     <button id="btnLevel" class="mbtn tgl" type="button" aria-pressed="false" title="Mostrar más bloques"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/></svg><span id="levelLabel">Pocos bloques</span></button>
     <button id="btnVoice" class="mbtn tgl" type="button" aria-pressed="false" title="Leer en voz alta lo que dicen los personajes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg><span>Voz</span></button>
+    <button id="btnVoiceSet" class="mbtn sq" type="button" title="Ajustes de voz: velocidad, volumen y voces" aria-label="Ajustes de voz"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
     <button id="btnZoomOut" class="mbtn sq" type="button" title="Bloques más pequeños" aria-label="Bloques más pequeños"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M16.5 16.5L21 21"/></svg></button>
     <button id="btnZoomIn" class="mbtn sq" type="button" title="Bloques más grandes" aria-label="Bloques más grandes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M16.5 16.5L21 21"/></svg></button>
     <button id="btnAbout" class="mbtn sq" type="button" title="Ayuda y créditos" aria-label="Ayuda y créditos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.6 2.6 0 1 1 3.6 2.4c-.8.4-1.1.9-1.1 1.8M12 17v.3"/></svg></button>
@@ -2647,7 +2662,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     /^(incre[ií]ble|genial|fant[aá]stic[oa]|perfecto|bonit[oa]|grand[ei]|enorme)$/i
   ];
   /* cuánto se nota el contorno en cada voz (1 = completo) */
-  const EXPR = { KITTEN: 1.0, ALTO: 1.0, SQUEAK: 0.8, GIANT: 0.6, TENOR: 0.3 };
+  const EXPR = { KITTEN: 1.0, ALTO: 1.0, SQUEAK: 0.8, GIANT: 0.6, TENOR: 0.3, PIPO: 1.0, PIPOM: 1.0 };
 
   const FUNC = /^(y|e|o|u|de|del|la|el|los|las|un|una|unos|unas|a|al|en|con|por|para|que|se|lo|su|sus|mi|tu|es|son|como|si|sin|sobre|entre|hasta)$/i;
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -2802,6 +2817,204 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   function flat(text) { return [{ text: String(text), kind: 'plano', tags: [], pause: 0, segs: [{ t: String(text), p: 1, r: 1, v: 1 }] }]; }
 
   PQ.prosody = { plan, flat, sentences, classify };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script src="../audio/manifest.js"></script>
+<script>
+/* PequeBloques — diseñado por David OZC
+ * tts.js: motor de voz. Español de España (es-ES).
+ *
+ * Dos motores, por este orden:
+ *   1. NEURONAL (pregrabado): frases ya sintetizadas con un modelo neuronal (Kokoro, código abierto) y con
+ *      entonación modelada por tipo de frase. Están en la carpeta audio/ (un mp3 por frase y voz) y se
+ *      localizan por una clave calculada con el texto exacto y el tipo de voz. No hay servidor, ni claves, ni
+ *      datos que salgan del dispositivo. Si un texto es de una sola frase conocida, o todas sus frases lo son,
+ *      se reproduce con la voz neuronal. Una locución nunca mezcla las dos voces.
+ *   2. DISPOSITIVO (respaldo): la voz del navegador, siempre en es-ES, eligiendo la mejor voz española
+ *      instalada (las «Natural» de Edge, las de Google, las «Mejoradas» de Apple) y nunca una que no sea
+ *      española si hay una de España. Se usa para los textos que no se pueden pregrabar (lo que escribe el
+ *      alumnado) o si no se encuentra la carpeta audio/.
+ * Ajustes (velocidad, volumen, motor, voz del dispositivo y voz de Pipo) en PQ.voiceCfg, guardados en el
+ * navegador, con su ventana en PQ.openVoiceSettings().
+ */
+(function (g) {
+  'use strict';
+  const PQ = g.PQ = g.PQ || {};
+  const STORE = 'pequebloques.voz';
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+  /* ---------- ajustes ---------- */
+  const cfg = PQ.voiceCfg = { rate: 1, volume: 1, engine: 'auto', device: '', pipo: 'f' };
+  try { Object.assign(cfg, JSON.parse(localStorage.getItem(STORE) || '{}')); } catch (e) { /* sin almacenamiento */ }
+  cfg.rate = clamp(+cfg.rate || 1, 0.6, 1.4); cfg.volume = clamp(cfg.volume === undefined ? 1 : +cfg.volume, 0, 1);
+  if (cfg.engine !== 'device') cfg.engine = 'auto';
+  if (cfg.pipo !== 'm') cfg.pipo = 'f';
+  try { if (/[?&]voz=dispositivo\b/.test(g.location.search)) cfg.engine = 'device'; } catch (e) { /* nada */ }   // para pruebas y para forzar la voz del dispositivo con ?voz=dispositivo
+  const save = () => { try { localStorage.setItem(STORE, JSON.stringify(cfg)); } catch (e) { /* nada */ } };
+
+  /* ---------- clave de cada clip (idéntica a la del generador de audios) ---------- */
+  function h32(s, seed) { let h = seed >>> 0; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; }
+  const hex8 = (n) => ('00000000' + n.toString(16)).slice(-8);
+  const clean = (t) => String(t).replace(/[«»]/g, '').replace(/\s+/g, ' ').trim();
+  function clipKey(voice, text) { const s = voice + '|' + clean(text); return hex8(h32(s, 0x811c9dc5)) + hex8(h32(s, 0x9747b28c)); }
+  const has = (k) => !!(PQ.AUDIO && PQ.AUDIO.k && PQ.AUDIO.k[k]);
+  const voiceId = (voice) => (voice === 'PIPO' && cfg.pipo === 'm') ? 'PIPOM' : voice;
+  const neuralReady = () => !!(PQ.AUDIO && PQ.AUDIO.k && cfg.engine !== 'device' && (typeof Audio !== 'undefined'));
+
+  /* ¿Se puede decir este texto con la voz neuronal? Devuelve la lista de claves (con pausas) o null. */
+  function plan(text, voice) {
+    if (!neuralReady()) return null;
+    const v = voiceId(voice);
+    const full = clipKey(v, text);
+    if (has(full)) return [{ k: full, gap: 0 }];
+    const ss = PQ.prosody && PQ.prosody.sentences ? PQ.prosody.sentences(text) : [];
+    if (ss.length < 2) return null;
+    const out = [];
+    for (let i = 0; i < ss.length; i++) {
+      const k = clipKey(v, ss[i]);
+      if (!has(k)) return null;
+      out.push({ k, gap: i < ss.length - 1 ? (/[?]$/.test(ss[i]) ? 0.34 : /…$/.test(ss[i]) ? 0.5 : 0.3) : 0 });
+    }
+    return out;
+  }
+
+  /* ---------- reproductor neuronal ---------- */
+  const pool = new Map();                                   // precarga: clave -> Audio
+  function clip(k) {
+    let a = pool.get(k);
+    if (!a) {
+      a = new Audio(PQ.AUDIO_BASE + k + '.mp3'); a.preload = 'auto';
+      pool.set(k, a);
+      if (pool.size > 24) pool.delete(pool.keys().next().value);
+    }
+    return a;
+  }
+  /* Reproduce job.clips seguidos. onEnd() al terminar; onFail() si el audio no se puede reproducir (para usar el respaldo). */
+  function play(job, onEnd, onFail) {
+    let i = 0, dead = false, cur = null, tm = 0, played = 0;
+    job.stop = () => { dead = true; clearTimeout(tm); if (cur) { cur.onended = cur.onerror = null; try { cur.pause(); } catch (e) { /* nada */ } } pool.forEach((a, k) => { if (a === cur) pool.delete(k); }); };
+    const step = () => {
+      if (dead) return;
+      if (i >= job.clips.length) { onEnd(); return; }
+      const c = job.clips[i++];
+      const a = clip(c.k); cur = a;
+      if (job.clips[i]) clip(job.clips[i].k);               // precarga la siguiente
+      try { a.currentTime = 0; } catch (e) { /* aún sin metadatos */ }
+      a.playbackRate = cfg.rate; a.volume = clamp(cfg.volume * (job.vol === undefined ? 1 : job.vol), 0, 1);
+      try { a.preservesPitch = true; a.mozPreservesPitch = true; a.webkitPreservesPitch = true; } catch (e) { /* nada */ }
+      let moved = false;
+      const nx = () => { if (moved || dead) return; moved = true; pool.delete(c.k); tm = setTimeout(step, (c.gap || 0) * 1000 / cfg.rate); };
+      a.onended = nx;
+      a.onerror = () => { if (dead) return; if (played === 0) { dead = true; onFail(); } else nx(); };
+      const p = a.play();
+      if (p && p.then) p.then(() => { played++; }, () => { if (dead) return; if (played === 0) { dead = true; onFail(); } else nx(); });
+    };
+    step();
+  }
+
+  /* ---------- voces del dispositivo: solo español, y la mejor ---------- */
+  const NATURAL = /natural|neural|online|premium|enhanced|mejorad|siri|google/i;
+  const POOR = /compact|espeak|festival|robot|novelty|bad news|whisper|zarvox|trinoids|bubbles|cellos|boing|bells|organ/i;
+  const isES = (v) => /^es([-_]|$)/i.test(v.lang || '');
+  const isSpain = (v) => /^es[-_]ES/i.test(v.lang || '');
+  let vlist = [];
+  function refreshVoices() {
+    try {
+      const all = (g.speechSynthesis && g.speechSynthesis.getVoices()) || [];
+      vlist = all.filter(isES).map((v) => ({ v, name: v.name, lang: v.lang, spain: isSpain(v),
+        score: (isSpain(v) ? 100 : 0) + (NATURAL.test(v.name) ? 30 : 0) + (v.localService ? 0 : 5) - (POOR.test(v.name) ? 200 : 0) }));   // las robóticas (espeak…) van siempre las últimas
+      vlist.sort((a, b) => b.score - a.score);
+      vlist._all = all.length;
+    } catch (e) { vlist = []; vlist._all = 0; }
+  }
+  refreshVoices();
+  try { if (g.speechSynthesis) g.speechSynthesis.addEventListener('voiceschanged', refreshVoices); } catch (e) { /* nada */ }
+  /* ¿puede el dispositivo hablar en español? (si aún no ha cargado ninguna voz se intenta igualmente con lang = es-ES) */
+  const deviceOK = () => !!g.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined' && (vlist.length > 0 || (vlist._all || 0) === 0);
+
+  /* ---------- API ---------- */
+  PQ.tts = {
+    clipKey, plan, play, cfg, save,
+    neuralReady,
+    deviceVoices: () => vlist.map((x) => x.v),
+    deviceInfo: () => vlist.slice(),
+    deviceOK,
+    chosenDevice: () => (cfg.device ? vlist.map((x) => x.v).find((v) => v.name === cfg.device) || null : null),
+    canSpeak: (text, voice) => !!plan(text, voice) || deviceOK(),
+    clipCount: () => (PQ.AUDIO && PQ.AUDIO.n) || 0
+  };
+  PQ.voiceAvailable = () => neuralReady() || deviceOK();
+  PQ.hasSpanishVoice = () => (!!(PQ.AUDIO && PQ.AUDIO.k)) || vlist.length > 0;
+
+  /* ---------- ventana de ajustes de voz ---------- */
+  const SAMPLE = { PIPO: '¡Hola! Soy Pipo. Así suena mi voz.' };
+  const PERS = [['KITTEN', 'Niña'], ['ALTO', 'Niño'], ['TENOR', 'Robot'], ['SQUEAK', 'Animal pequeño'], ['GIANT', 'Animal grande']];
+  function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+  PQ.openVoiceSettings = function () {
+    if (!PQ.ui || !PQ.ui.modal) return;
+    const body = el('div', 'vset');
+    const state = el('div', 'vstate'); body.appendChild(state);
+    const paintState = () => {
+      const neu = PQ.AUDIO && PQ.AUDIO.k ? 'Voces neuronales: disponibles (' + (PQ.AUDIO.n || '') + ' frases)' : 'Voces neuronales: no se encuentra la carpeta «audio»';
+      const dv = vlist[0];
+      const dev = deviceOK() ? (dv ? 'Voz del dispositivo: ' + dv.name + ' (' + dv.lang + ')' + (dv.spain ? '' : ' · no es de España') : 'Voz del dispositivo: la predeterminada (es-ES)') : 'Voz del dispositivo: no hay ninguna voz en español';
+      state.innerHTML = '<div><b>Idioma:</b> español de España (es-ES)</div><div>' + neu + '</div><div>' + dev + '</div>';
+    };
+    paintState();
+    const row = (label, ctl) => { const r = el('div', 'vrow'); r.appendChild(el('label', '', label)); r.appendChild(ctl); body.appendChild(r); return r; };
+
+    /* motor */
+    const eng = el('div', 'vseg');
+    [['auto', 'Automática (recomendada)'], ['device', 'Solo la del dispositivo']].forEach(([v, t]) => {
+      const b = el('button', 'btn ' + (cfg.engine === v ? 'ok' : ''), t); b.type = 'button'; b.setAttribute('aria-pressed', String(cfg.engine === v));
+      b.onclick = () => { cfg.engine = v; save(); [...eng.children].forEach((c, i) => { const on = i === (v === 'auto' ? 0 : 1); c.classList.toggle('ok', on); c.setAttribute('aria-pressed', String(on)); }); };
+      eng.appendChild(b);
+    });
+    row('Motor de voz', eng);
+
+    /* velocidad y volumen */
+    const mkRange = (min, max, step, val, fmt, onInput) => {
+      const w = el('div', 'vrange'); const r = el('input'); r.type = 'range'; r.min = min; r.max = max; r.step = step; r.value = val;
+      const o = el('output', '', fmt(val));
+      r.oninput = () => { o.textContent = fmt(r.value); onInput(+r.value); save(); };
+      w.appendChild(r); w.appendChild(o); return w;
+    };
+    row('Velocidad', mkRange(0.7, 1.3, 0.05, cfg.rate, (v) => (+v < 0.95 ? 'Lenta' : +v > 1.05 ? 'Rápida' : 'Normal') + ' · ×' + (+v).toFixed(2), (v) => { cfg.rate = v; }));
+    row('Volumen', mkRange(0, 1, 0.05, cfg.volume, (v) => Math.round(v * 100) + ' %', (v) => { cfg.volume = v; }));
+
+    const sample = (voice, opt) => { PQ.stopVoice && PQ.stopVoice(); PQ.utter(SAMPLE[voice] || '¡Hola! Así sueno yo.', voice, opt); };
+
+    /* Pipo: femenina / masculina */
+    const pip = el('div', 'vseg');
+    [['f', 'Femenina'], ['m', 'Masculina']].forEach(([v, t]) => {
+      const b = el('button', 'btn ' + (cfg.pipo === v ? 'ok' : ''), '▶ ' + t); b.type = 'button'; b.setAttribute('aria-pressed', String(cfg.pipo === v));
+      b.onclick = () => { cfg.pipo = v; save(); [...pip.children].forEach((c, i) => { const on = i === (v === 'f' ? 0 : 1); c.classList.toggle('ok', on); c.setAttribute('aria-pressed', String(on)); }); sample('PIPO'); };
+      pip.appendChild(b);
+    });
+    row('Voz de Pipo', pip);
+
+    /* personajes */
+    const per = el('div', 'vseg wrap');
+    PERS.forEach(([k, t]) => { const b = el('button', 'btn', '▶ ' + t); b.type = 'button'; b.onclick = () => sample(k); per.appendChild(b); });
+    row('Voces de los personajes', per);
+
+    /* voz del dispositivo */
+    if (vlist.length) {
+      const sel = el('select'); sel.setAttribute('aria-label', 'Voz del dispositivo');
+      sel.appendChild(new Option('Automática (la mejor en español)', ''));
+      vlist.forEach((x) => sel.appendChild(new Option(x.name + ' · ' + x.lang, x.name)));
+      sel.value = cfg.device || '';
+      sel.onchange = () => { cfg.device = sel.value; save(); };
+      const w = el('div', 'vseg'); w.appendChild(sel);
+      const b = el('button', 'btn', '▶ Probar'); b.type = 'button'; b.onclick = () => sample('PIPO', { engine: 'device' }); w.appendChild(b);
+      row('Voz del dispositivo (respaldo)', w);
+    }
+    body.appendChild(el('p', 'vnote', 'Lo que escribe el alumnado en «decir en voz alta» se lee con la voz del dispositivo. Los textos de cuentos, retos, pistas y bloques usan las voces neuronales.'));
+    PQ.ui.modal({ title: 'Voz', size: 'lg', body, buttons: [{ label: 'Listo', cls: 'ok' }] });
+  };
+  const gear = document.getElementById('btnVoiceSet');
+  if (gear) gear.addEventListener('click', () => PQ.openVoiceSettings());
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -2967,14 +3180,15 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
    * [tono, velocidad, género de voz preferido]. El navegador no dice el género de sus voces, así que se
    * deduce por el nombre (Mónica, Paulina, Helena… / Jorge, Diego, Pablo…). Si el dispositivo solo tiene
    * una voz, los personajes se distinguen por tono y velocidad. */
-  const VOICE_STYLE = { KITTEN: [1.55, 1.05, 'f'], ALTO: [1.2, 1.0, 'm'], TENOR: [0.45, 0.8, 'm'], SQUEAK: [1.8, 1.12, 'f'], GIANT: [0.12, 0.78, 'm'] };
-  const FEM = /m[oó]nica|paulina|helena|laura|luc[ií]a|elvira|elena|dalia|abril|ximena|vera|sabina|esperanza|marisol|isabella|camila|lupe|dalia|paloma|salom[eé]|marina|ximena|lia\b|female|mujer|google espa/i;
-  const MAS = /jorge|diego|pablo|[aá]lvaro|alvaro|arnau|[aá]lvaro|enrique|juan|carlos|miguel|ra[uú]l|tom[aá]s|pedro|jaime|alonso|arnau|sa[uú]l|gonzalo|ramiro|male\b|hombre|tony/i;
+  const VOICE_STYLE = { KITTEN: [1.55, 1.05, 'f'], ALTO: [1.2, 1.0, 'm'], TENOR: [0.45, 0.8, 'm'], SQUEAK: [1.8, 1.12, 'f'], GIANT: [0.12, 0.78, 'm'], PIPO: [1.3, 1.0, 'f'], PIPOM: [0.95, 1.0, 'm'] };
+  const FEM = /m[oó]nica|paulina|helena|laura|luc[ií]a|elvira|elena|dalia|abril|ximena|vera|sabina|esperanza|marisol|isabella|camila|lupe|dalia|paloma|salom[eé]|marina|ximena|lia\b|female|mujer|google espa|abril|estrella|triana|elena|sonia|carmen|mar[ií]a/i;
+  const MAS = /jorge|diego|pablo|[aá]lvaro|alvaro|arnau|[aá]lvaro|enrique|juan|carlos|miguel|ra[uú]l|tom[aá]s|pedro|jaime|alonso|arnau|sa[uú]l|gonzalo|ramiro|male\b|hombre|tony|dar[ií]o|xavier|ernesto|andr[eé]s|alberto/i;
+  /* solo voces en español, las de España primero y, dentro de ellas, las más naturales (ver tts.js) */
   function esVoices() {
     try {
+      if (PQ.tts && PQ.tts.deviceVoices) { const v = PQ.tts.deviceVoices(), pick = PQ.tts.chosenDevice(); return pick ? [pick].concat(v.filter((x) => x !== pick)) : v; }
       const all = (g.speechSynthesis.getVoices() || []).filter((v) => /^es/i.test(v.lang));
-      const q = (v) => (/natural|neural|online|premium|enhanced|siri|mejorada/i.test(v.name) ? 3 : 0) + (/google/i.test(v.name) ? 1 : 0) - (/espeak|compact|festival|mbrola/i.test(v.name) ? 3 : 0) + (/^es[-_]ES/i.test(v.lang) ? 1.5 : 0);
-      return all.map((v, i) => [v, q(v) - i * 0.001]).sort((a, b) => b[1] - a[1]).map((x) => x[0]);
+      return all.sort((a, b) => (/^es[-_]ES/i.test(b.lang) ? 1 : 0) - (/^es[-_]ES/i.test(a.lang) ? 1 : 0));
     } catch (e) { return []; }
   }
   const isFem = (v) => FEM.test(v.name) && !MAS.test(v.name);
@@ -3025,10 +3239,25 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   function jobEnd(job) {
     if (job.over) return;
     job.over = true; job.h.done = true; clearTimeout(job.timer);
+    if (job.stop) { try { job.stop(); } catch (e) { /* nada */ } }
     if (Q.cur === job) { Q.cur = null; const nx = Q.wait.shift(); if (nx) jobStart(nx); }
   }
   function jobStart(job) {
     Q.cur = job;
+    if (job.clips) {                                       // voz neuronal pregrabada (tts.js)
+      job.timer = setTimeout(() => jobEnd(job), 120000);
+      PQ.tts.play(job, () => jobEnd(job), () => {          // si el audio no se puede reproducir: respaldo con la voz del dispositivo
+        if (job.over || job.dead) return;
+        clearTimeout(job.timer); job.clips = null; job.stop = null;
+        if (!PQ.tts.deviceOK()) { jobEnd(job); return; }
+        const vf = voiceFor(job.key, job.text);              // respaldo: se construye el plan de la voz del dispositivo
+        job.base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * 0.92 };
+        job.units = (PROSODY.on && PQ.prosody) ? PQ.prosody.plan(job.text, job.key) : PQ.prosody.flat(job.text);
+        if (!job.units.length) { jobEnd(job); return; }
+        jobStart(job);
+      });
+      return;
+    }
     const est = job.units.reduce((n, u) => n + 3000 + u.segs.reduce((m, sg) => m + sg.t.length * 130, 0) + u.pause * 1000, 0);
     job.timer = setTimeout(() => jobEnd(job), Math.min(60000, est));
     playUnit(job, 0);
@@ -3054,8 +3283,8 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       const u = new SpeechSynthesisUtterance(sg.t);
       u.lang = 'es-ES';
       u.pitch = PQ.clamp(job.base.pitch * sg.p, 0, 2);
-      u.rate = PQ.clamp(job.base.rate * sg.r, 0.5, 2);
-      u.volume = sg.v;
+      u.rate = PQ.clamp(job.base.rate * sg.r * ((PQ.voiceCfg && PQ.voiceCfg.rate) || 1), 0.5, 2);
+      u.volume = PQ.clamp(sg.v * (PQ.voiceCfg ? PQ.voiceCfg.volume : 1), 0, 1);
       if (job.base.voice) u.voice = job.base.voice;
       u.onend = () => { if (--left <= 0) next(); };
       u.onerror = (e) => {
@@ -3075,33 +3304,46 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       synth0.__pqWrapped = true;
     }
   } catch (e) { /* sin voz */ }
-  function utter(text, key) {
+  function utter(text, key, opt) {
     const h = { done: false };
     text = String(text);
-    (PQ._log = PQ._log || []).push(text); if (PQ._log.length > 4) PQ._log.shift();   // para el icono «leer»
+    const neural = (!opt || opt.engine !== 'device') && PQ.tts ? PQ.tts.plan(text, key) : null;
     const synth = g.speechSynthesis;
-    if (!synth || typeof SpeechSynthesisUtterance === 'undefined') {
+    const devOK = !!synth && typeof SpeechSynthesisUtterance !== 'undefined' && (!PQ.tts || PQ.tts.deviceOK());
+    if (!neural && !devOK) {                              // nadie puede hablar: se espera lo que tardaría y se sigue (el bocadillo ya muestra el texto)
       setTimeout(() => { h.done = true; }, Math.min(8000, 400 + text.length * 70));
       return h;
     }
     try {
-      const vf = voiceFor(key, text);
-      const base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * (PQ.voiceNatural ? 0.95 : 0.92) };
-      const units = (PROSODY.on && PQ.prosody) ? PQ.prosody.plan(text, key) : PQ.prosody.flat(text);
-      if (!units.length) { h.done = true; return h; }
-      const job = { h, units, base, over: false, dead: false, timer: 0, natural: !!PQ.voiceNatural };
+      let job;
+      if (neural) {
+        job = { h, units: [], clips: neural, base: {}, over: false, dead: false, timer: 0, text, key };
+        PQ._lastUtter = { text, key, engine: 'neural', clips: neural.map((c) => c.k) };
+      } else {
+        const vf = voiceFor(key, text);
+        const base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * 0.92 };
+        const units = (PROSODY.on && PQ.prosody) ? PQ.prosody.plan(text, key) : PQ.prosody.flat(text);
+        if (!units.length) { h.done = true; return h; }
+        job = { h, units, base, over: false, dead: false, timer: 0 };
+        PQ._lastUtter = { text, key, engine: 'device', voice: vf.voice && vf.voice.name, pitch: vf.pitch, units };
+      }
       if (Q.cur && Q.wait.length >= 1) {                    // evita colas largas de voces atrasadas
         const old = Q.wait.splice(0); old.forEach((j) => { j.over = true; j.h.done = true; });
         const cur = Q.cur; cur.dead = true; jobEnd(cur); Q.cur = null;
-        try { c0cancel(synth); } catch (e) { /* nada */ }
+        try { if (synth) c0cancel(synth); } catch (e) { /* nada */ }
       }
       if (Q.cur) Q.wait.push(job); else jobStart(job);
-      PQ._lastUtter = { text, key, voice: vf.voice && vf.voice.name, pitch: vf.pitch, units };
     } catch (e) { h.done = true; }
     return h;
   }
   const c0cancel = (synth) => { synth.cancel(); };
   PQ.utter = utter;
+  /* parar toda la voz (neuronal y del dispositivo) y vaciar la cola */
+  PQ.stopVoice = function () {
+    Q.wait.splice(0).forEach((j) => { j.over = true; j.h.done = true; });
+    if (Q.cur) { Q.cur.dead = true; jobEnd(Q.cur); }
+    try { if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+  };
   function speakBubble(text, t) {
     if (!PQ.settings || !PQ.settings.voice) return { done: true };
     return utter(text, (t && t._voice) || defaultVoice(t));
@@ -3316,7 +3558,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     RT.threads.forEach((th) => { th.dead = true; });
     RT.threads = [];
     stopSounds();
-    try { if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+    try { if (PQ.stopVoice) PQ.stopVoice(); else if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
     if (RT.project && !keepBubbles) RT.project.sprites.forEach((s) => { s._say = null; });
     RT.dirty = true;
     if (RT.onChange) RT.onChange();
@@ -3535,7 +3777,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
         const words = fmt(A('WORDS'));
         if (!words) break;
         /* con voz no hace falta bocadillo (como en Scratch); solo se muestra si el dispositivo no puede hablar */
-        const bub = (t.isStage || (g.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined')) ? null : { text: words, think: false };
+        const bub = (t.isStage || (PQ.tts ? PQ.tts.canSpeak(words, t._voice || defaultVoice(t)) : (g.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined'))) ? null : { text: words, think: false };
         if (bub) { t._say = bub; RT.dirty = true; }
         const h = utter(words, t._voice || defaultVoice(t));
         yield;
@@ -3736,7 +3978,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
         return;
       }
       b.f[name] = sel.value; ED.changed(true);
-      if (a.menu === 'voices' && PQ.utter) { try { speechSynthesis.cancel(); } catch (e) { /* nada */ } PQ.utter('¡Hola! Así sueno yo.', sel.value); }
+      if (a.menu === 'voices' && PQ.utter) { if (PQ.stopVoice) PQ.stopVoice(); PQ.utter('¡Hola! Así sueno yo.', sel.value); }
     });
     return sel;
   }
@@ -4151,7 +4393,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
         if (isR) ED.showValue(be, b);
         else {
           if (kk !== 'hat' && PQ.RT) PQ.RT.runBlock(S.target, b);
-          if (PQ.settings && PQ.settings.voice && PQ.utter) { try { speechSynthesis.cancel(); } catch (e) { /* nada */ } PQ.utter(PQ.blockText(b), 'KITTEN'); }
+          if (PQ.settings && PQ.settings.voice && PQ.utter) { if (PQ.stopVoice) PQ.stopVoice(); PQ.utter(PQ.blockText(b), 'KITTEN'); }
         }
         flash(be);
       } else if (isR) {
@@ -4392,15 +4634,14 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   const MUTE_KEY = 'pequebloques.guideMute';
   let muted = false;
   try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch (e) { /* sin almacenamiento */ }
-  PQ.guideVoiceOn = () => !muted && !!g.speechSynthesis;
-  PQ.setGuideMute = (m) => { muted = !!m; try { localStorage.setItem(MUTE_KEY, m ? '1' : '0'); } catch (e) { /* nada */ } if (m) { try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ } } };
+  PQ.guideVoiceOn = () => !muted && (PQ.voiceAvailable ? PQ.voiceAvailable() : !!g.speechSynthesis);
+  PQ.setGuideMute = (m) => { muted = !!m; try { localStorage.setItem(MUTE_KEY, m ? '1' : '0'); } catch (e) { /* nada */ } if (m) { try { (PQ.stopVoice ? PQ.stopVoice() : g.speechSynthesis.cancel()); } catch (e) { /* nada */ } } };
   /* Pipo habla siempre con la misma voz (criatura pequeña: voz de animal pequeño). */
   PQ.say = function (text, force) {
     if (!force && !PQ.guideVoiceOn()) return;
-    try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
-    if (PQ.utter) PQ.utter(String(text).replace(/«|»/g, ''), 'SQUEAK');
+    try { (PQ.stopVoice ? PQ.stopVoice() : g.speechSynthesis.cancel()); } catch (e) { /* nada */ }
+    if (PQ.utter) PQ.utter(String(text).replace(/«|»/g, ''), 'PIPO');
   };
-  PQ.hasSpanishVoice = () => { try { return g.speechSynthesis.getVoices().some((v) => /^es/i.test(v.lang)); } catch (e) { return false; } };
 
   /* ---------- análisis de la situación ---------- */
   const B = () => PQ.BLOCKS;
@@ -4552,7 +4793,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       box.classList.remove('help');
       if (PQ.Tut && PQ.Tut.rerender && PQ.Tut.active && PQ.Tut.active()) PQ.Tut.rerender(); else { box.hidden = true; box.innerHTML = ''; }
       PQ.ed.highlight(null); pulseUi(null);
-      try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+      try { (PQ.stopVoice ? PQ.stopVoice() : g.speechSynthesis.cancel()); } catch (e) { /* nada */ }
     },
     isOpen: () => open,
     hints
@@ -7217,7 +7458,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     stop(silent) {
       if (!cur) return;
       cur = null; if (!silent || true) render();
-      try { if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+      try { if (PQ.stopVoice) PQ.stopVoice(); else if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
       if (PQ.Help) { PQ.Help.isOpen() && PQ.Help.close(); }
     },
     check() {
@@ -7444,7 +7685,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     if (PQ.removeReadIcon) PQ.removeReadIcon();
     PQ.voiceNatural = false;
     RT.stopAll();
-    if (g.speechSynthesis) try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+    try { if (PQ.stopVoice) PQ.stopVoice(); else if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
     p.messages = p.messages && p.messages.length ? p.messages : ['mensaje1'];
     PQ.allTargets(p).forEach((t) => { if (!t.costumes.length) t.costumes.push(PQ.mkCostume('disfraz1', '<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"></svg>', 'svg', 1, 1)); });
     S.project = p;
@@ -8122,7 +8363,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     window.addEventListener('resize', place);
     hintOff = () => { clearInterval(t0); clearTimeout(end); window.removeEventListener('resize', place); btns.forEach((b) => b.classList.remove('blink')); wrap.remove(); hintOff = null; };
     if (PQ.guideVoiceOn && PQ.guideVoiceOn() && PQ.utter) {
-      try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+      try { if (PQ.stopVoice) PQ.stopVoice(); else g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
       PQ.utter('Pulsa la bandera verde para empezar. Si quieres, puedes hacer la pantalla grande con el botón de la derecha.', 'KITTEN');
     }
   }
@@ -8158,7 +8399,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     btn.addEventListener('click', () => toggle(panel.hidden));
     txt.addEventListener('click', () => toggle(false));
     ear.addEventListener('click', () => {
-      try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+      try { if (PQ.stopVoice) PQ.stopVoice(); else g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
       if (PQ.utter && PQ.guideVoiceOn && PQ.guideVoiceOn()) PQ.utter(txt.textContent, 'KITTEN');
     });
   }
@@ -8335,8 +8576,8 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     $('#btnVoice').addEventListener('click', () => {
       PQ.settings.voice = !PQ.settings.voice;
       $('#btnVoice').setAttribute('aria-pressed', String(PQ.settings.voice));
-      if (PQ.settings.voice) { try { const u = new SpeechSynthesisUtterance('Voz activada'); u.lang = 'es-ES'; g.speechSynthesis.speak(u); } catch (e) { ui.toast('Este navegador no tiene voz.'); } }
-      else if (g.speechSynthesis) g.speechSynthesis.cancel();
+      if (PQ.settings.voice) { if (PQ.voiceAvailable && !PQ.voiceAvailable()) ui.toast('Este dispositivo no tiene voz en español. Se verá el texto en los bocadillos.'); else PQ.utter('Voz activada.', 'PIPO'); }
+      else if (PQ.stopVoice) PQ.stopVoice();
     });
     $('#btnZoomIn').addEventListener('click', () => ED.setZoom(S.zoom + 0.12));
     $('#btnZoomOut').addEventListener('click', () => ED.setZoom(S.zoom - 0.12));

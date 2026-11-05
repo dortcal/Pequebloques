@@ -30,7 +30,7 @@ async def session(example, w=1200, h=800):
     p=await async_playwright().start(); b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':w,'height':h}); errs=[]
     pg.on('pageerror',lambda e:errs.append(str(e)))
     await pg.add_init_script(STUB)
-    await pg.goto('file://'+os.path.abspath(os.path.join(os.path.dirname(__file__),'..','index.html'))); await pg.wait_for_timeout(500)
+    await pg.goto('file://'+os.path.abspath(os.path.join(os.path.dirname(__file__),'..','index.html')) + '?voz=dispositivo'); await pg.wait_for_timeout(500)
     await pg.evaluate('PQ.openExample("%s")'%example); await pg.wait_for_timeout(400)
     await pg.evaluate('document.querySelectorAll(".toast").forEach(t=>t.remove())')
     return p,b,pg,G(pg),errs

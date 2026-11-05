@@ -13,7 +13,7 @@ async def main():
         b = await p.chromium.launch(); ctx = await b.new_context(viewport={'width':1400,'height':900}); pg = await ctx.new_page(); errs=[]
         pg.on('pageerror', lambda e: errs.append('PAGEERR '+str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type=='error' else None)
         await pg.add_init_script(STUB)
-        await pg.goto('file://' + os.path.abspath(os.path.join(os.path.dirname(__file__),'..','index.html'))); await pg.wait_for_timeout(500)
+        await pg.goto('file://' + os.path.abspath(os.path.join(os.path.dirname(__file__),'..','index.html')) + '?voz=dispositivo'); await pg.wait_for_timeout(500)
         async def st(): return await pg.evaluate('PQ.S.project.sprites.map(s=>s.name+":"+Math.round(s.x)+","+Math.round(s.y)+(s.visible?"":"(h)")).join(" | ")')
         async def vars_(): return await pg.evaluate('JSON.stringify(PQ.S.project.vars.map(v=>[v.name,v.value]))')
         async def click(n): await pg.evaluate(f'PQ.RT.spriteClicked(PQ.S.project.sprites.find(s=>s.name==="{n}"))')

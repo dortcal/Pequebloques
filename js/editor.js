@@ -134,7 +134,7 @@
         return;
       }
       b.f[name] = sel.value; ED.changed(true);
-      if (a.menu === 'voices' && PQ.utter) { try { speechSynthesis.cancel(); } catch (e) { /* nada */ } PQ.utter('¡Hola! Así sueno yo.', sel.value); }
+      if (a.menu === 'voices' && PQ.utter) { if (PQ.stopVoice) PQ.stopVoice(); PQ.utter('¡Hola! Así sueno yo.', sel.value); }
     });
     return sel;
   }
@@ -549,7 +549,7 @@
         if (isR) ED.showValue(be, b);
         else {
           if (kk !== 'hat' && PQ.RT) PQ.RT.runBlock(S.target, b);
-          if (PQ.settings && PQ.settings.voice && PQ.utter) { try { speechSynthesis.cancel(); } catch (e) { /* nada */ } PQ.utter(PQ.blockText(b), 'KITTEN'); }
+          if (PQ.settings && PQ.settings.voice && PQ.utter) { if (PQ.stopVoice) PQ.stopVoice(); PQ.utter(PQ.blockText(b), 'KITTEN'); }
         }
         flash(be);
       } else if (isR) {

@@ -7,7 +7,7 @@ async def main():
         b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':1200,'height':800}); errs=[]
         pg.on('pageerror',lambda e:errs.append(str(e)))
         await pg.add_init_script(STUB)
-        await pg.goto('file://'+os.path.abspath('../index.html')); await pg.wait_for_timeout(500)
+        await pg.goto('file://'+os.path.abspath('../index.html') + '?voz=dispositivo'); await pg.wait_for_timeout(500)
         await pg.evaluate('PQ.openExample("memoria-canarias")'); await pg.wait_for_timeout(500)
         if FLAG: await pg.click('#btnFlag'); await pg.wait_for_timeout(int(sys.argv[2]) if len(sys.argv)>2 else 300)
         vd=lambda: pg.evaluate('Object.fromEntries(PQ.S.project.vars.map(v=>[v.name,v.value]))')

@@ -5,7 +5,7 @@ async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); pg = await (await b.new_context(viewport={'width':1280,'height':800})).new_page(); errs=[]
         pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type=='error' else None)
-        await pg.goto('file://' + __import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__),'..','index.html')) + ''); await pg.wait_for_timeout(500)
+        await pg.goto('file://' + __import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__),'..','index.html')) + '?voz=dispositivo'); await pg.wait_for_timeout(500)
         await pg.evaluate('PQ.Tut.start("primer-paso")'); await pg.wait_for_timeout(300)
         ws = await pg.locator('#ws').bounding_box(); x0,y0=ws['x']+60,ws['y']+60
         async def step(): return (await pg.inner_text('#guide')).split('\n')[0]

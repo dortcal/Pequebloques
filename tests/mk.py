@@ -6,7 +6,7 @@ async def main():
         b = await p.chromium.launch(); pg = await b.new_page(viewport={'width':1400,'height':900}); errs=[]
         pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.add_init_script(STUB)
-        await pg.goto('file://' + os.path.abspath('../index.html')); await pg.wait_for_timeout(500)
+        await pg.goto('file://' + os.path.abspath('../index.html') + '?voz=dispositivo'); await pg.wait_for_timeout(500)
         vs = lambda: pg.evaluate('JSON.stringify(PQ.S.project.vars.map(v=>[v.name,v.value]))')
         setL = lambda x,y: pg.evaluate(f'(()=>{{const l=PQ.S.project.sprites[0];l.x={x};l.y={y}}})()')
         await pg.evaluate('PQ.openExample("mercado-sano")'); await pg.wait_for_timeout(300); await pg.click('#btnFlag'); await pg.wait_for_timeout(2500)

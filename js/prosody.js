@@ -37,7 +37,7 @@
     /^(incre[ií]ble|genial|fant[aá]stic[oa]|perfecto|bonit[oa]|grand[ei]|enorme)$/i
   ];
   /* cuánto se nota el contorno en cada voz (1 = completo) */
-  const EXPR = { KITTEN: 1.0, ALTO: 1.0, SQUEAK: 0.8, GIANT: 0.6, TENOR: 0.3 };
+  const EXPR = { KITTEN: 1.0, ALTO: 1.0, SQUEAK: 0.8, GIANT: 0.6, TENOR: 0.3, PIPO: 1.0, PIPOM: 1.0 };
 
   const FUNC = /^(y|e|o|u|de|del|la|el|los|las|un|una|unos|unas|a|al|en|con|por|para|que|se|lo|su|sus|mi|tu|es|son|como|si|sin|sobre|entre|hasta)$/i;
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));

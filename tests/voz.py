@@ -14,7 +14,7 @@ async def run(b, voices, label):
     await ctx.add_init_script(STUB)
     pg = await ctx.new_page(); errs=[]
     pg.on('pageerror', lambda e: errs.append(str(e)))
-    await pg.goto('file://'+os.path.abspath('../dist/PequeBloques.html')); await pg.wait_for_timeout(500)
+    await pg.goto('file://'+os.path.abspath('../dist/PequeBloques.html') + '?voz=dispositivo'); await pg.wait_for_timeout(500)
     res = await pg.evaluate('''()=>{ const out={}; PQ.utter('Hola',"KITTEN");
       const f=(k,t)=>{PQ.utter(t||'Hola',k); return PQ._lastUtter;};
       ['KITTEN','ALTO','TENOR','SQUEAK','GIANT'].forEach(k=>out[k]=f(k)); out.Lagarto=f('SQUEAK','Lagarto'); out.Canario=f('SQUEAK','Canario'); out.Mariposa=f('SQUEAK','Mariposa');

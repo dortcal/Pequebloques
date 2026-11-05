@@ -4,7 +4,7 @@ async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); pg = await b.new_page(viewport={'width':1400,'height':900}, accept_downloads=True); errs=[]
         pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type=='error' else None)
-        await pg.goto('file://' + os.path.abspath('../index.html')); await pg.wait_for_timeout(500)
+        await pg.goto('file://' + os.path.abspath('../index.html') + '?voz=dispositivo'); await pg.wait_for_timeout(500)
         ops = "PQ.S.target.scripts.map(s=>s.blocks.map(b=>b.op.replace(/^[a-z]+_/,'')).join(','))"
         await pg.evaluate('PQ.openExample("canario-viajero")'); await pg.wait_for_timeout(400)
         print('ini', await pg.evaluate(ops))

@@ -6,7 +6,7 @@ async def main():
         b = await p.chromium.launch(); pg = await b.new_page(viewport={'width':1400,'height':900}); errs=[]
         pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.add_init_script(STUB)
-        await pg.goto('file://' + os.path.abspath('../index.html')); await pg.wait_for_timeout(500)
+        await pg.goto('file://' + os.path.abspath('../index.html') + '?voz=dispositivo'); await pg.wait_for_timeout(500)
         await pg.click('#btnStories'); await pg.wait_for_timeout(300)
         for t in ['Cuentos con voz','Cuentos','Juegos']:
             await pg.click(f'.tabsm button:has-text("{t}")'); await pg.wait_for_timeout(200)

@@ -27,7 +27,7 @@ async def run(p,prof):
     ctx=await b.new_context(viewport={'width':w,'height':h},has_touch=bool(touch),is_mobile=bool(touch) and w<1100,user_agent=ua,device_scale_factor=dpr,accept_downloads=True)
     pg=await ctx.new_page(); errs=[]
     pg.on('pageerror',lambda e:errs.append(str(e))); pg.on('console',lambda m:errs.append(m.text) if m.type=='error' else None)
-    await pg.goto('file://'+os.path.abspath('../index.html')); await pg.wait_for_timeout(600)
+    await pg.goto('file://'+os.path.abspath('../index.html') + '?voz=dispositivo'); await pg.wait_for_timeout(600)
     await pg.evaluate('document.querySelectorAll(".toast").forEach(t=>t.remove())')
     st=await pg.evaluate(JS_STATE); res['st']=st
     issues=[]

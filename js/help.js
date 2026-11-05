@@ -21,15 +21,14 @@
   const MUTE_KEY = 'pequebloques.guideMute';
   let muted = false;
   try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch (e) { /* sin almacenamiento */ }
-  PQ.guideVoiceOn = () => !muted && !!g.speechSynthesis;
-  PQ.setGuideMute = (m) => { muted = !!m; try { localStorage.setItem(MUTE_KEY, m ? '1' : '0'); } catch (e) { /* nada */ } if (m) { try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ } } };
+  PQ.guideVoiceOn = () => !muted && (PQ.voiceAvailable ? PQ.voiceAvailable() : !!g.speechSynthesis);
+  PQ.setGuideMute = (m) => { muted = !!m; try { localStorage.setItem(MUTE_KEY, m ? '1' : '0'); } catch (e) { /* nada */ } if (m) { try { (PQ.stopVoice ? PQ.stopVoice() : g.speechSynthesis.cancel()); } catch (e) { /* nada */ } } };
   /* Pipo habla siempre con la misma voz (criatura pequeña: voz de animal pequeño). */
   PQ.say = function (text, force) {
     if (!force && !PQ.guideVoiceOn()) return;
-    try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
-    if (PQ.utter) PQ.utter(String(text).replace(/«|»/g, ''), 'SQUEAK');
+    try { (PQ.stopVoice ? PQ.stopVoice() : g.speechSynthesis.cancel()); } catch (e) { /* nada */ }
+    if (PQ.utter) PQ.utter(String(text).replace(/«|»/g, ''), 'PIPO');
   };
-  PQ.hasSpanishVoice = () => { try { return g.speechSynthesis.getVoices().some((v) => /^es/i.test(v.lang)); } catch (e) { return false; } };
 
   /* ---------- análisis de la situación ---------- */
   const B = () => PQ.BLOCKS;
@@ -181,7 +180,7 @@
       box.classList.remove('help');
       if (PQ.Tut && PQ.Tut.rerender && PQ.Tut.active && PQ.Tut.active()) PQ.Tut.rerender(); else { box.hidden = true; box.innerHTML = ''; }
       PQ.ed.highlight(null); pulseUi(null);
-      try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+      try { (PQ.stopVoice ? PQ.stopVoice() : g.speechSynthesis.cancel()); } catch (e) { /* nada */ }
     },
     isOpen: () => open,
     hints

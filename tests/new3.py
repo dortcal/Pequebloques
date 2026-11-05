@@ -13,7 +13,7 @@ async def main():
         b = await p.chromium.launch(); ctx = await b.new_context(viewport={'width':1400,'height':900}); pg = await ctx.new_page(); errs=[]
         pg.on('pageerror', lambda e: errs.append('PAGEERR '+str(e)))
         await pg.add_init_script(STUB)
-        await pg.goto('file://' + os.path.abspath(os.path.join(os.path.dirname(__file__),'..','index.html'))); await pg.wait_for_timeout(500)
+        await pg.goto('file://' + os.path.abspath(os.path.join(os.path.dirname(__file__),'..','index.html')) + '?voz=dispositivo'); await pg.wait_for_timeout(500)
         async def shot(n): await pg.screenshot(path=f'/tmp/{n}.png', clip={'x':850,'y':170,'width':540,'height':410})
         async def open_(i):
             await pg.evaluate(f'PQ.openExample("{i}")'); await pg.wait_for_timeout(300); await pg.click('#btnFlag')

@@ -4,7 +4,7 @@ async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); pg = await b.new_page(viewport={'width':1280,'height':800}); errs=[]
         pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type=='error' else None)
-        await pg.goto('file://' + __import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__),'..','index.html')) + ''); await pg.wait_for_timeout(500)
+        await pg.goto('file://' + __import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__),'..','index.html')) + '?voz=dispositivo'); await pg.wait_for_timeout(500)
         await pg.evaluate('PQ.openExample("guagua-isla")'); await pg.wait_for_timeout(300)
         await pg.click('#btnFlag'); await pg.wait_for_timeout(200)
         x0=await pg.evaluate('PQ.S.target.x')

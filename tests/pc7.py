@@ -12,7 +12,8 @@ async def main():
     for ronda in (1,2):
         await g.waitvar('ronda',ronda,60); await g.waitvar('bloqueo',0,60)
         for k in range(1,5):
-            await g.click('Residuo %d'%k); await pg.wait_for_timeout(150)
+            async def vis(): return (await g.pos('Residuo %d'%k))[2]
+            await g.until(vis,10,'visible'); await g.click('Residuo %d'%k); await pg.wait_for_timeout(150)
             t=await g.var('t%d'%k); assert await g.var('selk')==k and await g.var('sel')==t,(k,t)
             if k==1:
                 wrong=1 if t!=1 else 2

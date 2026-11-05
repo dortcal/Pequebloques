@@ -261,6 +261,7 @@
   function utter(text, key) {
     const h = { done: false };
     text = String(text);
+    (PQ._log = PQ._log || []).push(text); if (PQ._log.length > 4) PQ._log.shift();   // para el icono «leer»
     const synth = g.speechSynthesis;
     if (!synth || typeof SpeechSynthesisUtterance === 'undefined') {
       setTimeout(() => { h.done = true; }, Math.min(8000, 400 + text.length * 70));

@@ -35,7 +35,7 @@ Siete cuentos con voz (seis de unos 10 minutos y uno más largo, de unos 20, par
 | Infantil | Los contenedores de colores | Reciclaje | Secuencia, clasificación, patrones, depuración |
 | Infantil | La casa de Yeray y la energía limpia | Energías limpias | Pasos en orden, condicional «si… entonces…», bucle, depuración |
 | Infantil | Las estrellas de Lucía y Yeray | Universo | Patrones, ordenar, cuenta atrás, seguir instrucciones |
-| Primaria | Misión limpiaplayas: programa al robot | Reciclaje | Algoritmos con tarjetas, descomposición, depuración, bucle |
+| Primaria | Misión limpiaplayas: programa al robot (6 misiones) | Reciclaje | Algoritmos con tarjetas, descomposición, depuración, bucle, planificar con obstáculos |
 | Primaria | La isla de la energía limpia | Energías limpias | Condicionales, variables, bucle de días, depuración |
 | Primaria | Misión Marte: programa al rover | Universo | Descomposición, obstáculos, prueba y error, bucle con límite de tarjetas |
 | Primaria (2.º) | El cole recicla: clasifica y programa al robot | Reciclaje en el colegio | Condiciones «si… entonces», secuencia lógica, instrucciones de dirección relativa (avanzar, retroceder, girar a izquierda/derecha, como un Blue-Bot), obstáculos, dos objetivos en orden, depuración |
@@ -49,6 +49,8 @@ Siete cuentos con voz (seis de unos 10 minutos y uno más largo, de unos 20, par
 Los cuentos son materiales originales de este proyecto, no recursos oficiales del programa Código Escuela 4.0.
 
 **Estado de las pruebas:** cada cuento se ha recorrido de principio a fin con un robot de pruebas en Chromium (voz simulada), los .sb3 exportados cargan y se ejecutan en `scratch-vm`. No se han probado con voces reales ni en tabletas físicas; la duración (10 minutos; 20 en el de 2.º) es una estimación.
+
+**Icono «leer».** En todas las actividades de pensamiento computacional hay un botón violeta (bocadillo con líneas) en la esquina superior derecha del escenario. Al tocarlo muestra por escrito lo último que se ha dicho, y el altavoz verde lo vuelve a leer en voz alta. Se cierra tocando el texto. Funciona también en pantalla grande.
 
 ## Voces
 

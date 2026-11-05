@@ -650,7 +650,7 @@
 
   EX.push(programmer({
     id: 'pc-reciclaje-primaria', title: 'Misión limpiaplayas: programa al robot', bg: 'playa', bgId: 'pc-playa', thumb: 'robot',
-    desc: 'Un robot limpia una playa de Tenerife. Programa su camino con tarjetas de flechas, arregla un programa con errores y úsalo con la tarjeta de repetir. Con voz, sin leer.',
+    desc: 'Un robot limpia una playa de Tenerife. Programa su camino con tarjetas de flechas, arregla un programa con errores y úsalo con la tarjeta de repetir. Seis misiones cada vez más difíciles. Con voz, sin leer.',
     challenge: 'Toca las flechas para armar el programa y pulsa el botón verde para que el robot lo ejecute.',
     robot: { id: 'robot', cost: 'Robot 1' }, item: { id: 'residuo', name: 'Residuo', cost: (i) => 'Residuo ' + (i + 1) }, obst: { id: 'obstaculo', name: 'Roca', cost: 'Obstáculo 2' },
     texts: {
@@ -685,10 +685,30 @@
       },
       {
         start: [0, 4], goal: [4, 0], items: [[4, 4], [4, 2]], obst: [[2, 2]], cap: 6, preset: null,
-        intro: [['L', '', 'Última misión. La playa es más grande y solo tenemos seis huecos para tarjetas. El robot tiene que recoger dos residuos y llegar arriba.'],
+        intro: [['L', '', 'Tercera misión. La playa es más grande y solo tenemos seis huecos para tarjetas. El robot tiene que recoger dos residuos y llegar arriba.'],
           ['Y', '', 'Fíjate en la tarjeta morada. Es la de repetir. Hace otra vez el último movimiento, dos veces más.'],
           ['L', '', 'Por ejemplo: flecha a la derecha y tarjeta de repetir, y el robot avanza tres casillas con solo dos tarjetas. Repetir en programación se llama bucle. ¡Pruébalo!']],
-        win: [['R', '', '¡Playa limpia!'], ['L', '', 'Has resuelto el reto con menos tarjetas gracias al bucle. Un programa corto es más fácil de leer y de arreglar.']]
+        win: [['R', '', '¡Residuos recogidos!'], ['L', '', 'Has resuelto el reto con menos tarjetas gracias al bucle. Un programa corto es más fácil de leer y de arreglar.']]
+      },
+      {
+        start: [0, 4], goal: [4, 2], items: [[3, 2], [4, 0], [2, 4]], obst: [[2, 2], [3, 0], [1, 3]], cap: 9, preset: null,
+        intro: [['L', '', 'Cuarta misión. Hay tres residuos y tres rocas en la playa. El robot tiene que recogerlos todos y acabar en la bandera.'],
+          ['Y', '', 'Cada roca es un obstáculo que hay que rodear. Haz el camino con el dedo y piensa en qué orden recoger los residuos.'],
+          ['L', '', 'Tienes nueve huecos para las tarjetas. ¡Piensa antes de ponerlas!']],
+        win: [['R', '', '¡Tres residuos recogidos!'], ['Y', '', 'Has dividido un problema grande en trozos pequeños: ir a cada residuo y, al final, a la meta. Eso es descomponer.']]
+      },
+      {
+        start: [0, 4], goal: [4, 2], items: [[3, 3], [3, 2]], obst: [[2, 1], [0, 0]], cap: 5, preset: null,
+        intro: [['L', '', 'Quinta misión, con pocas tarjetas: solo caben cinco. Hay que recoger dos residuos y llegar a la bandera.'],
+          ['Y', '', 'Aquí necesitas el bucle. La tarjeta morada repite el último movimiento dos veces más. Cuando veas pasos iguales seguidos, piensa en repetir.']],
+        win: [['R', '', '¡Qué rápido!'], ['L', '', 'Has descubierto un patrón, pasos que se repiten, y lo has resumido en una sola tarjeta. Los programas cortos son más fáciles de leer.']]
+      },
+      {
+        start: [0, 4], goal: [4, 0], items: [[3, 3], [3, 1], [1, 1], [3, 2]], obst: [[4, 4], [0, 0], [1, 2]], cap: 10, preset: null,
+        intro: [['L', '', 'Última misión de la playa, la más difícil. Hay cuatro residuos, tres rocas y diez huecos.'],
+          ['Y', '', 'Mira dónde puedes usar el bucle y dónde hay que cambiar de dirección. Si algo falla, observa dónde se detiene el robot y corrige.'],
+          ['L', '', '¡Tú puedes!']],
+        win: [['R', '', '¡Playa limpia del todo!'], ['L', '', 'Has juntado todo lo aprendido: descomponer, buscar patrones, usar bucles y depurar. ¡Gran trabajo!']]
       }
     ],
     outro: [

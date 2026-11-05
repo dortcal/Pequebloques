@@ -31,6 +31,16 @@ async def main():
     await card('Flecha derecha','Repetir','Flecha derecha','Flecha arriba','Repetir','Flecha arriba')
     await pg.screenshot(path='/tmp/p4c.png')
     await run(); await g.waitvar('hecho',1,60); print('nivel3 hecho','items',await g.var('items'))
+    from pl import solve
+    NM={1:'Flecha izquierda',2:'Flecha arriba',3:'Flecha abajo',4:'Flecha derecha',5:'Repetir'}
+    LV=[dict(start=(0,4),goal=(4,2),items=[(3,2),(4,0),(2,4)],obst=[(2,2),(3,0),(1,3)],cap=9),
+        dict(start=(0,4),goal=(4,2),items=[(3,3),(3,2)],obst=[(2,1),(0,0)],cap=5),
+        dict(start=(0,4),goal=(4,0),items=[(3,3),(3,1),(1,1),(3,2)],obst=[(4,4),(0,0),(1,2)],cap=10)]
+    for j,L in enumerate(LV):
+        await g.waitvar('nivel',4+j,90); await g.waitvar('modo',0,60); await g.waitvar('max',L['cap'],10)
+        if j==2: await pg.screenshot(path='/tmp/p4_l6.png')
+        sol=solve(L,L['cap'],True,True); await card(*[NM[c] for c in sol]); await run()
+        await g.waitvar('hecho',1,80); print('nivel',4+j,'hecho',sol)
     await g.until(lambda: pg.evaluate('!PQ.RT.threads.length'),90,'fin')
     print('fin %.1fs'%(time.time()-t0), errs); print((await g.spoken())[-2:]); await b.close(); await p.stop()
 asyncio.run(main())

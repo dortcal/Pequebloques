@@ -196,6 +196,7 @@
 
   function loadProject(p, opts) {
     opts = opts || {};
+    if (PQ.removeReadIcon) PQ.removeReadIcon();
     RT.stopAll();
     if (g.speechSynthesis) try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
     p.messages = p.messages && p.messages.length ? p.messages : ['mensaje1'];
@@ -881,6 +882,41 @@
   }
   PQ.startHint = startHint;
 
+  /* Icono «leer» de las actividades de pensamiento computacional: muestra por escrito lo último que se ha dicho */
+  let readTimer = 0;
+  PQ.removeReadIcon = function () {
+    clearInterval(readTimer); readTimer = 0;
+    ['readbtn', 'readpanel'].forEach((id) => { const e = document.getElementById(id); if (e) e.remove(); });
+  };
+  function addReadIcon() {
+    PQ.removeReadIcon();
+    const wrap = $('#stagewrap'); if (!wrap) return;
+    const btn = h('button', ''); btn.id = 'readbtn'; btn.type = 'button';
+    btn.setAttribute('aria-label', 'Leer lo que hay que hacer'); btn.title = 'Leer lo que hay que hacer';
+    btn.innerHTML = '<svg viewBox="0 0 48 48" width="100%" height="100%" aria-hidden="true"><path d="M6 8 H42 Q44 8 44 10 V32 Q44 34 42 34 H24 L14 43 V34 H6 Q4 34 4 32 V10 Q4 8 6 8 Z" fill="#fff" stroke="#3a2c4f" stroke-width="3" stroke-linejoin="round"/><path d="M12 17 H36 M12 24 H36 M12 31 H26" stroke="#7C5CFF" stroke-width="3.4" stroke-linecap="round"/></svg>';
+    const panel = h('div', ''); panel.id = 'readpanel'; panel.hidden = true;
+    const txt = h('div', 'rtxt'); const ear = h('button', 'rear'); ear.type = 'button'; ear.setAttribute('aria-label', 'Escuchar otra vez');
+    ear.innerHTML = '<svg viewBox="0 0 48 48" width="100%" height="100%" aria-hidden="true"><path d="M6 18 H14 L26 8 V40 L14 30 H6 Z" fill="#fff" stroke="#3a2c4f" stroke-width="3" stroke-linejoin="round"/><path d="M32 16 Q38 24 32 32 M37 11 Q47 24 37 37" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/></svg>';
+    panel.appendChild(txt); panel.appendChild(ear); wrap.appendChild(btn); wrap.appendChild(panel);
+    const fill = () => {
+      const l = (PQ._log || []).slice(-2);
+      const s = l.join(' ') || 'Pulsa la bandera verde para empezar.';
+      if (txt.dataset.s !== s) { txt.dataset.s = s; txt.textContent = s; }
+    };
+    const toggle = (on) => {
+      panel.hidden = !on; btn.classList.toggle('on', on);
+      clearInterval(readTimer); readTimer = 0;
+      if (on) { fill(); readTimer = setInterval(fill, 400); }
+    };
+    ['pointerdown', 'mousedown', 'touchstart'].forEach((ev) => { btn.addEventListener(ev, (e) => e.stopPropagation()); panel.addEventListener(ev, (e) => e.stopPropagation()); });
+    btn.addEventListener('click', () => toggle(panel.hidden));
+    txt.addEventListener('click', () => toggle(false));
+    ear.addEventListener('click', () => {
+      try { g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
+      if (PQ.utter && PQ.guideVoiceOn && PQ.guideVoiceOn()) PQ.utter(txt.textContent, 'KITTEN');
+    });
+  }
+
   function openExample(id) {
     const ex = PQ.EX.find((x) => x.id === id);
     if (!ex) return;
@@ -889,6 +925,7 @@
     p.noPad = !!ex.nopad;
     loadProject(p, { banner: ex.challenge });
     startHint(); if (!ex.voices) PQ.say(ex.challenge);
+    PQ._log = []; if (ex.pc) addReadIcon();
     if (ex.openSprite) { const s = p.sprites.find((x) => x.name === ex.openSprite); if (s) { S.target = s; renderAll(); } }
   }
   PQ.openExample = openExample;

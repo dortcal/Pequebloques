@@ -210,7 +210,8 @@
   sp('tarjetar', 'Tarjeta de dirección', [
     ['tarjetar-a', slot('')],
     ['tarjetar-b', slot(arrow(0), '#59B7FF')], ['tarjetar-c', slot(arrow(180), '#FFA63D')],
-    ['tarjetar-d', slot(giroI, '#FF6FA8')], ['tarjetar-e', slot(giroD, '#5ED08A')]
+    ['tarjetar-d', slot(giroI, '#FF6FA8')], ['tarjetar-e', slot(giroD, '#5ED08A')],
+    ['tarjetar-f', slot(rep, '#9B6BFF')]
   ]);
   /* robot de suelo visto desde arriba (mira hacia arriba) */
   sp('robotsuelo', 'Robot de suelo', [['robotsuelo-a', svg(`<g transform="rotate(90 60 60)">

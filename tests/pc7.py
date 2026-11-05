@@ -1,7 +1,7 @@
 import asyncio, time, sys
 from pchelp import *
 from solve_cole import LV, minsol
-BTN={1:'Tarjeta avanzar',2:'Tarjeta retroceder',3:'Tarjeta girar izquierda',4:'Tarjeta girar derecha'}
+BTN={5:'Tarjeta repetir',1:'Tarjeta avanzar',2:'Tarjeta retroceder',3:'Tarjeta girar izquierda',4:'Tarjeta girar derecha'}
 COL=['','amarillo','azul','verde','marrón','gris']
 async def main():
     p,b,pg,g,errs=await session('pc-cole-primaria',1200,800)
@@ -42,14 +42,24 @@ async def main():
             await g.click(BTN[c]); await pg.wait_for_timeout(200)
     async def run():
         await g.click('Botón Ir'); await g.waitvar('modo',1,8)
-    names=['T1','T2','T3','T4','M1','D1','M2','M3']
+    names=['T1','T2','T3','T4','M1','D1','M2','D2','M3','B1','B2','B3','B4']
+    SOL={'M2':[4,1,1,1,3,1,4,1],'M3':[4,1,1,2,1,3,1,1,1],'B4':[1,5,3,2,2,5,3,1,2]}
     for i,nm in enumerate(names):
         await g.waitvar('nivel',i+1,120); await g.waitvar('modo',0,120)
         L=LV[nm]; await pg.wait_for_timeout(200)
-        if i in (0,3,4,6,7): await pg.screenshot(path='/tmp/c3_%s.png'%nm)
+        if i in (0,3,4,6,7,9,11): await pg.screenshot(path='/tmp/c3_%s.png'%nm)
         if nm=='T1':
             await card([1,1]); await run(); await g.waitvar('modo',0,30); assert await g.var('hecho')==0; log('T1 corto ok (sin llegar)')
             await card([1]); await run()
+        elif nm=='D2':
+            assert await g.var('n')==10
+            await run(); await g.waitvar('modo',0,40); assert await g.var('hecho')==0; log('D2 bug falla')
+            for _ in range(2): await g.click('Botón Quitar')
+            await card([3,1]); await run()
+        elif nm=='B3':
+            assert await g.var('n')==4
+            await run(); await g.waitvar('modo',0,40); assert await g.var('hecho')==0; log('B3 bug falla')
+            await g.click('Botón Quitar'); await card([1,5]); await run()
         elif nm=='D1':
             assert await g.var('n')==6
             await run(); await g.waitvar('modo',0,30); assert await g.var('hecho')==0; log('D1 programa con bug falla (equivocado)')
@@ -67,9 +77,9 @@ async def main():
         elif nm=='M2':
             await card([1,1,1]); await run(); await g.waitvar('modo',0,30); assert await g.var('hecho')==0
             await pg.wait_for_timeout(1500); sp=await g.spoken(); assert ' '.join(sp[-8:]).find('obstáculo')>=0,sp[-8:]; log('M2 choque ok')
-            await g.click('Botón Borrar'); n,_,sol=minsol(L,L['cap']); await card(sol); await run()
+            await g.click('Botón Borrar'); await card(SOL['M2']); await run()
         else:
-            n,_,sol=minsol(L,L['cap']); await card(sol); await run()
+            sol=SOL.get(nm) or minsol(L,L['cap'],(1,2,3,4,5) if nm[0]=='B' else (1,2,3,4))[2]; await card(sol); await run()
         await g.waitvar('hecho',1,60); log(nm,'hecho')
     await g.until(lambda: pg.evaluate('!PQ.RT.threads.length'),120,'fin')
     log('fin',errs); print((await g.spoken())[-2:])

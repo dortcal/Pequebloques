@@ -1,6 +1,14 @@
 import itertools, sys
 D={0:(0,-1),1:(1,0),2:(0,1),3:(-1,0)}
+def expand(prog):
+    out=[]; ult=0
+    for c in prog:
+        if c==5:
+            if ult: out+= [ult]*2
+        else: out.append(c); ult=c
+    return out
 def run(L,prog):
+    prog=expand(prog)
     x,y=L['start']; h=L.get('h',0); carry=0; ent=0
     items={tuple(p[:2]):p[2] for p in L.get('items',[])}
     bins={tuple(p[:2]):p[2] for p in L.get('bins',[])}
@@ -19,9 +27,9 @@ def run(L,prog):
     tot=len(L.get('items',[]))
     if tot==0: return 'ok' if (x,y)==tuple(L['goal']) else 'corto'
     return 'ok' if ent==tot else ('sinentrega' if carry else 'faltan')
-def minsol(L,cap):
+def minsol(L,cap,syms=(1,2,3,4,5)):
     for n in range(1,cap+1):
-        sols=[p for p in itertools.product([1,2,3,4],repeat=n) if run(L,p)=='ok']
+        sols=[p for p in itertools.product(syms,repeat=n) if run(L,p)=='ok']
         if sols: return n,len(sols),sols[0]
     return None
 LV={
@@ -34,6 +42,13 @@ LV={
  'M2':dict(start=(0,4),h=0,items=[(3,3,1)],bins=[(4,3,1),(2,2,3)],obst=[(3,2),(2,3),(0,3)],cap=10),
  'M3':dict(start=(0,4),h=0,items=[(2,2,1),(2,4,4)],bins=[(2,1,1),(1,4,4),(3,4,5)],obst=[(0,3),(3,2)],cap=10),
 }
+LV.update({
+ 'D2':dict(start=(0,4),h=0,items=[(2,3,2)],bins=[(4,2,2),(4,4,5)],obst=[(2,2),(3,2)],cap=10),
+ 'B1':dict(start=(0,4),h=0,goal=(0,1),cap=2),
+ 'B2':dict(start=(0,4),h=0,items=[(1,1,2)],bins=[(3,1,2),(4,3,3)],obst=[(0,0),(2,4)],cap=5),
+ 'B3':dict(start=(4,4),h=0,goal=(1,1),cap=6),
+ 'B4':dict(start=(0,4),h=0,items=[(2,1,1),(4,2,5)],bins=[(3,1,1),(4,1,5),(4,3,3)],obst=[(1,4),(1,2)],cap=10),
+})
 if __name__=='__main__':
     for k,L in LV.items(): print(k,minsol(L,L['cap']))
     print('D1 bug',run(LV['D1'],[1,1,3,1,1,1]),'fix',run(LV['D1'],[1,1,4,1,1,1]))

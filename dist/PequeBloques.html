@@ -6852,8 +6852,9 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     const retry = [S.wait(1.4), S.send('lay'), S.setv('modo', 0)];
     sprites.push({
       id: 'robotsuelo', name: 'Robot', x: cx(0), y: cy(4), size: 40, hidden: true, sounds: ['Pop', 'Boing', 'Ta-chán'], scripts: [
-        [F(), S.hide(), S.size(40)],
-        [S.recv('lay'), S.show(), S.setv('carry', 0), S.setv('carrycost', 0), S.setv('entregados', 0), S.send('carga')].concat(goStart),
+        [F(), S.size(34), S.dir(0), S.xy(-125, 148), S.show()],
+        [S.recv('r1'), S.hide()],
+        [S.recv('lay'), S.size(40), S.show(), S.setv('carry', 0), S.setv('carrycost', 0), S.setv('entregados', 0), S.send('carga')].concat(goStart),
         [S.recv('ocultaR'), S.hide()],
         [S.recv('ir'), S.setv('modo', 1), S.setv('fallo', 0), S.setv('i', 0), S.send('lay'), S.wait(0.4), S.sound('Pop'),
           S.rep(NS, [S.iff(S.and(S.eq(v('fallo'), 0), S.lt(v('i'), v('n'))), [S.chv('i', 1), S.send('paso')]

@@ -115,7 +115,7 @@
   /* ---------- tarjetas y botones del programador ---------- */
   const arrow = (rot) => `<g transform="rotate(${rot} 60 60)"><path d="M60 16 L100 60 H76 V104 H44 V60 H20 Z" fill="#fff" ${st(4)}/></g>`;
   const slot = (inner, fill) => svg(`<rect x="6" y="6" width="108" height="108" rx="18" fill="${fill || '#F2F4FA'}" ${st(4)} ${fill ? '' : 'stroke-dasharray="9 7"'}/>${inner || ''}`);
-  const rep = '<path d="M30 54 Q32 30 58 30 H78 M70 18 L84 30 L70 42 M90 66 Q88 90 62 90 H42 M50 78 L36 90 L50 102" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><text x="60" y="68" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="26" text-anchor="middle" fill="#fff">x2</text>';
+  const rep = '<path d="M30 54 Q32 30 58 30 H78 M70 18 L84 30 L70 42 M90 66 Q88 90 62 90 H42 M50 78 L36 90 L50 102" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><text x="60" y="68" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="26" text-anchor="middle" fill="#fff">+2</text>';
   sp('ranura', 'Ranura', [
     ['ranura-a', slot('')],
     ['ranura-b', slot(arrow(270), '#FF6FA8')], ['ranura-c', slot(arrow(0), '#59B7FF')], ['ranura-d', slot(arrow(180), '#FFA63D')], ['ranura-e', slot(arrow(90), '#5ED08A')],

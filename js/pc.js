@@ -1064,7 +1064,7 @@
       { // B1 enseñar el bucle
         start: [0, 4], h: 0, goal: [0, 1], items: [], bins: [], obst: [], cap: 2, preset: null,
         intro: [['L', 'Fíjate: para ir lejos hay que poner muchas tarjetas iguales. Los programadores no quieren escribir lo mismo muchas veces.'],
-          ['Y', 'Para eso existe la tarjeta morada, la de repetir. Hace otra vez la tarjeta que tiene justo antes, dos veces más.'],
+          ['Y', 'Para eso existe la tarjeta morada, la de repetir. Hace otra vez la tarjeta que tiene justo antes, dos veces más. Por eso lleva escrito más dos.'],
           ['L', 'Si pones avanzar y después repetir, el robot avanza tres casillas. Solo tienes dos huecos, así que no podrás usar tres tarjetas de avanzar. ¡Pruébalo!']],
         win: [['R', '¡Tres pasos con solo dos tarjetas!'], ['Y', 'Repetir una instrucción varias veces se llama bucle. Los bucles hacen los programas más cortos.']]
       },

@@ -240,9 +240,9 @@
     },
     /* 6 */
     {
-      id: 'baile-robot', title: 'El baile del robot', kind: 'reto', stars: 2, bg: 'noche', sprite: 'robot',
+      id: 'baile-robot', nopad: true, title: 'El baile del robot', kind: 'reto', stars: 2, bg: 'noche', sprite: 'robot',
       desc: 'Un robot baila con giros y cambios de disfraz. ¡Invéntate tu coreografía!',
-      challenge: 'Pulsa la bandera o la tecla espacio. Crea un baile nuevo con tus propios pasos.',
+      challenge: 'Pulsa la bandera, toca al robot o pulsa la tecla espacio. Crea un baile nuevo con tus propios pasos.',
       openSprite: 'Robot',
       build() {
         return make({
@@ -251,6 +251,8 @@
             id: 'robot', x: 0, y: -20, sounds: ['Pop', 'Tambor'], scripts: [
               [F(), S.rep(4, [S.right(90), S.next(), S.wait(0.3)]), S.dir(90)],
               [S.key('space'), S.sound('Tambor'), S.rep(3, [S.dx(20), S.grow(5), S.wait(0.15)]),
+                S.rep(3, [S.dx(-20), S.grow(-5), S.wait(0.15)])],
+              [S.click(), S.sound('Tambor'), S.rep(3, [S.dx(20), S.grow(5), S.wait(0.15)]),
                 S.rep(3, [S.dx(-20), S.grow(-5), S.wait(0.15)])]
             ]
           }]
@@ -260,7 +262,7 @@
     /* 7 */
     {
       id: 'guagua-isla', title: 'La guagua por la isla', kind: 'reto', stars: 2, bg: 'pueblo', sprite: 'guagua',
-      desc: 'Conduce la guagua con las flechas del teclado. ¡Pita con la barra espaciadora!',
+      desc: 'Conduce la guagua con las flechas (o el mando de la pantalla). ¡Pita con la barra espaciadora o tocando la guagua!',
       challenge: 'Añade las teclas para ir hacia arriba y hacia abajo. ¿Y si cambias el fondo al llegar al borde?',
       openSprite: 'Guagua',
       build() {
@@ -271,7 +273,8 @@
               [F(), S.xy(-150, -70), S.dir(90)],
               [S.key('right arrow'), S.dx(15)],
               [S.key('left arrow'), S.dx(-15)],
-              [S.key('space'), S.sound('Bocina'), S.sayFor('¡Piiiii!', 1)]
+              [S.key('space'), S.sound('Bocina'), S.sayFor('¡Piiiii!', 1)],
+              [S.click(), S.sound('Bocina'), S.sayFor('¡Piiiii!', 1)]
             ]
           }]
         });
@@ -417,13 +420,14 @@
     },
     /* ---------- cuentos largos, con cambios de escenario ---------- */
     {
-      id: 'tesoro-teide', title: 'El tesoro del Teide', kind: 'cuento', voices: true, stars: 3, bg: 'teide', sprite: 'cofre',
+      id: 'tesoro-teide', nopad: true, title: 'El tesoro del Teide', kind: 'cuento', voices: true, stars: 3, bg: 'teide', sprite: 'cofre',
       desc: 'Lucía y Yeray buscan un tesoro. Cinco escenarios y tú decides quién les guía.',
-      challenge: 'Pulsa la bandera y escucha. Cuando te lo pidan, toca a Yeray, elige un guía y pulsa la tecla espacio. ¿Qué voz le pondrías al perro?',
+      challenge: 'Pulsa la bandera y escucha. Cuando te lo pidan, toca a Yeray, elige un guía y toca la pantalla para entrar en la cueva. ¿Qué voz le pondrías al perro?',
       openSprite: 'Yeray',
       build() {
         const L = S.talk;
         const paso = (n) => S.eq(S.v('paso'), n);
+        const entrar = () => S.iff(paso(5), [S.setv('paso', 6), S.send('cueva')]);
         return make({
           backdrops: ['pueblo', 'laurisilva', 'teide', 'cueva', 'playa'],
           messages: ['m1', 'm2', 'bosque', 'elperro', 'lamariposa', 'teide', 't2', 't3', 'cueva', 'c2', 'abrir', 'a2', 'final', 'adios'],
@@ -433,7 +437,8 @@
             [S.recv('bosque'), S.backdrop('laurisilva')],
             [S.recv('teide'), S.backdrop('teide')],
             [S.recv('cueva'), S.backdrop('cueva')],
-            [S.recv('final'), S.backdrop('playa')]
+            [S.recv('final'), S.backdrop('playa')],
+            [mk('event_whenstageclicked'), entrar()]
           ],
           sprites: [
             {
@@ -442,12 +447,12 @@
                 [S.recv('m2'), S.voice('KITTEN')].concat(L('¡Vamos a buscarlo! Toca a Yeray para empezar el viaje.'), [S.setv('paso', 1)]),
                 [S.recv('bosque'), S.voice('KITTEN'), S.setv('paso', 3), S.xy(-150, -70), S.wait(0.6)].concat(L('¡Qué bosque tan verde! Esto es la laurisilva.'), L('Un perro y una mariposa quieren guiarnos. ¡Toca al que prefieras!')),
                 [S.recv('teide'), S.voice('KITTEN'), S.xy(-150, -80), S.wait(0.6)].concat(L('¡Cuánto hemos subido! Este es el Teide, el pico más alto de España.'), [S.send('t2')]),
-                [S.recv('t3'), S.voice('KITTEN')].concat(L('Pulsa la tecla espacio para entrar en la cueva.'), [S.setv('paso', 5)]),
-                [S.key('space'), S.iff(paso(5), [S.setv('paso', 6), S.send('cueva')])],
+                [S.recv('t3'), S.voice('KITTEN')].concat(L('Toca la pantalla para entrar en la cueva.'), [S.setv('paso', 5)]),
+                [S.key('space'), entrar()],
                 [S.recv('cueva'), S.voice('KITTEN'), S.xy(-150, -90), S.wait(0.8)].concat(L('¡Qué oscuro! Menos mal que los cristales brillan.'), [S.send('c2')]),
                 [S.recv('abrir'), S.voice('KITTEN')].concat(L('¡Hay monedas de oro y una nota!'), [S.send('a2')]),
                 [S.recv('final'), S.voice('KITTEN'), S.xy(-130, -100), S.wait(0.6)].concat(L('¡Qué aventura tan bonita! Gracias por venir con nosotros.'), [S.send('adios')]),
-                [S.click(), S.voice('KITTEN')].concat(L('¡Yeray, mira! He encontrado un mapa del tesoro.'))
+                [S.click(), S.ifelse(paso(5), [S.setv('paso', 6), S.send('cueva')], [S.voice('KITTEN')].concat(L('¡Yeray, mira! He encontrado un mapa del tesoro.')))]
               ]
             },
             {
@@ -459,6 +464,7 @@
                 [S.recv('teide'), S.xy(-70, -80)],
                 [S.recv('t2'), S.voice('SQUEAK')].concat(L('¡Brrr, qué frío hace aquí arriba! Mira, ¡hay una cueva!'), [S.send('t3')]),
                 [S.recv('cueva'), S.xy(-70, -90)],
+                [S.click(), entrar()],
                 [S.recv('c2'), S.voice('SQUEAK')].concat(L('¡Un cofre! Está cerrado. ¡Toca el cofre para abrirlo!'), [S.setv('paso', 7)]),
                 [S.recv('a2'), S.voice('SQUEAK')].concat(L('La nota dice: el mayor tesoro es viajar con los amigos.'), [S.send('final')]),
                 [S.recv('final'), S.xy(-30, -100)],
@@ -474,6 +480,7 @@
                 [S.recv('lamariposa'), S.hide()],
                 [S.recv('teide'), S.xy(40, -80)],
                 [S.recv('cueva'), S.xy(35, -95)],
+                [S.click(), entrar()],
                 [S.recv('final'), S.xy(70, -115)]
               ]
             },
@@ -486,6 +493,7 @@
                 [S.recv('elperro'), S.hide()],
                 [S.recv('teide'), S.xy(40, 30)],
                 [S.recv('cueva'), S.xy(-10, 20)],
+                [S.click(), entrar()],
                 [S.recv('final'), S.xy(40, 20)],
                 [F(), S.forever([S.next(), S.wait(0.25)])]
               ]
@@ -495,6 +503,7 @@
                 [F(), S.hide(), S.costume('Cofre 1'), S.xy(160, -90)],
                 [S.recv('cueva'), S.costume('Cofre 1'), S.xy(160, -90), S.show()],
                 [S.click(), S.iff(paso(7), [S.setv('paso', 8), S.costume('Cofre 2'), S.sound('Ta-chán'), S.grow(20), S.wait(0.4), S.grow(-20), S.send('abrir')])],
+                [S.click(), entrar()],
                 [S.recv('final'), S.hide()]
               ]
             }
@@ -671,9 +680,9 @@
     },
     /* ---------- juegos de movimiento ---------- */
     {
-      id: 'penalti', title: '¡Penalti!', kind: 'juego', stars: 2, bg: 'estadio', sprite: 'balon',
-      desc: 'Elige hacia dónde chutar con las flechas y pulsa espacio. ¡El portero se tira al azar!',
-      challenge: 'Mueve la mira con las flechas izquierda y derecha y pulsa la tecla espacio para chutar. Tienes 5 tiros. ¿Cuántos goles marcas?',
+      id: 'penalti', nopad: true, title: '¡Penalti!', kind: 'juego', stars: 2, bg: 'estadio', sprite: 'balon',
+      desc: 'Toca la mira para elegir hacia dónde chutar y toca el balón para lanzar (o usa flechas y espacio). ¡El portero se tira al azar!',
+      challenge: 'Toca la mira para moverla y toca el balón para chutar (también vale con las flechas y la tecla espacio). Tienes 5 tiros. ¿Cuántos goles marcas?',
       openSprite: 'Portero',
       build() {
         const L = S.talk;
@@ -686,7 +695,7 @@
           sprites: [
             {
               id: 'lucia', name: 'Lucía', x: -110, y: -125, size: 65, sounds: ['Pop'], scripts: [
-                [F(), S.voice('KITTEN'), S.xy(-110, -125)].concat(L('¡Penalti! Mueve la mira con las flechas y pulsa espacio para chutar.'), [S.setv('listo', 1)]),
+                [F(), S.voice('KITTEN'), S.xy(-110, -125)].concat(L('¡Penalti! Toca la mira para moverla y toca el balón para chutar.'), [S.setv('listo', 1)]),
                 [S.recv('gol'), S.voice('KITTEN'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Goooool!')),
                 [S.recv('parada'), S.voice('KITTEN')].concat(L('¡Uy! ¡Qué parada!')),
                 [S.recv('fin'), S.voice('KITTEN'), R('text2speech_speakAndWait', { WORDS: S.join('Se acabó. Has marcado ', S.join(S.v('Goles'), ' goles. ¡Pulsa la bandera para jugar otra vez!')) })]
@@ -705,6 +714,7 @@
               id: 'balon', x: 0, y: -110, size: 45, sounds: ['Pop', 'Ta-chán', 'Boing'], scripts: [
                 [F(), S.xy(0, -110), S.costume('Balón 1'), S.setv('Goles', 0), S.setv('Tiros', 5), S.setv('listo', 0), S.setv('tiro', 0)],
                 [S.key('space'), S.iff(libre(), [S.setv('listo', 0), S.send('chuta')])],
+                [S.click(), S.iff(libre(), [S.setv('listo', 0), S.send('chuta')])],
                 [S.recv('chuta'), S.sound('Pop'), S.chv('Tiros', -1), S.glide(0.45, S.v('tiro'), 62), S.next(), S.wait(0.3),
                   S.ifelse(S.eq(S.v('tiro'), S.v('salto')), [S.send('parada')], [S.send('gol')])],
                 [S.recv('gol'), S.chv('Goles', 1), S.sound('Ta-chán'), S.wait(1.6), S.send('siguiente')],
@@ -715,6 +725,7 @@
             {
               id: 'mira', x: 0, y: 62, size: 55, sounds: ['Pop'], scripts: [
                 [F(), S.xy(0, 62), S.setv('tiro', 0)],
+                [S.click(), S.iff(libre(), [S.ifelse(S.gt(S.xpos(), 90), [S.xy(-100, 62)], [S.dx(100)]), S.setv('tiro', S.xpos())])],
                 [S.key('left arrow'), S.iff(S.and(libre(), S.gt(S.xpos(), -90)), [S.dx(-100), S.setv('tiro', S.xpos())])],
                 [S.key('right arrow'), S.iff(S.and(libre(), S.lt(S.xpos(), 90)), [S.dx(100), S.setv('tiro', S.xpos())])],
                 [S.recv('reset'), S.xy(0, 62), S.setv('tiro', 0)]

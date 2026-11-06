@@ -1013,7 +1013,8 @@
       const walk = (arr) => (arr || []).forEach(one);
       PQ.allTargets(S.project).forEach((t) => (t.scripts || []).forEach((sc) => walk(sc.blocks)));
       if (S.project && S.project.noPad) { show(false); return; }
-      if (uses && g.matchMedia && g.matchMedia('(pointer: coarse)').matches) show(true);
+      /* también en ordenadores con pizarra digital (PDI): el puntero no siempre se detecta como táctil */
+      if (uses) show(true);
     };
     pad.querySelectorAll('.pk').forEach((el) => {
       const k = el.dataset.k; let timer = null;

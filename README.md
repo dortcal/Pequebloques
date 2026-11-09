@@ -18,7 +18,7 @@ Editor de programación por bloques para el alumnado de **Infantil y primer cicl
 - **Borrar con el teclado**: toca un bloque para seleccionarlo (se marca en amarillo); **Supr** o **Retroceso** borra solo ese bloque y **Mayús + Supr** borra todo el conjunto. También en el menú del botón derecho.
 - Bloque de evento **«al hacer clic en el escenario»** (solo en el escenario, igual que en Scratch 3).
 - **Mando en pantalla** (botón del mando junto al escenario): flechas y espacio con el dedo, para jugar en tabletas sin teclado. Se abre solo en pantallas táctiles cuando el proyecto usa teclas.
-- Editor de disfraces (pintar, subir imagen), grabación de voz, 16 personajes, 12 fondos y 8 sonidos originales.
+- Editor de disfraces (pintar, subir imagen), grabación de voz, 16 personajes, 12 fondos y 62 sonidos originales en 6 categorías (animales, efectos, música, naturaleza, transporte y casa; se escuchan antes de añadirlos; tests/sounds.py y tests/soundui.py).
 - Copia automática en el navegador (botón «Último») y descarga como .sb3.
 
 ## Usarlo

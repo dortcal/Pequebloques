@@ -487,14 +487,35 @@
       });
     } else if (kind === 'sound') {
       title = 'Elige un sonido';
-      PQ.SOUND_LIB.forEach((it) => {
-        const c = h('button', 'card'); c.type = 'button';
-        c.innerHTML = '<span class="snd"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></span><span></span>';
-        $('span:last-child', c).textContent = it.name;
-        c.addEventListener('click', () => { const s = PQ.makeSound(it.name); PQ.playSoundObj(s); addSound(s); done(); });
-        gridEl.appendChild(c);
+      /* categorías; un toque lo escucha y lo marca, otro toque (o «Añadir») lo añade al personaje */
+      const chips = h('div', 'chips'); chips.setAttribute('role', 'group'); chips.setAttribute('aria-label', 'Tipo de sonido');
+      body.insertBefore(chips, gridEl);
+      let cat = 'Todos', picked = null;
+      const addBtn = h('button', 'btn ok sndadd'); addBtn.type = 'button'; addBtn.textContent = '＋ Añadir el sonido elegido'; addBtn.disabled = true;
+      const paint = () => {
+        gridEl.innerHTML = '';
+        PQ.SOUND_LIB.filter((it) => cat === 'Todos' || it.cat === cat).forEach((it) => {
+          const c = h('button', 'card' + (picked === it.name ? ' sel' : '')); c.type = 'button';
+          c.innerHTML = '<span class="snd"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></span><span></span>';
+          $('span:last-child', c).textContent = it.name;
+          c.addEventListener('click', () => {
+            if (picked === it.name) { addBtn.click(); return; }
+            picked = it.name; addBtn.disabled = false; addBtn.textContent = '＋ Añadir «' + it.name + '»';
+            gridEl.querySelectorAll('.card.sel').forEach((x) => x.classList.remove('sel')); c.classList.add('sel');
+            PQ.playSoundObj(PQ.makeSound(it.name));
+          });
+          gridEl.appendChild(c);
+        });
+      };
+      addBtn.addEventListener('click', () => { if (!picked) return; const sd = PQ.makeSound(picked); addSound(sd); done(); });
+      PQ.SOUND_CATS.forEach((cn) => {
+        const b = h('button', 'btn chip' + (cn === cat ? ' ok' : '')); b.type = 'button'; b.textContent = cn; b.setAttribute('aria-pressed', String(cn === cat));
+        b.addEventListener('click', () => { cat = cn; [...chips.children].forEach((x) => { const on = x === b; x.classList.toggle('ok', on); x.setAttribute('aria-pressed', String(on)); }); paint(); });
+        chips.appendChild(b);
       });
-      body.appendChild(h('p', 'hint', 'Al elegir un sonido lo escucharás y se añadirá a tu personaje.'));
+      paint();
+      body.appendChild(h('p', 'hint', 'Toca un sonido para escucharlo. Si te gusta, tócalo otra vez o pulsa «Añadir».'));
+      body.appendChild(addBtn);
     }
     m = ui.modal({ title, body, buttons: [{ label: 'Cerrar' }] });
     if (sndPrev) sndPrev = null;

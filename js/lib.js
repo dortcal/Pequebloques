@@ -656,7 +656,103 @@
     ['Bocina', () => synth(0.6, (t) => (Math.sign(Math.sin(2 * Math.PI * 330 * t)) * 0.3 + Math.sign(Math.sin(2 * Math.PI * 415 * t)) * 0.25) * Math.min(1, t / 0.02) * (t > 0.5 ? 1 - (t - 0.5) / 0.1 : 1))],
     ['Magia', () => synth(1.0, (t) => { let v = 0; for (let k = 0; k < 6; k++) { const s = k * 0.1; if (t >= s) { const tt = t - s; v += Math.sin(2 * Math.PI * (1000 + k * 260) * tt) * env(tt, 0.12) * 0.22; } } return v; })]
   ];
-  PQ.SOUND_LIB = SOUNDS.map((s) => ({ name: s[0], make: s[1] }));
+  /* ---- sonidos nuevos (todos sintetizados aquí, sin archivos; se generan solo al elegirlos) ---- */
+  const TAU = 2 * Math.PI, rnd = () => Math.random() * 2 - 1, hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+  /* tono con deslizamiento: f(t,p) en Hz, h = amplitudes de los armónicos 1,2,3…, a(t,p) = amplitud */
+  function tone(dur, f, h, a) {
+    let ph = 0; h = h || [1];
+    return synth(dur, (t, p) => { ph += TAU * f(t, p) / RATE; let v = 0; for (let k = 0; k < h.length; k++) v += h[k] * Math.sin(ph * (k + 1)); return v * a(t, p); });
+  }
+  /* ruido filtrado: a(t,p) = suavizado (0.01 grave … 1 agudo), amp(t,p) = volumen */
+  function noiseLP(dur, a, amp) { let y = 0; return synth(dur, (t, p) => { y += a(t, p) * (rnd() - y); return y * amp(t, p); }); }
+  function mix(dur, parts) {
+    const n = Math.floor(dur * RATE), out = new Float32Array(n);
+    parts.forEach((q) => { const o = Math.floor(q[0] * RATE), a = q[1]; for (let i = 0; i < a.length && o + i < n; i++) out[o + i] += a[i]; });
+    return out;
+  }
+  /* cuerda pulsada (Karplus-Strong) */
+  function ks(freq, dur, damp) {
+    const n = Math.floor(dur * RATE), N = Math.max(2, Math.round(RATE / freq)), buf = new Float32Array(N), out = new Float32Array(n);
+    for (let i = 0; i < N; i++) buf[i] = rnd();
+    let idx = 0;
+    for (let i = 0; i < n; i++) { const nx = (idx + 1) % N, v = buf[idx]; out[i] = v; buf[idx] = (damp || 0.996) * 0.5 * (v + buf[nx]); idx = nx; }
+    return out;
+  }
+  const bell = (f, dur, d) => synth(dur, (t) => (Math.sin(TAU * f * t) + 0.4 * Math.sin(TAU * f * 2.76 * t) + 0.2 * Math.sin(TAU * f * 5.4 * t)) * env(t, d));
+  const knock = (dur) => mix(dur, [[0, synth(0.12, (t) => (Math.sin(TAU * 170 * t) + rnd() * 0.25) * env(t, 0.03))]]);
+  /* normaliza (pico 0.8) y suaviza los extremos para que no «chasquee» */
+  function fin(a) {
+    let pk = 0; for (let i = 0; i < a.length; i++) pk = Math.max(pk, Math.abs(a[i]));
+    const g = pk > 0 ? 0.8 / pk : 1, f = Math.floor(0.006 * RATE);
+    for (let i = 0; i < a.length; i++) { let v = a[i] * g; if (i < f) v *= i / f; if (a.length - i < f) v *= (a.length - i) / f; a[i] = v; }
+    return a;
+  }
+  const sw = (p) => Math.sin(Math.PI * p);
+  const NEW = [
+    /* ---- animales ---- */
+    ['Gato', 'Animales', () => tone(0.75, (t, p) => 380 + 520 * sw(p) ** 0.7, [1, 0.6, 0.4, 0.25], (t, p) => sw(p) ** 0.5 * 0.6)],
+    ['Perro', 'Animales', () => mix(0.5, [0, 0.27].map((s) => [s, tone(0.16, (t, p) => 430 - 190 * p, [1, 0.8, 0.6, 0.45, 0.3], (t) => env(t, 0.09, 0.004) * 0.7)]))],
+    ['Pájaro', 'Animales', () => mix(0.8, [0, 0.16, 0.32, 0.5].map((s, i) => [s, tone(0.11, (t, p) => 2500 + 1100 * p + i * 150, [1, 0.15], (t, p) => sw(p) * 0.5)]))],
+    ['Vaca', 'Animales', () => tone(1.4, (t) => 118 - 18 * t / 1.4 + 3 * Math.sin(TAU * 5 * t), [1, 0.9, 0.7, 0.5, 0.35, 0.2], (t, p) => Math.min(1, t / 0.12) * (1 - p ** 3) * 0.5)],
+    ['Pato', 'Animales', () => mix(0.9, [0, 0.26, 0.52].map((s) => [s, tone(0.14, (t, p) => 760 - 320 * p, [1, 0.8, 0.7, 0.6, 0.5, 0.4], (t, p) => (1 - p) * 0.5)]))],
+    ['Rana', 'Animales', () => mix(0.8, [0, 0.3].map((s) => [s, tone(0.22, (t) => 170 - 60 * t / 0.22, [1, 0.8, 0.6, 0.4], (t, p) => sw(p) * (0.6 + 0.4 * Math.sin(TAU * 38 * t)))]))],
+    ['Abeja', 'Animales', () => tone(1.2, (t) => 210 + 12 * Math.sin(TAU * 6 * t), [1, 0.8, 0.6, 0.5, 0.3], (t, p) => sw(Math.min(1, p * 1.05)) * (0.6 + 0.4 * Math.sin(TAU * 90 * t)) * 0.5)],
+    ['Grillo', 'Animales', () => synth(1.6, (t, p) => { const g = (t * 9) % 1 < 0.55 && (t % 0.5) < 0.36 ? 1 : 0; return Math.sin(TAU * 4300 * t) * g * 0.5; })],
+    ['Ballena', 'Animales', () => tone(3, (t, p) => 190 + 260 * sw(Math.min(1, p * 1.25)) ** 1.2 + 6 * Math.sin(TAU * 4 * t), [1, 0.5, 0.3, 0.15], (t, p) => sw(p) ** 0.7 * 0.6)],
+    ['Búho', 'Animales', () => mix(1.1, [0, 0.45].map((s) => [s, tone(0.3, (t, p) => 360 - 40 * p, [1, 0.3], (t, p) => sw(p) ** 0.6 * 0.6)]))],
+    ['Ratón', 'Animales', () => mix(0.7, [0, 0.14, 0.28].map((s) => [s, tone(0.08, (t, p) => 2200 + 900 * p, [1], (t, p) => sw(p) * 0.5)]))],
+    /* ---- efectos ---- */
+    ['Moneda', 'Efectos', () => mix(0.6, [[0, tone(0.09, () => 987.8, [1, 0.3], (t) => env(t, 0.08, 0.003) * 0.6)], [0.08, tone(0.5, () => 1318.5, [1, 0.3], (t) => env(t, 0.18, 0.003) * 0.6)]])],
+    ['Salto', 'Efectos', () => tone(0.28, (t, p) => 220 + 640 * p, [1, 0.3, 0.2], (t, p) => (1 - p) ** 0.6 * 0.5)],
+    ['Láser', 'Efectos', () => tone(0.35, (t, p) => 2000 * Math.exp(-4 * p) + 150, [1, 0.5, 0.3, 0.2], (t, p) => (1 - p) * 0.5)],
+    ['Explosión', 'Efectos', () => mix(1.4, [[0, noiseLP(1.4, (t) => 0.05 + 0.3 * Math.exp(-t * 4), (t) => env(t, 0.35, 0.003))], [0, tone(1.4, (t) => 70 * Math.exp(-t * 0.8), [1], (t) => env(t, 0.4, 0.003))]])],
+    ['Error', 'Efectos', () => mix(0.6, [[0, tone(0.2, () => 220, [1, 0.5, 0.33, 0.25], (t, p) => (1 - p * 0.3) * 0.4)], [0.22, tone(0.3, (t, p) => 165 - 20 * p, [1, 0.5, 0.33, 0.25], (t, p) => (1 - p) * 0.4)]])],
+    ['Acierto', 'Efectos', () => mix(0.9, [[0, bell(880, 0.5, 0.15)], [0.12, bell(1318.5, 0.8, 0.25)]])],
+    ['Whoosh', 'Efectos', () => noiseLP(0.8, (t, p) => 0.02 + 0.5 * sw(p), (t, p) => sw(p) * 1.2)],
+    ['Gota', 'Efectos', () => mix(0.6, [[0, tone(0.14, (t, p) => 1500 * Math.exp(-2.5 * p), [1], (t) => env(t, 0.07, 0.002) * 0.7)], [0.18, tone(0.2, (t, p) => 1100 * Math.exp(-2.5 * p), [1], (t) => env(t, 0.08, 0.002) * 0.3)]])],
+    ['Burbujas', 'Efectos', () => mix(1.2, [0, 0.17, 0.31, 0.52, 0.66, 0.9].map((s, i) => [s, tone(0.1, (t, p) => 500 + i * 110 + 700 * p, [1], (t) => env(t, 0.04, 0.003) * 0.5)]))],
+    ['Teletransporte', 'Efectos', () => tone(0.9, (t, p) => 300 * Math.pow(2, p * 3.2) + 20 * Math.sin(TAU * 25 * t), [1, 0.4], (t, p) => sw(p) ** 0.5 * 0.5)],
+    ['Robot', 'Efectos', () => tone(1, (t, p) => 140 + 60 * Math.sin(TAU * 3 * t), [1, 0.9, 0.8, 0.7], (t, p) => sw(p) ** 0.4 * (Math.sin(TAU * 32 * t) > 0 ? 0.5 : 0.2))],
+    ['Alarma', 'Efectos', () => synth(1.4, (t, p) => Math.sign(Math.sin(TAU * ((t * 4) % 1 < 0.5 ? 620 : 830) * t)) * 0.4 * sw(Math.min(1, p * 1.0 + 0.0)) ** 0.2)],
+    ['Silbido', 'Efectos', () => tone(0.7, (t, p) => 1300 + 900 * sw(p) + 25 * Math.sin(TAU * 8 * t), [1, 0.12], (t, p) => sw(p) ** 0.5 * 0.5)],
+    ['Fanfarria', 'Efectos', () => mix(1.2, [[0, 392], [0.17, 392], [0.34, 392], [0.51, 523.25]].map((q, i) => [q[0], tone(i < 3 ? 0.16 : 0.7, () => q[1], [1, 0.6, 0.5, 0.4, 0.3], (t, p) => Math.min(1, t / 0.02) * (1 - p) ** 0.5 * 0.4)]))],
+    ['Fallo', 'Efectos', () => mix(1.5, [392, 370, 349.2, 329.6].map((f, i) => [i * 0.3, tone(i < 3 ? 0.3 : 0.55, () => f, [1, 0.4, 0.2], (t, p) => (1 - p) ** 0.7 * 0.5)]))],
+    ['Aplauso', 'Efectos', () => { let y = 0, g = 0; return synth(1.6, (t, p) => { if (Math.random() < 0.012) g = 1; g *= 0.9985; const x = rnd(); y += 0.7 * (x - y); return (x - y) * g * 0.8 * sw(Math.min(1, p * 1.1)) ** 0.3; }); }],
+    ['Pasos', 'Efectos', () => mix(1.2, [0, 0.3, 0.6, 0.9].map((s, i) => [s, noiseLP(0.1, () => 0.12 + (i % 2) * 0.04, (t) => env(t, 0.03, 0.002) * 1.4)]))],
+    ['Toc toc', 'Casa', () => mix(0.8, [[0, knock(0.2)], [0.25, knock(0.2)], [0.5, knock(0.2)]])],
+    /* ---- naturaleza ---- */
+    ['Lluvia', 'Naturaleza', () => { let y = 0, d = 0; return synth(2.5, () => { y += 0.55 * (rnd() - y); if (Math.random() < 0.002) d = 0.6; d *= 0.99; return (rnd() * 0.15 + (rnd() - y) * 0.35) + d * Math.sin(TAU * 2200 * d); }); }],
+    ['Viento', 'Naturaleza', () => noiseLP(3, (t, p) => 0.015 + 0.06 * sw(p), (t, p) => (0.3 + 0.7 * sw(p)) * 2.5)],
+    ['Olas', 'Naturaleza', () => noiseLP(5, (t) => 0.03 + 0.2 * (0.5 - 0.5 * Math.cos(TAU * t / 2.5)) ** 2, (t) => (0.15 + 0.85 * (0.5 - 0.5 * Math.cos(TAU * t / 2.5)) ** 2) * 1.8)],
+    ['Trueno', 'Naturaleza', () => mix(2.4, [[0, noiseLP(2.4, () => 0.012, (t) => env(t, 0.7, 0.04) * 6)], [0, tone(2.4, (t) => 45 + 20 * Math.sin(TAU * 3 * t), [1, 0.5], (t) => env(t, 0.8, 0.05) * 0.6)]])],
+    ['Fuego', 'Naturaleza', () => { let g = 0, y = 0; return synth(2.5, () => { if (Math.random() < 0.0025) g = 1; g *= 0.992; y += 0.2 * (rnd() - y); return rnd() * g * 0.6 + y * 0.35; }); }],
+    ['Cascada', 'Naturaleza', () => noiseLP(2.5, () => 0.3, () => 0.8)],
+    /* ---- música ---- */
+    ['Piano', 'Música', () => mix(2, [60, 64, 67, 72].map((m, i) => [i * 0.2, synth(1.5, (t) => (Math.sin(TAU * hz(m) * t) + 0.5 * Math.sin(TAU * hz(m) * 2 * t) + 0.25 * Math.sin(TAU * hz(m) * 3 * t) + 0.12 * Math.sin(TAU * hz(m) * 4 * t)) * env(t, 0.5, 0.004) * 0.4)]))],
+    ['Xilófono', 'Música', () => mix(1.4, [72, 74, 76, 79, 81, 84].map((m, i) => [i * 0.14, synth(0.4, (t) => (Math.sin(TAU * hz(m) * t) + 0.3 * Math.sin(TAU * hz(m) * 3.9 * t)) * env(t, 0.09, 0.002) * 0.5)]))],
+    ['Flauta', 'Música', () => mix(1.9, [76, 79, 81].map((m, i) => [i * 0.5, synth(0.6, (t, p) => (Math.sin(TAU * hz(m) * t + 0.4 * Math.sin(TAU * 5 * t)) + 0.15 * Math.sin(TAU * hz(m) * 2 * t) + rnd() * 0.04) * sw(p) ** 0.4 * 0.5)]))],
+    ['Guitarra', 'Música', () => mix(2.4, [55, 59, 62, 67].map((m, i) => [i * 0.07, ks(hz(m), 2, 0.997)]))],
+    ['Timple', 'Música', () => mix(1.8, [69, 76, 81, 76, 84].map((m, i) => [i * 0.11, ks(hz(m), 1.1, 0.994)]))],
+    ['Escala', 'Música', () => mix(1.8, [60, 62, 64, 65, 67, 69, 71, 72].map((m, i) => [i * 0.2, tone(0.3, () => hz(m), [1, 0.2], (t) => env(t, 0.18, 0.006) * 0.5)]))],
+    ['Redoble', 'Música', () => { const ts = []; let t0 = 0, dt = 0.12; while (t0 < 1.2) { ts.push(t0); t0 += dt; dt = Math.max(0.035, dt * 0.88); } return mix(1.5, ts.map((s) => [s, noiseLP(0.08, () => 0.5, (t) => env(t, 0.025, 0.002) * 1.2)]).concat([[1.25, noiseLP(0.25, () => 0.7, (t) => env(t, 0.08, 0.002) * 1.5)]])); }],
+    ['Platillo', 'Música', () => { let y = 0; return synth(1.6, (t) => { const x = rnd(); y += 0.4 * (x - y); return (x - y) * env(t, 0.45, 0.001); }); }],
+    ['Cascabeles', 'Música', () => mix(1.2, Array.from({ length: 14 }, (_, i) => [i * 0.075 + (i % 3) * 0.01, synth(0.2, (t) => (Math.sin(TAU * 2093 * t) + Math.sin(TAU * 3136 * t) * 0.7 + Math.sin(TAU * 4186 * t) * 0.4) * env(t, 0.05, 0.001) * 0.3)]))],
+    ['Xilófono grave', 'Música', () => mix(1.2, [55, 57, 60, 64].map((m, i) => [i * 0.18, synth(0.5, (t) => (Math.sin(TAU * hz(m) * t) + 0.3 * Math.sin(TAU * hz(m) * 3.9 * t)) * env(t, 0.14, 0.002) * 0.5)]))],
+    /* ---- transporte ---- */
+    ['Tren', 'Transporte', () => mix(2.2, [0, 0.22, 0.44, 0.66].map((s) => [s, noiseLP(0.16, () => 0.25, (t) => env(t, 0.05, 0.01) * 1.5)]).concat([[1.0, tone(1.1, () => 620, [1, 0.5, 0.3], (t, p) => sw(p) ** 0.3 * 0.4)], [1.0, tone(1.1, () => 780, [1, 0.5, 0.3], (t, p) => sw(p) ** 0.3 * 0.4)]]))],
+    ['Barco', 'Transporte', () => mix(2, [[0, tone(2, () => 110, [1, 0.7, 0.5, 0.3], (t, p) => sw(Math.min(1, p * 1.1)) ** 0.3 * 0.4)], [0, tone(2, () => 164.8, [1, 0.6, 0.4], (t, p) => sw(Math.min(1, p * 1.1)) ** 0.3 * 0.3)]])],
+    ['Cohete', 'Transporte', () => mix(3, [[0, noiseLP(3, (t, p) => 0.05 + 0.25 * p, (t, p) => Math.min(1, t / 0.4) * (1 - p ** 4) * 2.2)], [0, tone(3, (t) => 60 + 20 * Math.sin(TAU * 11 * t), [1, 0.6], (t, p) => Math.min(1, t / 0.4) * (1 - p ** 4) * 0.5)]])],
+    ['Moto', 'Transporte', () => tone(1.6, (t, p) => 70 + 220 * Math.min(1, p * 1.6) ** 1.5 + 8 * Math.sin(TAU * 40 * t), [1, 0.8, 0.7, 0.5, 0.4], (t, p) => sw(Math.min(1, p * 1.05)) ** 0.3 * 0.4)],
+    /* ---- casa ---- */
+    ['Timbre', 'Casa', () => mix(1.6, [[0, bell(659.3, 0.7, 0.25)], [0.45, bell(523.3, 1.1, 0.4)]])],
+    ['Reloj', 'Casa', () => mix(2.2, Array.from({ length: 4 }, (_, i) => [i * 0.5, synth(0.1, (t) => Math.sin(TAU * (i % 2 ? 1500 : 1900) * t) * env(t, 0.012, 0.001) * 0.6 + rnd() * env(t, 0.004, 0.0005) * 0.5)]))],
+    ['Teléfono', 'Casa', () => synth(1.7, (t) => { const on = (t % 0.85) < 0.4; return on ? (Math.sin(TAU * 440 * t) + Math.sin(TAU * 480 * t)) * (0.5 + 0.5 * Math.sin(TAU * 20 * t)) * 0.3 : 0; })],
+    ['Burbuja grande', 'Efectos', () => tone(0.35, (t, p) => 300 + 600 * p ** 0.8, [1], (t, p) => sw(p) ** 0.3 * 0.6)]
+  ];
+  const CAT = {'Pop': 'Efectos', 'Boing': 'Efectos', 'Campana': 'Música', 'Tambor': 'Música', 'Música ritmo': 'Música', 'Ta-chán': 'Efectos', 'Chapuzón': 'Naturaleza', 'Bocina': 'Transporte', 'Magia': 'Efectos'};
+  NEW.forEach((n) => SOUNDS.push([n[0], () => fin(n[2]()), n[1]]));
+  PQ.SOUND_CATS = ['Todos', 'Animales', 'Efectos', 'Música', 'Naturaleza', 'Transporte', 'Casa'];
+  PQ.SOUND_LIB = SOUNDS.map((s) => ({ name: s[0], make: s[1], cat: s[2] || CAT[s[0]] || 'Efectos' }));
 
   PQ.makeSound = function (libName) {
     const s = SOUNDS.find((x) => x[0] === libName) || SOUNDS[0];

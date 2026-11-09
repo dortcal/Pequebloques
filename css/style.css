@@ -542,3 +542,9 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 .vrange input{flex:1;min-width:0;height:34px;accent-color:#8B5CF6}
 .vrange output{min-width:9.5em;text-align:right;font-weight:700;color:#3b3170}
 .vnote{margin:0;font-size:13.5px;color:#5f5a86;line-height:1.4}
+/* biblioteca de sonidos: categorías y elegido */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.chip{min-height:44px;padding:6px 14px;font-weight:800}
+.card.sel{border-color:#8B5CF6;background:#EADFFF;box-shadow:0 0 0 3px #CBB4FF}
+.sndadd{display:block;width:100%;margin-top:10px;min-height:52px;font-size:17px}
+.sndadd:disabled{opacity:.5}

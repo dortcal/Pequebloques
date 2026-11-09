@@ -1,0 +1,23 @@
+import asyncio, sys
+sys.path.insert(0, __file__.rsplit('/',1)[0])
+from pchelp import session
+async def main():
+    p,b,pg,g,errs = await session('canario-viajero')
+    await pg.click('text=Sonidos'); await pg.wait_for_timeout(300)
+    await pg.click('button:has-text("Elegir sonido")'); await pg.wait_for_timeout(400)
+    n_all = await pg.locator('.modal .grid .card').count()
+    await pg.click('.modal .chip:has-text("Animales")'); await pg.wait_for_timeout(200)
+    n_an = await pg.locator('.modal .grid .card').count()
+    n0 = await pg.evaluate("PQ.S.target.sounds.length")
+    await pg.click('.modal .card:has-text("Ballena")'); await pg.wait_for_timeout(300)
+    sel = await pg.locator('.modal .card.sel').count(); n1 = await pg.evaluate("PQ.S.target.sounds.length")
+    await pg.click('.modal .sndadd'); await pg.wait_for_timeout(300)
+    n2 = await pg.evaluate("PQ.S.target.sounds.map(s=>s.name)")
+    print('todos',n_all,'animales',n_an,'seleccionado',sel,'antes de añadir',n1-n0,'tras añadir',n2[-2:],'errs',errs)
+    await pg.click('button:has-text("Elegir sonido")'); await pg.wait_for_timeout(300)
+    await pg.click('.modal .chip:has-text("Casa")'); await pg.wait_for_timeout(200)
+    await pg.screenshot(path='/tmp/sonidos.png')
+    await pg.click('.modal .card:has-text("Timbre")'); await pg.click('.modal .card:has-text("Timbre")'); await pg.wait_for_timeout(300)
+    print('doble toque añade:', await pg.evaluate("PQ.S.target.sounds.map(s=>s.name)"))
+    await b.close(); await p.stop()
+asyncio.run(main())

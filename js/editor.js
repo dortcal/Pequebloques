@@ -529,7 +529,8 @@
   function onMove(e) {
     if (pending && !drag) {
       const mdx = e.clientX - pending.sx, mdy = e.clientY - pending.sy;
-      if (Math.hypot(mdx, mdy) < 6) return;
+      /* con el dedo o el lápiz de una pizarra digital el pulso tiembla: umbral mayor para no arrancar el bloque sin querer */
+      if (Math.hypot(mdx, mdy) < (e.pointerType === 'mouse' ? 6 : 14)) return;
       /* con el dedo en la paleta, un gesto más vertical que horizontal es para hacer scroll, no para coger el bloque */
       if (pending.fromPal && e.pointerType === 'touch' && Math.abs(mdy) > Math.abs(mdx) * 1.2) return;
       beginDrag(e);
@@ -588,7 +589,8 @@
     const fl = h('div', 'dragstack');
     fl.appendChild(renderStack(dragged, { blocks: dragged }));
     document.body.appendChild(fl);
-    drag = { dragged, el: fl, ox: pending.sx - r.left, oy: pending.sy - r.top, fromPal, snap: null, hl: null, line: h('div', 'snapline') };
+    const snapshot = fromPal ? null : (S.target._undo && S.target._undo[S.target._undo.length - 1]);
+    drag = { snapshot, sx: pending.sx, sy: pending.sy, dragged, el: fl, ox: pending.sx - r.left, oy: pending.sy - r.top, fromPal, snap: null, hl: null, line: h('div', 'snapline') };
     document.body.appendChild(drag.line);
     drag.line.style.display = 'none';
     document.body.classList.add('dragging');
@@ -674,6 +676,13 @@
     const wsRect = $('#ws').getBoundingClientRect(), wsEl = $('#ws');
     const toWs = (x, y) => ({ x: Math.max(6, Math.round(x - wsRect.left + wsEl.scrollLeft)), y: Math.max(6, Math.round(y - wsRect.top + wsEl.scrollTop)) });
     let changed = true;
+    /* un arrastre accidental (movimiento corto y soltado en el vacío) devuelve el bloque, y todo lo que llevaba debajo, a su sitio */
+    if (!cancelled && !d.fromPal && !d.snap && !d.overPal && d.snapshot && e && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 44) {
+      S.target.scripts = JSON.parse(d.snapshot);
+      S.target._undo.pop();
+      ED.renderWorkspace();
+      return;
+    }
     if (cancelled) {
       const p = toWs(wsRect.left + 30, wsRect.top + 30);
       S.target.scripts.push({ x: p.x, y: p.y, blocks: d.dragged });

@@ -224,6 +224,7 @@
     $('#btnLevel').setAttribute('aria-pressed', String(on));
     $('#levelLabel').textContent = on ? 'Más bloques' : 'Pocos bloques';
   }
+  PQ.setLevel = (n) => { if (S.level >= n) return; S.level = n; updateLevelBtn(); ED.renderPalette(); };
 
   /* ============================ aviso (reto) ============================ */
   function showBanner(text) {
@@ -432,6 +433,7 @@
     S.project.sprites.push(s);
     if (select !== false) S.target = s;
     RT.dirty = true; markDirty(); renderAll();
+    if (PQ.Tut) PQ.Tut.check();
   }
   function duplicateSprite(s) {
     const n = PQ.newTarget(PQ.uniqueName(s.name, S.project.sprites.map((x) => x.name)), false);

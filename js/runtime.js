@@ -176,8 +176,10 @@
   const hash = (t) => { let h = 7; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 997; return h / 997; };
   /* perfil «natural»: tonos cercanos a 1 (un tono muy forzado suena a robot) y voz más suave */
   const NAT_STYLE = { KITTEN: [1.12, 1.0, 'f'], ALTO: [0.98, 1.0, 'm'], TENOR: [0.78, 0.96, 'm'], SQUEAK: [1.4, 1.08, 'f'], GIANT: [0.4, 0.85, 'm'] };
+  /* con una voz natural del dispositivo no se fuerza el tono: un tono muy alterado la vuelve robótica */
+  const isNat = () => !!(PQ.voiceNatural || (PQ.tts && PQ.tts.usingNatural && PQ.tts.usingNatural()));
   function voiceFor(key, text) {
-    const st = (PQ.voiceNatural ? NAT_STYLE[key] : null) || VOICE_STYLE[key] || VOICE_STYLE.ALTO;
+    const st = (isNat() ? NAT_STYLE[key] : null) || VOICE_STYLE[key] || VOICE_STYLE.ALTO;
     let pitch = st[0], rate = st[1], voice = null;
     const vs = esVoices();
     if (vs.length) {
@@ -301,10 +303,10 @@
         PQ._lastUtter = { text, key, engine: 'neural', clips: neural.map((c) => c.k) };
       } else {
         const vf = voiceFor(key, text);
-        const base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * (PQ.voiceNatural ? 0.95 : 0.92) };
+        const base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * (isNat() ? 0.95 : 0.92) };
         const units = (PROSODY.on && PQ.prosody) ? PQ.prosody.plan(text, key) : PQ.prosody.flat(text);
         if (!units.length) { h.done = true; return h; }
-        job = { h, units, base, over: false, dead: false, timer: 0, natural: !!PQ.voiceNatural };
+        job = { h, units, base, over: false, dead: false, timer: 0, natural: isNat() };
         PQ._lastUtter = { text, key, engine: 'device', voice: vf.voice && vf.voice.name, pitch: vf.pitch, units };
       }
       if (Q.cur && Q.wait.length >= 1) {                    // evita colas largas de voces atrasadas

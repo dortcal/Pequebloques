@@ -2854,7 +2854,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   const cfg = PQ.voiceCfg = { rate: 1, volume: 1, engine: 'auto', device: '', pipo: 'f' };
   try { Object.assign(cfg, JSON.parse(localStorage.getItem(STORE) || '{}')); } catch (e) { /* sin almacenamiento */ }
   cfg.rate = clamp(+cfg.rate || 1, 0.6, 1.4); cfg.volume = clamp(cfg.volume === undefined ? 1 : +cfg.volume, 0, 1);
-  if (cfg.engine !== 'device') cfg.engine = 'auto';
+  if (cfg.engine !== 'device' && cfg.engine !== 'clips') cfg.engine = 'auto';
   if (cfg.pipo !== 'm') cfg.pipo = 'f';
   try { if (/[?&]voz=dispositivo\b/.test(g.location.search)) cfg.engine = 'device'; } catch (e) { /* nada */ }   // para pruebas y para forzar la voz del dispositivo con ?voz=dispositivo
   const save = () => { try { localStorage.setItem(STORE, JSON.stringify(cfg)); } catch (e) { /* nada */ } };
@@ -2866,7 +2866,9 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   function clipKey(voice, text) { const s = voice + '|' + clean(text); return hex8(h32(s, 0x811c9dc5)) + hex8(h32(s, 0x9747b28c)); }
   const has = (k) => !!(PQ.AUDIO && PQ.AUDIO.k && PQ.AUDIO.k[k]);
   const voiceId = (voice) => (voice === 'PIPO' && cfg.pipo === 'm') ? 'PIPOM' : voice;
-  const neuralReady = () => !!(PQ.AUDIO && PQ.AUDIO.k && cfg.engine !== 'device' && (typeof Audio !== 'undefined'));
+  /* Motor «automático»: si el dispositivo tiene una voz española NATURAL utilizable (Microsoft «Natural», Google, Siri, mejoradas…),
+   * se usa esa para todo —suena mejor que las voces pregrabadas—; si no, las grabadas (Kokoro). «clips» fuerza las grabadas. */
+  const neuralReady = () => !!(PQ.AUDIO && PQ.AUDIO.k && (typeof Audio !== 'undefined') && (cfg.engine === 'clips' || (cfg.engine === 'auto' && !naturalDevice())));
 
   /* ¿Se puede decir este texto con la voz neuronal? Devuelve la lista de claves (con pausas) o null. */
   function plan(text, voice) {
@@ -2929,12 +2931,18 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     try {
       const all = (g.speechSynthesis && g.speechSynthesis.getVoices()) || [];
       vlist = all.filter(isES).map((v) => ({ v, name: v.name, lang: v.lang, spain: isSpain(v),
-        score: (isSpain(v) ? 100 : 0) + (NATURAL.test(v.name) ? 30 : 0) + (v.localService ? 0 : 5) - (POOR.test(v.name) ? 200 : 0) }));   // las robóticas (espeak…) van siempre las últimas
+        score: (isSpain(v) ? 100 : 0) + (NATURAL.test(v.name) ? 120 : 0) + (v.localService ? 0 : 5) - (POOR.test(v.name) ? 200 : 0) }));   // las robóticas (espeak…) van siempre las últimas
       vlist.sort((a, b) => b.score - a.score);
       vlist._all = all.length;
     } catch (e) { vlist = []; vlist._all = 0; }
   }
   refreshVoices();
+  /* mejor voz natural que se pueda usar ahora (las de red necesitan conexión) o null */
+  function naturalDevice() {
+    const online = !(g.navigator && g.navigator.onLine === false);
+    const x = vlist.find((e) => NATURAL.test(e.name) && !POOR.test(e.name) && (e.v.localService || online));
+    return x ? x.v : null;
+  }
   try { if (g.speechSynthesis) g.speechSynthesis.addEventListener('voiceschanged', refreshVoices); } catch (e) { /* nada */ }
   /* ¿puede el dispositivo hablar en español? (si aún no ha cargado ninguna voz se intenta igualmente con lang = es-ES) */
   const deviceOK = () => !!g.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined' && (vlist.length > 0 || (vlist._all || 0) === 0);
@@ -2942,7 +2950,8 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   /* ---------- API ---------- */
   PQ.tts = {
     clipKey, plan, play, cfg, save,
-    neuralReady,
+    neuralReady, naturalDevice,
+    usingNatural: () => !!naturalDevice(),
     deviceVoices: () => vlist.map((x) => x.v),
     deviceInfo: () => vlist.slice(),
     deviceOK,
@@ -2972,9 +2981,10 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 
     /* motor */
     const eng = el('div', 'vseg');
-    [['auto', 'Automática (recomendada)'], ['device', 'Solo la del dispositivo']].forEach(([v, t]) => {
+    const ENG = [['auto', 'Automática (recomendada)'], ['clips', 'Grabadas'], ['device', 'Solo la del dispositivo']];
+    ENG.forEach(([v, t]) => {
       const b = el('button', 'btn ' + (cfg.engine === v ? 'ok' : ''), t); b.type = 'button'; b.setAttribute('aria-pressed', String(cfg.engine === v));
-      b.onclick = () => { cfg.engine = v; save(); [...eng.children].forEach((c, i) => { const on = i === (v === 'auto' ? 0 : 1); c.classList.toggle('ok', on); c.setAttribute('aria-pressed', String(on)); }); };
+      b.onclick = () => { cfg.engine = v; save(); [...eng.children].forEach((c, k) => { const on = ENG[k][0] === v; c.classList.toggle('ok', on); c.setAttribute('aria-pressed', String(on)); }); };
       eng.appendChild(b);
     });
     row('Motor de voz', eng);
@@ -3016,7 +3026,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       const b = el('button', 'btn', '▶ Probar'); b.type = 'button'; b.onclick = () => sample('PIPO', { engine: 'device' }); w.appendChild(b);
       row('Voz del dispositivo (respaldo)', w);
     }
-    body.appendChild(el('p', 'vnote', 'Lo que escribe el alumnado en «decir en voz alta» se lee con la voz del dispositivo. Los textos de cuentos, retos, pistas y bloques usan las voces neuronales.'));
+    body.appendChild(el('p', 'vnote', 'Automática: si tu dispositivo tiene una voz española «natural» (Microsoft Natural, Google, Siri…) se usa para todo, porque suele sonar mejor; si no, se usan las voces grabadas. «Grabadas» fuerza las voces neuronales incluidas. Lo que escribe el alumnado en «decir en voz alta» siempre se lee con la voz del dispositivo.'));
     PQ.ui.modal({ title: 'Voz', size: 'lg', body, buttons: [{ label: 'Listo', cls: 'ok' }] });
   };
   const gear = document.getElementById('btnVoiceSet');
@@ -3203,8 +3213,10 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   const hash = (t) => { let h = 7; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 997; return h / 997; };
   /* perfil «natural»: tonos cercanos a 1 (un tono muy forzado suena a robot) y voz más suave */
   const NAT_STYLE = { KITTEN: [1.12, 1.0, 'f'], ALTO: [0.98, 1.0, 'm'], TENOR: [0.78, 0.96, 'm'], SQUEAK: [1.4, 1.08, 'f'], GIANT: [0.4, 0.85, 'm'] };
+  /* con una voz natural del dispositivo no se fuerza el tono: un tono muy alterado la vuelve robótica */
+  const isNat = () => !!(PQ.voiceNatural || (PQ.tts && PQ.tts.usingNatural && PQ.tts.usingNatural()));
   function voiceFor(key, text) {
-    const st = (PQ.voiceNatural ? NAT_STYLE[key] : null) || VOICE_STYLE[key] || VOICE_STYLE.ALTO;
+    const st = (isNat() ? NAT_STYLE[key] : null) || VOICE_STYLE[key] || VOICE_STYLE.ALTO;
     let pitch = st[0], rate = st[1], voice = null;
     const vs = esVoices();
     if (vs.length) {
@@ -3328,10 +3340,10 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
         PQ._lastUtter = { text, key, engine: 'neural', clips: neural.map((c) => c.k) };
       } else {
         const vf = voiceFor(key, text);
-        const base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * (PQ.voiceNatural ? 0.95 : 0.92) };
+        const base = { voice: vf.voice, pitch: vf.pitch, rate: vf.rate * (isNat() ? 0.95 : 0.92) };
         const units = (PROSODY.on && PQ.prosody) ? PQ.prosody.plan(text, key) : PQ.prosody.flat(text);
         if (!units.length) { h.done = true; return h; }
-        job = { h, units, base, over: false, dead: false, timer: 0, natural: !!PQ.voiceNatural };
+        job = { h, units, base, over: false, dead: false, timer: 0, natural: isNat() };
         PQ._lastUtter = { text, key, engine: 'device', voice: vf.voice && vf.voice.name, pitch: vf.pitch, units };
       }
       if (Q.cur && Q.wait.length >= 1) {                    // evita colas largas de voces atrasadas

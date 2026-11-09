@@ -41,7 +41,8 @@ async def page(b, voices=VOICES_OK, cfg=None, query=''):
     ctx = await b.new_context(viewport={'width': 1300, 'height': 820}); pg = await ctx.new_page(); errs = []
     pg.on('pageerror', lambda e: errs.append('PAGEERR ' + str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
     await pg.add_init_script(STUB % json.dumps(voices))
-    if cfg: await pg.add_init_script("localStorage.setItem('pequebloques.voz', %s)" % json.dumps(json.dumps(cfg)))
+    cfg = dict(cfg or {}); cfg.setdefault('engine', 'clips')   # estas pruebas miden las voces grabadas; el modo automático con voz natural tiene su propia comprobación
+    if cfg: await pg.add_init_script("if(!localStorage.getItem('pequebloques.voz'))localStorage.setItem('pequebloques.voz', %s)" % json.dumps(json.dumps(cfg)))
     await pg.goto('file://' + ROOT + '/index.html' + query); await pg.wait_for_timeout(700)
     return pg, errs
 
@@ -56,6 +57,10 @@ async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required'])
         pg, errs = await page(b)
+        await pg.evaluate("PQ.voiceCfg.engine='auto'")
+        auto = await pg.evaluate('({nat:!!PQ.tts.naturalDevice(), ready:PQ.tts.neuralReady()})')
+        ck('motor automático: con voz natural en el dispositivo se usa esa, no las grabadas', auto['nat'] and not auto['ready'], auto)
+        await pg.evaluate("PQ.voiceCfg.engine='clips'; PQ.tts.save()")
         info = await pg.evaluate('({n:PQ.AUDIO&&PQ.AUDIO.n, base:PQ.AUDIO_BASE, ready:PQ.tts.neuralReady(), es:PQ.tts.deviceInfo().map(v=>v.name)})')
         print('estado:', info)
         ck('manifiesto de audio cargado', bool(info['n']) and info['ready'], info['n'])

@@ -250,7 +250,7 @@ PQ.defer('tutorials', function (g) {
     const btn = (label, cls, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ' + cls; b.innerHTML = label; b.addEventListener('click', fn); gb.appendChild(b); };
     btn('🔊 Escuchar', '', () => PQ.say(text, true));
     if (done) {
-      btn('Más cuentos y retos', 'pri', () => { PQ.Tut.stop(); PQ.openStories('all'); });
+      btn('Más cuentos y retos', 'pri', () => { PQ.Tut.stop(); PQ.openStories('cuento'); });
       btn('Seguir jugando', '', () => PQ.Tut.stop());
     } else {
       btn('Salir', '', () => PQ.Tut.stop());

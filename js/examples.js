@@ -907,7 +907,7 @@ PQ.defer('examples', function (g) {
               ]
             },
             {
-              id: 'estrella', name: 'Sol', x: 170, y: 120, size: 70, hidden: true, sounds: ['Magia'], scripts: [
+              id: 'sol', name: 'Sol', x: 170, y: 120, size: 70, hidden: true, sounds: ['Magia'], scripts: [
                 [F(), S.hide(), S.xy(170, 120)],
                 [S.recv('sol'), S.show()],
                 [S.click(), S.iff(paso(4), [S.setv('paso', 4.5), S.sound('Magia'), S.grow(30), S.wait(0.3), S.hide(), S.send('crece')])]

@@ -918,7 +918,7 @@
   /* ============================ cuentos y retos ============================ */
   function openStories(filter) {
     PQ.need('stories');
-    filter = filter || 'all';
+    filter = (filter && filter !== 'all') ? filter : 'tut';
     const body = h('div');
     const tabs = h('div', 'tabsm');
     const grid = h('div', 'stories');
@@ -927,7 +927,7 @@
       (PQ.EX || []).map((x) => ({ kind: x.kind, pc: x.pc, voices: x.voices, id: x.id, title: x.title, desc: x.desc, stars: x.stars, bg: x.bg, sprite: x.sprite })));
     function draw() {
       grid.innerHTML = '';
-      items().filter((x) => filter === 'all' || (filter === 'pc' ? !!x.pc : filter === 'voz' ? !!x.voices : (x.kind === filter && !(filter === 'cuento' && x.voices)))).forEach((x) => {
+      items().filter((x) => (filter === 'pc' ?!!x.pc : filter === 'voz' ? !!x.voices : (x.kind === filter && !(filter === 'cuento' && x.voices)))).forEach((x) => {
         const c = h('button', 'story'); c.type = 'button';
         const bd = PQ.BACKDROP_LIB.find((b) => b.id === x.bg) || PQ.BACKDROP_LIB[0];
         const sp = PQ.spriteLibById(x.sprite) || PQ.SPRITE_LIB[0];
@@ -943,7 +943,7 @@
         grid.appendChild(c);
       });
     }
-    [['all', 'Todo'], ['tut', 'Tutoriales'], ['cuento', 'Cuentos'], ['voz', 'Cuentos con voz'], ['pc', 'Pensamiento computacional'], ['reto', 'Retos'], ['juego', 'Juegos']].forEach((f) => {
+    [['tut', 'Tutoriales'], ['cuento', 'Cuentos'], ['voz', 'Cuentos con voz'], ['pc', 'Pensamiento computacional'], ['reto', 'Retos'], ['juego', 'Juegos']].forEach((f) => {
       const b = h('button', filter === f[0] ? 'on' : '', f[1]); b.type = 'button';
       b.addEventListener('click', () => { filter = f[0]; $$('button', tabs).forEach((x) => x.classList.toggle('on', x === b)); draw(); });
       tabs.appendChild(b);

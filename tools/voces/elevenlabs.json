@@ -78,10 +78,14 @@
     "pendiente_de_probar": [
       "todas"
     ],
-    "importante": "Elegidas por descripción y etiquetas, sin escucharlas. La muestra generada antes (Fruna, español latino) queda descartada. Falta decidir si se diseña una voz con acento canario."
+    "importante": "Elegidas por descripción y etiquetas, sin escucharlas. La muestra generada antes (Fruna, español latino) queda descartada. Falta decidir si se diseña una voz con acento canario.",
+    "primera_tanda": "Solo el narrador. Pipo (en su opción de voz masculina, PIPOM) y los tutoriales usan la voz del narrador. Trabajos en trabajos_narrador.json. Pendiente de generar con la clave de ElevenLabs."
   },
   "acento": {
     "objetivo": "español de España; si es posible, acento canario",
     "situacion": "La búsqueda «canario/canarias» no devolvió ninguna voz de la biblioteca. Todas las elegidas son de español peninsular (castellano). El acento canario solo se conseguiría diseñando una voz nueva (creative_design_voice) o clonando una voz real con permiso."
+  },
+  "usar_en_programa": {
+    "PIPOM": "NARRADOR"
   }
 }

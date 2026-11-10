@@ -1,0 +1,382 @@
+[
+[
+"PIPOM",
+"¡Hola! Soy Pipo. Vamos a mover al canario. Arrastra el bloque amarillo «al hacer clic en la bandera» hasta la zona blanca."
+],
+[
+"PIPOM",
+"¡Muy bien! Ahora arrastra «mover 10 pasos» y engánchalo debajo del bloque amarillo."
+],
+[
+"PIPOM",
+"Toca el número 10 y escribe 100 para que el canario vaya más lejos."
+],
+[
+"PIPOM",
+"Ahora pulsa la bandera verde de arriba. ¡A ver qué pasa!"
+],
+[
+"PIPOM",
+"¡Lo has conseguido! Has creado tu primer programa. Prueba otros números."
+],
+[
+"PIPOM",
+"Empieza igual: arrastra «al hacer clic en la bandera»."
+],
+[
+"PIPOM",
+"Engancha «decir ¡Hola! durante 2 segundos». Puedes escribir lo que quieras."
+],
+[
+"PIPOM",
+"Para repetir, busca el bloque naranja «repetir 10 veces» y engánchalo debajo."
+],
+[
+"PIPOM",
+"Mete dentro del bucle «girar ↻ 15 grados». Arrástralo al hueco del bloque naranja."
+],
+[
+"PIPOM",
+"¡Pulsa la bandera verde y mira cómo gira!"
+],
+[
+"PIPOM",
+"¡Genial! Un bucle repite las órdenes muchas veces. Cambia el 10 y el 15 y mira qué pasa."
+],
+[
+"PIPOM",
+"Vamos a hacer que el canario vuele. Arrastra «al hacer clic en la bandera»."
+],
+[
+"PIPOM",
+"Engancha el bloque naranja «repetir 10 veces»."
+],
+[
+"PIPOM",
+"Dentro del bucle pon «siguiente disfraz». ¡Así bate las alas!"
+],
+[
+"PIPOM",
+"Añade también «esperar 1 segundos» dentro del bucle, para que no vaya demasiado rápido. Pon 0.2."
+],
+[
+"PIPOM",
+"Pulsa la bandera verde para ver volar al canario."
+],
+[
+"PIPOM",
+"¡Fantástico! Así se hacen las animaciones: cambiar de disfraz muchas veces. Añade «mover 5 pasos» dentro del bucle y volará."
+],
+[
+"PIPOM",
+"Vamos a hacer una fiesta. Arrastra «al hacer clic en la bandera»."
+],
+[
+"PIPOM",
+"Los bloques rosas son los sonidos. Arrastra «iniciar sonido Pop» y engánchalo debajo."
+],
+[
+"PIPOM",
+"Ahora el bucle naranja «repetir 10 veces». Engánchalo debajo del sonido."
+],
+[
+"PIPOM",
+"Dentro del bucle pon «girar ↺ 15 grados». Para bailar, escribe 30."
+],
+[
+"PIPOM",
+"Añade también «siguiente disfraz» dentro del bucle, para que bata las alas mientras gira."
+],
+[
+"PIPOM",
+"¡Pulsa la bandera verde y a bailar!"
+],
+[
+"PIPOM",
+"¡Qué fiesta! Has juntado sonido, bucle, giro y disfraz. Prueba otro sonido: toca la palabra Pop del bloque."
+],
+[
+"PIPOM",
+"Esta vez no usaremos la bandera. Busca «al hacer clic en este objeto» y arrástralo a la zona blanca."
+],
+[
+"PIPOM",
+"Para saltar, engancha «cambiar y por 10». Toca el 10 y escribe 40."
+],
+[
+"PIPOM",
+"Engancha «esperar 1 segundos» y escribe 0.3, para que se quede un momento arriba."
+],
+[
+"PIPOM",
+"Para bajar, otro «cambiar y por», pero escribe -40 (con el signo menos)."
+],
+[
+"PIPOM",
+"¡Toca al canario en el escenario y míralo saltar!"
+],
+[
+"PIPOM",
+"¡Salta! Los bloques amarillos de eventos deciden cuándo empieza tu programa: con la bandera o al tocar. Prueba el salto más alto."
+],
+[
+"PIPOM",
+"Un proyecto puede tener muchos personajes. Toca el botón «＋» de los personajes y elige a un amigo."
+],
+[
+"PIPOM",
+"Tu amigo ya está elegido. Arrastra «al hacer clic en la bandera» para él."
+],
+[
+"PIPOM",
+"Engancha «decir ¡Hola! durante 2 segundos». Puedes cambiar lo que dice."
+],
+[
+"PIPOM",
+"Ahora vamos con el canario. Tócalo en la lista de personajes, abajo a la derecha."
+],
+[
+"PIPOM",
+"Al canario también: «al hacer clic en la bandera» y «decir ¡Hola! durante 2 segundos»."
+],
+[
+"PIPOM",
+"¡Pulsa la bandera verde! Cada personaje tiene sus propios bloques."
+],
+[
+"PIPOM",
+"¡Ya tienes dos personajes! Cada uno hace lo que le programas. Cambia los textos para que charlen."
+],
+[
+"PIPOM",
+"Vamos a manejar al canario. Arrastra «al presionar espacio» y toca la palabra «espacio» para elegir «flecha →»."
+],
+[
+"PIPOM",
+"Engancha «cambiar x por 10» debajo. Así se mueve a la derecha."
+],
+[
+"PIPOM",
+"Otro bloque «al presionar» y elige «flecha ←»."
+],
+[
+"PIPOM",
+"Debajo, «cambiar x por» con un número negativo: escribe -10."
+],
+[
+"PIPOM",
+"¡A jugar! Pulsa las flechas del teclado o los botones con flechas que han salido en pantalla."
+],
+[
+"PIPOM",
+"¡Ya lo manejas tú! Los programas pueden esperar a que pulses una tecla. Prueba con «cambiar y por» para ir arriba y abajo."
+],
+[
+"PIPOM",
+"Vamos a repetir para siempre. Empieza con «al hacer clic en la bandera»."
+],
+[
+"PIPOM",
+"«Por siempre» es un bucle que no termina. Engánchalo debajo."
+],
+[
+"PIPOM",
+"Dentro de «por siempre» mete «mover 10 pasos». Prueba con 5."
+],
+[
+"PIPOM",
+"Para que no se escape, mete también «rebotar si está en el borde»."
+],
+[
+"PIPOM",
+"Añade «siguiente disfraz» dentro del bucle y se moverá como si nadara."
+],
+[
+"PIPOM",
+"Pulsa la bandera verde. Para pararlo, usa el botón rojo de arriba."
+],
+[
+"PIPOM",
+"¡Rebota! «Por siempre» no se acaba solo: hay que parar con el botón rojo. Cambia los pasos para ir más rápido o más despacio."
+],
+[
+"PIPOM",
+"Aquí hay un canario y una tortuga. El canario va a avisar a la tortuga. Empieza con «al hacer clic en la bandera»."
+],
+[
+"PIPOM",
+"Engancha «decir ¡Hola! durante 2 segundos»."
+],
+[
+"PIPOM",
+"Ahora el bloque amarillo «enviar mensaje1». Es como un aviso para los demás."
+],
+[
+"PIPOM",
+"Toca la tortuga en la lista de personajes para programarla."
+],
+[
+"PIPOM",
+"Arrastra «al recibir mensaje1». La tortuga hará algo cuando llegue el aviso."
+],
+[
+"PIPOM",
+"Engancha «decir ¡Hola! durante 2 segundos» y escribe ¡Hola, canario!"
+],
+[
+"PIPOM",
+"¡Pulsa la bandera verde! Primero habla el canario y después responde la tortuga."
+],
+[
+"PIPOM",
+"¡Se han hablado! Los mensajes sirven para que los personajes se coordinen. En Scratch se llaman igual."
+],
+[
+"PIPOM",
+"Una variable es una cajita con un número. Ve al grupo naranja «Variables» y pulsa «Crear variable». Llámala puntos."
+],
+[
+"PIPOM",
+"Para empezar de cero: «al hacer clic en la bandera»."
+],
+[
+"PIPOM",
+"Engancha «dar a puntos el valor 0». Así siempre empiezas con 0 puntos."
+],
+[
+"PIPOM",
+"Ahora, «al hacer clic en este objeto»."
+],
+[
+"PIPOM",
+"Engancha «sumar a puntos el valor 1». Cada toque suma uno."
+],
+[
+"PIPOM",
+"Pulsa la bandera y toca al canario varias veces. ¡Mira cómo sube el marcador!"
+],
+[
+"PIPOM",
+"¡Ya sabes usar variables! Guardan números que cambian, como los puntos de un juego. Pruébalo con «sumar 5»."
+],
+[
+"PIPOM",
+"Vamos a hacer un programa que decide. Empieza con «al hacer clic en la bandera»."
+],
+[
+"PIPOM",
+"Engancha el bucle «por siempre»."
+],
+[
+"PIPOM",
+"Dentro, «mover 10 pasos». Escribe 3 para que vaya despacio."
+],
+[
+"PIPOM",
+"Y también «rebotar si está en el borde», dentro del bucle."
+],
+[
+"PIPOM",
+"Ahora lo importante: «si … entonces». Va dentro de «por siempre», debajo de los otros."
+],
+[
+"PIPOM",
+"En el hueco del «si» encaja la pregunta azul «¿tocando puntero del ratón?»."
+],
+[
+"PIPOM",
+"Dentro del «si» pon «decir ¡Hola! durante 2 segundos» y escribe ¡Me tocas!"
+],
+[
+"PIPOM",
+"Pulsa la bandera. Pasa el puntero (o el dedo) por encima del canario y verás qué hace."
+],
+[
+"PIPOM",
+"¡Ya sabes decidir! «Si» solo hace algo cuando se cumple la pregunta. Es la base de los juegos."
+],
+[
+"PIPOM",
+"Vamos a hacer un juego. Crea una variable llamada puntos: en el grupo naranja «Variables» pulsa «Crear variable»."
+],
+[
+"PIPOM",
+"«Al hacer clic en la bandera» y debajo «dar a puntos el valor 0»."
+],
+[
+"PIPOM",
+"Ahora «al hacer clic en este objeto». Aquí va lo que ocurre al atrapar al canario."
+],
+[
+"PIPOM",
+"Engancha «sumar a puntos el valor 1»."
+],
+[
+"PIPOM",
+"Engancha «ir a x: 0 y: 0». Hará que el canario se mueva."
+],
+[
+"PIPOM",
+"Arrastra el reportero verde «al azar entre 1 y 10» y suéltalo encima del número de x."
+],
+[
+"PIPOM",
+"Cambia el 1 por -150 y el 10 por 150. Así salta a cualquier lugar."
+],
+[
+"PIPOM",
+"¡A jugar! Pulsa la bandera y atrapa al canario tres veces."
+],
+[
+"PIPOM",
+"¡Has hecho un juego! Usaste variables, eventos, movimiento y azar. Dile a un amigo que lo pruebe y añade un sonido."
+],
+[
+"PIPOM",
+"Tu personaje está escondido. Pulsa el ojo abierto para que se vea."
+],
+[
+"PIPOM",
+"Vamos a empezar. Arrastra el bloque amarillo de la bandera hasta el espacio blanco."
+],
+[
+"PIPOM",
+"Tu programa necesita un bloque de inicio. Arrastra el bloque amarillo de la bandera y ponlo arriba del todo."
+],
+[
+"PIPOM",
+"Ya tienes el inicio. Ahora engancha un bloque justo debajo. Prueba con este."
+],
+[
+"PIPOM",
+"Este bloque naranja está vacío. Arrastra otro bloque dentro del hueco."
+],
+[
+"PIPOM",
+"¡Ya lo tienes! Pulsa la bandera verde para ver qué hace tu programa."
+],
+[
+"PIPOM",
+"Puedes hacer que tu personaje hable. Arrastra este bloque morado y escribe lo que quieras."
+],
+[
+"PIPOM",
+"Para repetir algo muchas veces, usa el bloque naranja de repetir. Mete dentro otros bloques."
+],
+[
+"PIPOM",
+"Añade un sonido. Arrastra este bloque rosa."
+],
+[
+"PIPOM",
+"Toca un bloque para ver qué hace. Para borrar uno, arrástralo de vuelta a la lista de bloques."
+],
+[
+"PIPOM",
+"Si algo no sale bien, pulsa la flecha de deshacer. ¡Equivocarse es parte de aprender!"
+],
+[
+"PIPOM",
+"Voz activada."
+]
+]

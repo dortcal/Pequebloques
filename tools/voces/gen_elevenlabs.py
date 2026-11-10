@@ -29,6 +29,7 @@ def main():
     jobs = json.load(open(sys.argv[1], encoding='utf-8')); out = sys.argv[2]; os.makedirs(out, exist_ok=True)
     solo = sys.argv[sys.argv.index('--solo') + 1] if '--solo' in sys.argv else None
     voices = {k: v['voice_id'] for k, v in cat['personajes'].items()}; voices['NARRADOR'] = cat['narrador']['voice_id']
+    for k, v in cat.get('usar_en_programa', {}).items(): voices[k] = voices[v]   # p. ej. PIPOM (Pipo en modo voz masculina) -> NARRADOR
     st = cat['ajustes_por_defecto']
     for voz, texto in jobs:
         if solo and voz != solo: continue

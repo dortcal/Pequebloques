@@ -118,3 +118,9 @@ Diseño y dirección: **David OZC**. Scratch es un proyecto de la Fundación Scr
 ## Voces de ElevenLabs (catálogo para ampliar el programa)
 
 `tools/voces/elevenlabs.json` guarda las voces elegidas (narrador y personajes) con sus `voice_id`, el modelo y los ajustes. `tools/voces/gen_elevenlabs.py` genera los clips con esos datos y los nombra igual que el programa (`clipKey`), así que basta copiarlos a `audio/` y regenerar `manifest.js`. La clave de API se pasa por la variable `ELEVENLABS_API_KEY` y no se guarda en el repositorio. Estado: voces de español de España (no hay acento canario en la biblioteca), elegidas por su descripción y pendientes de escuchar; el script no se ha probado contra la API.
+
+**Primera tanda (narrador).** En el programa no hay una voz «narrador» propia; la voz que guía es Pipo (ayuda, avisos y tutoriales). La voz de Adrián (español de España) sustituye a la de Pipo en su opción de voz masculina (`PIPOM`, en Ajustes → Voz de Pipo). Pasos desde tu ordenador, con tu clave:
+
+1. `ELEVENLABS_API_KEY=... python3 tools/voces/gen_elevenlabs.py tools/voces/trabajos_narrador.json salida/` (95 frases; prueba antes con unas pocas).
+2. Copia `salida/*.mp3` a `audio/` (sustituyen a los clips con el mismo nombre).
+3. `python3 tools/voces/actualizar_manifest.py` y `python3 tools/build-single.py`.

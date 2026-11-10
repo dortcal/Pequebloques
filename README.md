@@ -114,3 +114,7 @@ Diseño y dirección: **David OZC**. Scratch es un proyecto de la Fundación Scr
 ## Licencia
 
 © 2026 David OZC. Uso gratuito en centros educativos. Licencia **CC BY-NC-ND 4.0** (Reconocimiento – NoComercial – SinObraDerivada): se puede compartir sin cambios y citando al autor; no se permite modificarla, venderla ni presentarla como propia sin su permiso. Ver `LICENSE`.
+
+## Voces de ElevenLabs (catálogo para ampliar el programa)
+
+`tools/voces/elevenlabs.json` guarda las voces elegidas (narrador y personajes) con sus `voice_id`, el modelo y los ajustes. `tools/voces/gen_elevenlabs.py` genera los clips con esos datos y los nombra igual que el programa (`clipKey`), así que basta copiarlos a `audio/` y regenerar `manifest.js`. La clave de API se pasa por la variable `ELEVENLABS_API_KEY` y no se guarda en el repositorio. Estado: voces elegidas por su descripción, pendientes de escuchar; el script no se ha probado contra la API.

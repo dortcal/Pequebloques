@@ -42,7 +42,13 @@
       const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
       const cx = cv.getContext('2d', { willReadFrequently: true });
       cx.drawImage(c._img, 0, 0, d.w, d.h);
-      c._ad = { w: cw, h: ch, data: cx.getImageData(0, 0, cw, ch).data };
+      /* máscara de 1 byte por píxel (opaco o no) y caja ajustada a lo que se ve: se calculan una sola vez por disfraz */
+      const data = cx.getImageData(0, 0, cw, ch).data, a = new Uint8Array(cw * ch);
+      let x0 = cw, y0 = ch, x1 = -1, y1 = -1;
+      for (let y = 0, i = 0; y < ch; y++) for (let x = 0; x < cw; x++, i++) {
+        if (data[i * 4 + 3] > 24) { a[i] = 1; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      }
+      c._ad = { w: cw, h: ch, a, x0, y0, x1: x1 + 1, y1: y1 + 1, empty: x1 < 0 };
     } catch (e) { c._ad = null; }
     return c._ad;
   }
@@ -60,17 +66,28 @@
     const flip = t.rotationStyle === 'left-right' && t.direction < 0 ? -1 : 1;
     return { t, c, d, s, rot, flip, cos: Math.cos(rot), sin: Math.sin(rot), ad: null };
   }
+  /* caja en el escenario del rectángulo (u0,v0)-(u1,v1) del disfraz, ya girado y escalado */
+  function boxOf(p, u0, v0, u1, v1) {
+    const t = p.t;
+    let l = 1e9, r = -1e9, tp = -1e9, bt = 1e9;
+    for (let k = 0; k < 4; k++) {
+      const x = ((k === 1 || k === 2 ? u1 : u0) - p.d.rcx) * p.s * p.flip, y = ((k > 1 ? v1 : v0) - p.d.rcy) * p.s;
+      const X = t.x + x * p.cos - y * p.sin, Y = t.y - (x * p.sin + y * p.cos);
+      if (X < l) l = X; if (X > r) r = X; if (Y > tp) tp = Y; if (Y < bt) bt = Y;
+    }
+    return { left: l, right: r, top: tp, bottom: bt };
+  }
   function bounds(t) {
     const p = prep(t);
-    const pts = [[-p.d.rcx, -p.d.rcy], [p.d.w - p.d.rcx, -p.d.rcy], [p.d.w - p.d.rcx, p.d.h - p.d.rcy], [-p.d.rcx, p.d.h - p.d.rcy]];
-    let l = 1e9, r = -1e9, tp = -1e9, bt = 1e9;
-    pts.forEach((q) => {
-      const x = q[0] * p.s * p.flip, y = q[1] * p.s;
-      const sx = x * p.cos - y * p.sin, sy = x * p.sin + y * p.cos;
-      const X = t.x + sx, Y = t.y - sy;
-      l = Math.min(l, X); r = Math.max(r, X); tp = Math.max(tp, Y); bt = Math.min(bt, Y);
-    });
-    return { left: l, right: r, top: tp, bottom: bt };
+    return boxOf(p, 0, 0, p.d.w, p.d.h);
+  }
+  /* caja ajustada a los píxeles visibles (para descartar pares que solo se solapan por sus márgenes transparentes) */
+  function tightBox(p) {
+    if (!p.ad && p.ad !== false) p.ad = alphaData(p.c) || false;
+    const ad = p.ad;
+    if (!ad) return boxOf(p, 0, 0, p.d.w, p.d.h);
+    if (ad.empty) return null;
+    return boxOf(p, ad.x0, ad.y0, Math.min(p.d.w, ad.x1), Math.min(p.d.h, ad.y1));
   }
   function hit(p, sx, sy) {
     if (!p.ad && p.ad !== false) p.ad = alphaData(p.c) || false;
@@ -81,7 +98,7 @@
     if (u < 0 || v < 0 || u >= p.d.w || v >= p.d.h) return false;
     if (!p.ad) return true;
     const iu = Math.min(p.ad.w - 1, Math.floor(u)), iv = Math.min(p.ad.h - 1, Math.floor(v));
-    return p.ad.data[(iv * p.ad.w + iu) * 4 + 3] > 24;
+    return p.ad.a[iv * p.ad.w + iu] === 1;
   }
   function fence(t) {
     const b = bounds(t);
@@ -335,9 +352,10 @@
   const RT = PQ.RT = {
     project: null, canvas: null, ctx: null, threads: [], keys: {}, mouse: { x: 0, y: 0, down: false },
     dirty: true, flagCount: 0, runCount: 0, grid: false, last: 0, acc: 0, onChange: null, overlay: null,
-    answer: '', timerStart: 0, pen: null
+    answer: '', timerStart: 0, pen: null, alpha: 1, smooth: true, fx: 0, stats: { sampled: 0 }
   };
 
+  const TICK = 1000 / 30;
   RT.init = function (canvas) {
     RT.canvas = canvas; RT.ctx = canvas.getContext('2d');
     canvas.width = W * 2; canvas.height = H * 2;
@@ -346,9 +364,11 @@
       if (!RT.last) RT.last = ts;
       RT.acc += Math.min(200, ts - RT.last); RT.last = ts;
       let n = 0;
-      while (RT.acc >= 1000 / 30 && n < 4) { RT.step(); RT.acc -= 1000 / 30; n++; }
+      while (RT.acc >= TICK && n < 4) { RT.step(); RT.acc -= TICK; n++; }
       if (RT.acc > 200) RT.acc = 0;
-      if (RT.dirty || RT.threads.length) { RT.render(); RT.dirty = false; }
+      /* fracción del paso lógico ya transcurrida: el dibujo va de la posición anterior a la actual */
+      RT.alpha = RT.threads.length && RT.smooth ? Math.min(1, RT.acc / TICK) : 1;
+      if (RT.dirty || RT.threads.length || RT.fx > 0) { RT.render(); RT.dirty = false; }
     };
     requestAnimationFrame(loop);
   };
@@ -454,6 +474,21 @@
     ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
     drawTarget(ctx, p.stage);
     if (RT.pen) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(RT.pen, 0, 0); ctx.restore(); }
+    /* movimiento fluido: entre dos pasos lógicos se dibuja la posición intermedia (los saltos grandes no se interpolan) */
+    let moved = null;
+    if (RT.alpha < 1) {
+      const k = RT.alpha;
+      p.sprites.forEach((s) => {
+        if (s._px === undefined) return;
+        const dx = s.x - s._px, dy = s.y - s._py;
+        let dd = s.direction - s._pd; if (dd > 180) dd -= 360; else if (dd < -180) dd += 360;
+        const mv = (dx || dy) && dx * dx + dy * dy <= 80 * 80, tn = dd && Math.abs(dd) <= 60 && s.rotationStyle === 'all around';
+        if (!mv && !tn) return;
+        (moved || (moved = [])).push([s, s.x, s.y, s.direction]);
+        if (mv) { s.x = s._px + dx * k; s.y = s._py + dy * k; }
+        if (tn) s.direction = s._pd + dd * k;
+      });
+    }
     p.sprites.forEach((s) => { if (s.visible) drawTarget(ctx, s); });
     if (RT.grid) {
       ctx.save();
@@ -465,6 +500,7 @@
       ctx.restore();
     }
     p.sprites.forEach((s) => drawBubble(ctx, s));
+    if (moved) moved.forEach((m) => { m[0].x = m[1]; m[0].y = m[2]; m[0].direction = m[3]; });
     drawMonitors(ctx, p);
     if (RT.overlay) RT.overlay(ctx);
   };
@@ -495,11 +531,44 @@
     if (what === '_mouse_') return hit(prep(t), RT.mouse.x, RT.mouse.y);
     const o = RT.project.sprites.find((s) => s.name === what);
     if (!o || o === t || !o.visible) return false;
-    const a = bounds(t), b = bounds(o);
+    /* 1) si ninguno de los dos ha cambiado desde la última consulta, vale la respuesta guardada */
+    const ca = t.costumes[t.current] || t.costumes[0], cb = o.costumes[o.current] || o.costumes[0];
+    const memo = t._tm || (t._tm = new Map());
+    let m = memo.get(o);
+    if (m && m.ax === t.x && m.ay === t.y && m.ad === t.direction && m.as === t.size && m.ac === ca && m.ar === t.rotationStyle &&
+        m.bx === o.x && m.by === o.y && m.bd === o.direction && m.bs === o.size && m.bc === cb && m.br === o.rotationStyle &&
+        m.rd === (ca._ready && cb._ready)) return m.val;
+    if (!m) { m = {}; memo.set(o, m); }
+    m.ax = t.x; m.ay = t.y; m.ad = t.direction; m.as = t.size; m.ac = ca; m.ar = t.rotationStyle;
+    m.bx = o.x; m.by = o.y; m.bd = o.direction; m.bs = o.size; m.bc = cb; m.br = o.rotationStyle; m.rd = !!(ca._ready && cb._ready);
+    m.val = touchingPair(t, o);
+    return m.val;
+  }
+  /* 2) descarte por cajas ajustadas a lo visible y 3) muestreo sobre las máscaras cacheadas, sin crear objetos */
+  function touchingPair(t, o) {
+    const pa = prep(t), pb = prep(o);
+    const a = tightBox(pa), b = tightBox(pb);
+    if (!a || !b) return false;
     const l = Math.max(a.left, b.left), r = Math.min(a.right, b.right), bt = Math.max(a.bottom, b.bottom), tp = Math.min(a.top, b.top);
     if (l > r || bt > tp) return false;
-    const pa = prep(t), pb = prep(o);
-    for (let y = bt; y <= tp; y += 2) for (let x = l; x <= r; x += 2) if (hit(pa, x, y) && hit(pb, x, y)) return true;
+    RT.stats.sampled++;
+    const A = pa.ad, B = pb.ad;
+    const ax = t.x, ay = t.y, acs = pa.cos / pa.s, asn = pa.sin / pa.s, af = pa.flip, arx = pa.d.rcx, ary = pa.d.rcy, aw = pa.d.w, ah = pa.d.h;
+    const bx = o.x, by = o.y, bcs = pb.cos / pb.s, bsn = pb.sin / pb.s, bf = pb.flip, brx = pb.d.rcx, bry = pb.d.rcy, bw = pb.d.w, bh = pb.d.h;
+    for (let y = bt; y <= tp; y += 2) {
+      const pya = -(y - ay), pyb = -(y - by);
+      for (let x = l; x <= r; x += 2) {
+        let px = x - ax;
+        let u = (px * acs + pya * asn) * af + arx, v = -px * asn + pya * acs + ary;
+        if (u < 0 || v < 0 || u >= aw || v >= ah) continue;
+        if (A && A.a[Math.min(A.h - 1, v | 0) * A.w + Math.min(A.w - 1, u | 0)] !== 1) continue;
+        px = x - bx;
+        u = (px * bcs + pyb * bsn) * bf + brx; v = -px * bsn + pyb * bcs + bry;
+        if (u < 0 || v < 0 || u >= bw || v >= bh) continue;
+        if (B && B.a[Math.min(B.h - 1, v | 0) * B.w + Math.min(B.w - 1, u | 0)] !== 1) continue;
+        return true;
+      }
+    }
     return false;
   }
   RT.touching = touching;
@@ -571,11 +640,18 @@
   };
   RT.step = function () {
     if (!RT.threads.length) return;
+    const sp = RT.project.sprites;
+    for (let i = 0; i < sp.length; i++) { const s = sp[i]; s._px = s.x; s._py = s.y; s._pd = s.direction; }
     const list = RT.threads.slice();
     list.forEach((th) => {
       if (th.dead) return;
       let r;
-      try { r = th.gen.next(); } catch (e) { th.dead = true; if (g.console) console.error(e); r = { done: true }; }
+      try { r = th.gen.next(); } catch (e) {
+        /* un hilo que falla se detiene solo; los demás siguen. Se avisa con un mensaje amable (ver app.js) */
+        th.dead = true; r = { done: true };
+        if (g.console) console.error(e);
+        if (PQ.onThreadError) { try { PQ.onThreadError({ error: e, block: th.cur || null, target: th.target, script: th.script }); } catch (e2) { /* el aviso no debe romper nada */ } }
+      }
       if (r.done) th.dead = true;
     });
     const before = RT.threads.length;
@@ -660,6 +736,7 @@
   RT.exec = function* (arr, th) {
     for (let i = 0; i < arr.length; i++) {
       if (th.dead) return;
+      th.cur = arr[i];
       yield* RT.block(arr[i], th);
     }
   };

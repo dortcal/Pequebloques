@@ -131,6 +131,39 @@
     const off = (e) => { if (!m.contains(e.target)) { m.remove(); document.removeEventListener('pointerdown', off, true); } };
     setTimeout(() => document.addEventListener('pointerdown', off, true), 0);
   }
+  /* Globo de Pipo: avisos amables que no interrumpen (por ejemplo, cuando un bloque falla) */
+  let pipoTimer = 0;
+  ui.pipo = function (msg, o) {
+    o = o || {};
+    let box = $('#pipo');
+    if (!box) { box = h('div', ''); box.id = 'pipo'; box.setAttribute('role', 'alert'); document.body.appendChild(box); }
+    box.className = o.cls || '';
+    box.innerHTML = PQ.PIPO + '<div class="pt"><p></p><div class="pb"></div></div>';
+    $('p', box).textContent = msg;
+    const close = () => { clearTimeout(pipoTimer); box.classList.add('out'); setTimeout(() => { if (box.classList.contains('out')) box.remove(); }, 180); if (o.onClose) o.onClose(); };
+    const b = h('button', 'btn pri'); b.type = 'button'; b.textContent = o.button || 'Vale'; b.addEventListener('click', close);
+    $('.pb', box).appendChild(b);
+    clearTimeout(pipoTimer); pipoTimer = setTimeout(close, o.ms || 12000);
+    if (PQ.say && o.speak !== false) PQ.say(msg);
+    return { close };
+  };
+  /* Un bloque ha fallado al ejecutarse: el hilo se para solo y el resto del programa sigue */
+  let lastErrAt = 0;
+  PQ.onThreadError = function (info) {
+    const now = Date.now();
+    if (now - lastErrAt < 2500) return;                    // un bucle roto no debe llenar la pantalla de avisos
+    lastErrAt = now;
+    let name = '';
+    try { name = info.block ? PQ.blockText(info.block) : ''; } catch (e) { name = ''; }
+    if (!name && info.block && PQ.BLOCKS[info.block.op]) name = PQ.BLOCKS[info.block.op].label.replace(/%\w+/g, '…');
+    const who = info.target && !info.target.isStage ? ' de ' + info.target.name : '';
+    const msg = name ? '¡Uy! El bloque «' + name + '»' + who + ' no ha podido funcionar. Lo he parado. Lo demás sigue en marcha.'
+      : '¡Uy! Un bloque' + who + ' no ha podido funcionar. Lo he parado. Lo demás sigue en marcha.';
+    /* se señala el bloque en el área de programación, si está a la vista */
+    const mark = () => $$('#wsin .block').forEach((el) => el.classList.toggle('failed', !!info.block && el._b === info.block));
+    mark();
+    ui.pipo(msg, { cls: 'warn', onClose: () => $$('#wsin .block.failed').forEach((el) => el.classList.remove('failed')) });
+  };
   function confetti() {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const cols = ['#FFBF00', '#4C97FF', '#9966FF', '#59D98E', '#FF6FA8', '#FF8A4D'];

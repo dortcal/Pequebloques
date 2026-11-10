@@ -21,11 +21,12 @@
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
   /* ---------- ajustes ---------- */
-  const cfg = PQ.voiceCfg = { rate: 1, volume: 1, engine: 'auto', device: '', pipo: 'f' };
+  const cfg = PQ.voiceCfg = { rate: 1, volume: 1, engine: 'auto', device: '', pipo: 'f', fx: true };
   try { Object.assign(cfg, JSON.parse(localStorage.getItem(STORE) || '{}')); } catch (e) { /* sin almacenamiento */ }
   cfg.rate = clamp(+cfg.rate || 1, 0.6, 1.4); cfg.volume = clamp(cfg.volume === undefined ? 1 : +cfg.volume, 0, 1);
   if (cfg.engine !== 'device' && cfg.engine !== 'clips') cfg.engine = 'auto';
   if (cfg.pipo !== 'm') cfg.pipo = 'f';
+  cfg.fx = cfg.fx !== false;
   try { if (/[?&]voz=dispositivo\b/.test(g.location.search)) cfg.engine = 'device'; } catch (e) { /* nada */ }   // para pruebas y para forzar la voz del dispositivo con ?voz=dispositivo
   const save = () => { try { localStorage.setItem(STORE, JSON.stringify(cfg)); } catch (e) { /* nada */ } };
 
@@ -93,6 +94,8 @@
 
   /* ---------- voces del dispositivo: solo español, y la mejor ---------- */
   const NATURAL = /natural|neural|online|premium|enhanced|mejorad|siri|google/i;
+  /* voces de sistema de Apple (Mónica, Paulina, Jorge… y las «Eddy, Flo, Reed…»): suenan bien sin pedir tonos forzados */
+  const APPLE = /^(m[oó]nica|paulina|jorge|juan|diego|soledad|[aá]ngelica|marisol|francisca|carlos|isabela|jimena|montserrat|luciana|(eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley) \()/i;
   const POOR = /compact|espeak|festival|robot|novelty|bad news|whisper|zarvox|trinoids|bubbles|cellos|boing|bells|organ/i;
   const isES = (v) => /^es([-_]|$)/i.test(v.lang || '');
   const isSpain = (v) => /^es[-_]ES/i.test(v.lang || '');
@@ -110,7 +113,7 @@
   /* mejor voz natural que se pueda usar ahora (las de red necesitan conexión) o null */
   function naturalDevice() {
     const online = !(g.navigator && g.navigator.onLine === false);
-    const x = vlist.find((e) => NATURAL.test(e.name) && !POOR.test(e.name) && (e.v.localService || online));
+    const x = vlist.find((e) => (NATURAL.test(e.name) || (APPLE.test(e.name) && e.v.localService)) && !POOR.test(e.name) && (e.v.localService || online));
     return x ? x.v : null;
   }
   try { if (g.speechSynthesis) g.speechSynthesis.addEventListener('voiceschanged', refreshVoices); } catch (e) { /* nada */ }
@@ -184,6 +187,11 @@
     const per = el('div', 'vseg wrap');
     PERS.forEach(([k, t]) => { const b = el('button', 'btn', '▶ ' + t); b.type = 'button'; b.onclick = () => sample(k); per.appendChild(b); });
     row('Voces de los personajes', per);
+
+    /* sonidillos de personaje */
+    const fxb = el('button', 'btn ' + (cfg.fx ? 'ok' : ''), cfg.fx ? 'Activados' : 'Desactivados'); fxb.type = 'button'; fxb.setAttribute('aria-pressed', String(cfg.fx));
+    fxb.onclick = () => { cfg.fx = !cfg.fx; save(); fxb.textContent = cfg.fx ? 'Activados' : 'Desactivados'; fxb.classList.toggle('ok', cfg.fx); fxb.setAttribute('aria-pressed', String(cfg.fx)); if (cfg.fx) sample('SQUEAK'); };
+    row('Sonidillos de personajes', fxb);
 
     /* voz del dispositivo */
     if (vlist.length) {

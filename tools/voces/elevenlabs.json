@@ -1,28 +1,87 @@
 {
-  "_nota": "Catálogo de voces de ElevenLabs elegidas para PequeBloques (cuenta de David OZC, elegidas el 2026-11-10). NO contiene claves de API: la clave se pasa por la variable de entorno ELEVENLABS_API_KEY. Los voice_id salen de la biblioteca de voces de ElevenLabs; si alguno deja de estar disponible, se busca otro con las mismas etiquetas y se actualiza aquí.",
+  "_nota": "Catálogo de voces de ElevenLabs elegidas para PequeBloques (cuenta de David OZC, elegidas el 2026-11-10, revisadas el mismo día para español de España). NO contiene claves de API: la clave se pasa por la variable de entorno ELEVENLABS_API_KEY. Los voice_id salen de la biblioteca de voces de ElevenLabs; si alguno deja de estar disponible, se busca otro con las mismas etiquetas y se actualiza aquí.",
   "modelo": "eleven_v4",
   "idioma": "es",
-  "ajustes_por_defecto": {"stability": 0.5, "similarity_boost": 0.8, "speed": 1.0},
+  "ajustes_por_defecto": {
+    "stability": 0.5,
+    "similarity_boost": 0.8,
+    "speed": 1.0
+  },
   "narrador": {
-    "voice_id": "HvGHhLAx7UNxYofHDPRW",
-    "nombre": "Lucas - Clear, Conversational",
-    "motivo": "Castellano peninsular, cálido, dicción clara; pensado para narración y contenido educativo.",
+    "voice_id": "5Cz4t26dDYTfYJXKmlJ4",
+    "nombre": "Adrián – Cálido y natural",
+    "motivo": "Español de España, tono medio-grave, cálido y sereno; descrito para narración y contenido educativo.",
     "alternativas": [
-      {"voice_id": "VDqN2mmmJ4ajf7i2loiF", "nombre": "Julián - Narrador sereno y cálido", "nota": "Castellano, más pausado y grave"},
-      {"voice_id": "la6RPabI2cxKM6nIEr7B", "nombre": "Leo Timoteo - Storyteller for children", "nota": "Latino, más juguetón; para cuentos de Infantil"}
+      {
+        "voice_id": "FXn3GKRRt9FCEyTbrkaL",
+        "nombre": "Nico - History & Documentary",
+        "nota": "Cálido, sonríe suavemente; documental y educativo"
+      },
+      {
+        "voice_id": "pN4aFdNIp2mvGfTwy1Oj",
+        "nombre": "Sofia - Captivating Narration",
+        "nota": "Narradora joven, suave"
+      },
+      {
+        "voice_id": "B0r3rOF9WOwQ4BBKhRWO",
+        "nombre": "Tom - Calma y claridad",
+        "nota": "Joven, pausado, claro"
+      }
     ]
   },
   "personajes": {
-    "KITTEN":  {"rol": "niña (Lucía)", "voice_id": "2CGcaXd1E04jesxY7nfq", "nombre": "Fruna - Playful, mischievous, sweet", "alternativa": {"voice_id": "zJtOCbdQjTZt7YZtkRDP", "nombre": "Natalia - Doblaje versátil"}},
-    "ALTO":    {"rol": "niño (Yeray)", "voice_id": "JIfdwGbJNfJKbPNRYqP2", "nombre": "Isaak", "alternativa": {"voice_id": "WXhpeBU9aWHzJYNLQaSr", "nombre": "Leandro - Natural, Narrative & Stories"}},
-    "SQUEAK":  {"rol": "animal pequeño", "voice_id": "CPv3Zr3CQCqE4ZzuCgBP", "nombre": "Lulu - Adorable, Bright & Playful"},
-    "GIANT":   {"rol": "animal grande", "voice_id": "EGuq18jUC3ilTnuBn2wj", "nombre": "Ezequiel - Magical, Wise and Mysterious"},
-    "TENOR":   {"rol": "robot", "voice_id": "pmbvTcigLSLJPZPWD6QD", "nombre": "Profesor Quirk - Científico loco", "nota": "Se puede añadir un efecto de robot con ffmpeg si se quiere"},
-    "PIPO":    {"rol": "Pipo, ayudante", "voice_id": "iV6xDQ4wcM3ZcXDx30GB", "nombre": "Betty - Quirky, Cartoonish & Warm"}
+    "KITTEN": {
+      "rol": "niña (Lucía)",
+      "voice_id": "ODQQw99uvxi7piSglbBJ",
+      "nombre": "Carlota – Playful Educator",
+      "nota": "Aguda y dulce, pensada para contenido infantil; es voz de adulta, no de niña",
+      "alternativa": {
+        "voice_id": "Wi5NZQRxyOb3Jx4r0hrI",
+        "nombre": "Gala - Fresh, Energetic and Spontaneous"
+      }
+    },
+    "ALTO": {
+      "rol": "niño (Yeray)",
+      "voice_id": "J5hu7rFtEb1rgdJDH30E",
+      "nombre": "JR - Tranquila y amigable",
+      "nota": "Joven de 21 años; no hay voces infantiles en español de España en la búsqueda",
+      "alternativa": {
+        "voice_id": "Ol36Ik3IUXEnXKMyM7Sr",
+        "nombre": "Rodrigo – Spanish Entertainment Host"
+      }
+    },
+    "SQUEAK": {
+      "rol": "animal pequeño",
+      "voice_id": "OqYUnLECNnKNnEhZppA0",
+      "nombre": "El Pájaro - Intimate & Mysterious",
+      "nota": "Neutra, ligera; se puede subir el tono"
+    },
+    "GIANT": {
+      "rol": "animal grande",
+      "voice_id": "EGuq18jUC3ilTnuBn2wj",
+      "nombre": "Ezequiel - Magical, Wise and Mysterious"
+    },
+    "TENOR": {
+      "rol": "robot",
+      "voice_id": "0hrAuCpLthVKUeE3HaoL",
+      "nombre": "Silvermouth",
+      "nota": "Añadir efecto de robot con ffmpeg"
+    },
+    "PIPO": {
+      "rol": "Pipo, ayudante",
+      "voice_id": "Wi5NZQRxyOb3Jx4r0hrI",
+      "nombre": "Gala - Fresh, Energetic and Spontaneous"
+    }
   },
   "estado": {
-    "verificado_con_audio": ["KITTEN (Fruna): una muestra generada en el flujo «PequeBloques · voces» de ElevenLabs; sin escuchar por el asistente"],
-    "pendiente_de_probar": ["narrador", "ALTO", "SQUEAK", "GIANT", "TENOR", "PIPO"],
-    "importante": "Las voces se han elegido por su descripción y etiquetas, no escuchándolas. Hay que oírlas y decidir antes de generar el audio de todo el programa."
+    "verificado_con_audio": [],
+    "pendiente_de_probar": [
+      "todas"
+    ],
+    "importante": "Elegidas por descripción y etiquetas, sin escucharlas. La muestra generada antes (Fruna, español latino) queda descartada. Falta decidir si se diseña una voz con acento canario."
+  },
+  "acento": {
+    "objetivo": "español de España; si es posible, acento canario",
+    "situacion": "La búsqueda «canario/canarias» no devolvió ninguna voz de la biblioteca. Todas las elegidas son de español peninsular (castellano). El acento canario solo se conseguiría diseñando una voz nueva (creative_design_voice) o clonando una voz real con permiso."
   }
 }

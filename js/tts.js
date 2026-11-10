@@ -149,6 +149,19 @@
     paintState();
     const row = (label, ctl) => { const r = el('div', 'vrow'); r.appendChild(el('label', '', label)); r.appendChild(ctl); body.appendChild(r); return r; };
 
+    /* animaciones y modo tranquilo */
+    const sw = (key, text, help) => {
+      const b = el('button', 'vswitch'); b.type = 'button'; b.setAttribute('role', 'switch');
+      const paint = () => { b.setAttribute('aria-checked', String(!!PQ.prefs[key])); b.innerHTML = '<span class="knob" aria-hidden="true"></span><span class="st"><b></b><small></small></span>'; b.querySelector('b').textContent = text; b.querySelector('small').textContent = help; };
+      b.onclick = () => { PQ.prefs[key] = !PQ.prefs[key]; PQ.savePrefs(); paint(); };
+      paint(); return b;
+    };
+    const anim = el('div', 'vsw');
+    anim.appendChild(sw('calm', 'Modo tranquilo', 'Sin animaciones ni sonidos de la interfaz. Los programas funcionan igual.'));
+    anim.appendChild(sw('fade', 'Fundido al cambiar de disfraz', 'Los cambios de disfraz y de fondo se ven más suaves.'));
+    anim.appendChild(sw('uiSound', 'Sonidos de la interfaz', 'Un «clic» al encajar un bloque y una melodía al conseguir un reto.'));
+    row('Animaciones y sonidos', anim);
+
     /* motor */
     const eng = el('div', 'vseg');
     const ENG = [['auto', 'Automática (recomendada)'], ['clips', 'Grabadas'], ['device', 'Solo la del dispositivo']];
@@ -197,7 +210,7 @@
       row('Voz del dispositivo (respaldo)', w);
     }
     body.appendChild(el('p', 'vnote', 'Automática: si tu dispositivo tiene una voz española «natural» (Microsoft Natural, Google, Siri…) se usa para todo, porque suele sonar mejor; si no, se usan las voces grabadas. «Grabadas» fuerza las voces neuronales incluidas. Lo que escribe el alumnado en «decir en voz alta» siempre se lee con la voz del dispositivo.'));
-    PQ.ui.modal({ title: 'Voz', size: 'lg', body, buttons: [{ label: 'Listo', cls: 'ok' }] });
+    PQ.ui.modal({ title: 'Ajustes', size: 'lg', body, buttons: [{ label: 'Listo', cls: 'ok' }] });
   };
   const gear = document.getElementById('btnVoiceSet');
   if (gear) gear.addEventListener('click', () => PQ.openVoiceSettings());

@@ -5,6 +5,26 @@
   'use strict';
   const PQ = g.PQ = g.PQ || {};
 
+  /* ---------- preferencias de la interfaz (se guardan en el navegador) ----------
+   *   fade: fundido corto al cambiar de disfraz · calm: «modo tranquilo» (sin animaciones ni sonidos de la interfaz)
+   *   uiSound: sonidos de la interfaz (encajar un bloque, celebración) */
+  const PREFS = 'pequebloques.ajustes';
+  PQ.prefs = { fade: true, calm: false, uiSound: true };
+  try { Object.assign(PQ.prefs, JSON.parse(localStorage.getItem(PREFS) || '{}')); } catch (e) { /* sin almacenamiento */ }
+  PQ.savePrefs = function () {
+    try { localStorage.setItem(PREFS, JSON.stringify(PQ.prefs)); } catch (e) { /* nada */ }
+    PQ.applyPrefs();
+  };
+  const RM = (function () { try { return g.matchMedia ? g.matchMedia('(prefers-reduced-motion: reduce)') : null; } catch (e) { return null; } })();
+  /* ¿se pueden usar animaciones? No, si el sistema pide menos movimiento o está el modo tranquilo */
+  PQ.motionOK = () => !PQ.prefs.calm && !(RM && RM.matches);
+  PQ.uiSoundOK = () => PQ.prefs.uiSound && !PQ.prefs.calm;
+  PQ.applyPrefs = function () {
+    try { document.documentElement.classList.toggle('calm', !!PQ.prefs.calm); } catch (e) { /* sin documento */ }
+    if (PQ.RT) PQ.RT.dirty = true;
+  };
+  PQ.applyPrefs();
+
   let _n = 0;
   PQ.uid = (p) => (p || 'id') + (++_n) + Math.random().toString(36).slice(2, 6);
   PQ.clone = (o) => JSON.parse(JSON.stringify(o));

@@ -290,7 +290,7 @@
       }
       if (adv) {
         render();
-        if (cur.i >= cur.t.steps.length) PQ.ui.confetti();
+        if (cur.i >= cur.t.steps.length) PQ.ui.celebrate();
       }
     },
     welcome(hasAuto, recover) {

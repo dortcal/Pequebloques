@@ -352,7 +352,7 @@
   const RT = PQ.RT = {
     project: null, canvas: null, ctx: null, threads: [], keys: {}, mouse: { x: 0, y: 0, down: false },
     dirty: true, flagCount: 0, runCount: 0, grid: false, last: 0, acc: 0, onChange: null, overlay: null,
-    answer: '', timerStart: 0, pen: null, alpha: 1, smooth: true, fx: 0, stats: { sampled: 0 }
+    answer: '', timerStart: 0, pen: null, alpha: 1, smooth: true, fxUntil: 0, stats: { sampled: 0 }
   };
 
   const TICK = 1000 / 30;
@@ -368,7 +368,7 @@
       if (RT.acc > 200) RT.acc = 0;
       /* fracción del paso lógico ya transcurrida: el dibujo va de la posición anterior a la actual */
       RT.alpha = RT.threads.length && RT.smooth ? Math.min(1, RT.acc / TICK) : 1;
-      if (RT.dirty || RT.threads.length || RT.fx > 0) { RT.render(); RT.dirty = false; }
+      if (RT.dirty || RT.threads.length || RT.now() < RT.fxUntil) { RT.render(); RT.dirty = false; }
     };
     requestAnimationFrame(loop);
   };
@@ -398,13 +398,50 @@
     const img = costumeImg(c);
     if (!c._ready || c._broken) return;
     const p = prep(t);
+    /* fundido corto entre el disfraz anterior y el nuevo: primero aparece el nuevo encima y después se va el anterior */
+    const fx = t._fx;
+    let k = 1, old = null;
+    if (fx) {
+      k = (RT.now() - fx.t0) / FADE;
+      old = fx.from;
+      if (k >= 1 || !old || !old._ready || old._broken || old === c) { t._fx = null; k = 1; old = null; }
+    }
     ctx.save();
     ctx.translate(W / 2 + t.x, H / 2 - t.y);
     ctx.rotate(p.rot);
     ctx.scale(p.s * p.flip, p.s);
+    if (old) {
+      const od = dims(old);
+      ctx.globalAlpha = Math.min(1, 2 * (1 - k));
+      ctx.drawImage(old._img, -od.rcx, -od.rcy, od.w, od.h);
+      ctx.globalAlpha = Math.min(1, 2 * k);
+    }
     ctx.drawImage(img, -p.d.rcx, -p.d.rcy, p.d.w, p.d.h);
     ctx.restore();
   }
+  /* cambio de disfraz (o de fondo) con fundido. No se aplica en animaciones rápidas (cambios seguidos),
+   * ni con el fundido desactivado en Ajustes, ni si el sistema o el «modo tranquilo» piden menos animación. */
+  const FADE = 170;
+  function setCostume(t, i) {
+    if (i === t.current) return;
+    const now = RT.now(), from = t.costumes[t.current];
+    const quick = t._cAt && now - t._cAt < 260;
+    t._cAt = now;
+    t._fx = (PQ.prefs && PQ.prefs.fade && PQ.motionOK() && !quick && from && (t.isStage || t.visible)) ? { from, t0: now } : null;
+    if (t._fx) RT.fxUntil = Math.max(RT.fxUntil, now + FADE + 40);
+    t.current = i; RT.dirty = true;
+  }
+  RT.setCostume = setCostume;
+  /* bocadillos: entran y salen con una escala suave */
+  const BUB_IN = 170, BUB_OUT = 110;
+  function setSay(t, bub) {
+    const now = RT.now(), prev = t._say;
+    if (bub) { bub.t0 = now; bub.swap = !!prev; t._sayOut = null; }
+    else if (prev && t.visible && PQ.motionOK()) { t._sayOut = { b: prev, t0: now }; RT.fxUntil = Math.max(RT.fxUntil, now + BUB_OUT + 40); }
+    if (bub && PQ.motionOK()) RT.fxUntil = Math.max(RT.fxUntil, now + BUB_IN + 40);
+    t._say = bub; RT.dirty = true;
+  }
+  RT.setSay = setSay;
   function wrapText(ctx, text, maxW) {
     const words = String(text).split(/\s+/), lines = [];
     let cur = '';
@@ -416,8 +453,22 @@
     return lines.slice(0, 6);
   }
   function drawBubble(ctx, t) {
-    const s = t._say;
-    if (!s || !t.visible) return;
+    let s = t._say, k = 1, fade = 1;
+    if (!t.visible) return;
+    const anim = PQ.motionOK(), now = RT.now();
+    if (s) {
+      if (anim && s.t0) {
+        const q = Math.min(1, (now - s.t0) / BUB_IN);
+        const e = 1 + 1.6 * Math.pow(q - 1, 3) + 0.6 * Math.pow(q - 1, 2);     // llega un poco más allá y vuelve
+        const k0 = s.swap ? 0.9 : 0.55;                                        // si solo cambia el texto, el gesto es menor
+        k = k0 + (1 - k0) * e; fade = s.swap ? 1 : Math.min(1, q * 2.5);
+      }
+    } else if (t._sayOut) {
+      const q = (now - t._sayOut.t0) / BUB_OUT;
+      if (q >= 1 || !anim) { t._sayOut = null; return; }
+      s = t._sayOut.b; k = 1 - 0.35 * q; fade = 1 - q;
+    }
+    if (!s) return;
     ctx.save();
     ctx.font = '700 15px "Trebuchet MS", "Segoe UI", Arial, sans-serif';
     const lines = wrapText(ctx, s.text, 150);
@@ -429,6 +480,10 @@
     let bx = W / 2 + b.right - 8, by = H / 2 - b.top - bh - 14;
     if (bx + bw > W - 4) { bx = W / 2 + b.left + 8 - bw; left = false; }
     bx = PQ.clamp(bx, 4, W - bw - 4); by = PQ.clamp(by, 4, H - bh - 24);
+    if (k !== 1 || fade !== 1) {                         // la escala nace en la punta del bocadillo
+      const ox = left ? bx + 10 : bx + bw - 10, oy = by + bh + 14;
+      ctx.translate(ox, oy); ctx.scale(k, k); ctx.translate(-ox, -oy); ctx.globalAlpha = Math.max(0, fade);
+    }
     ctx.fillStyle = '#fff'; ctx.strokeStyle = '#B9C0CF'; ctx.lineWidth = 2.5;
     ctx.beginPath();
     const r = 12;
@@ -499,7 +554,7 @@
       ctx.beginPath(); ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke();
       ctx.restore();
     }
-    p.sprites.forEach((s) => drawBubble(ctx, s));
+    p.sprites.forEach((s) => { if (s._say || s._sayOut) drawBubble(ctx, s); });
     if (moved) moved.forEach((m) => { m[0].x = m[1]; m[0].y = m[2]; m[0].direction = m[3]; });
     drawMonitors(ctx, p);
     if (RT.overlay) RT.overlay(ctx);
@@ -610,7 +665,7 @@
     RT.threads = [];
     stopSounds();
     try { if (PQ.stopVoice) PQ.stopVoice(); else if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
-    if (RT.project && !keepBubbles) RT.project.sprites.forEach((s) => { s._say = null; });
+    if (RT.project && !keepBubbles) RT.project.sprites.forEach((s) => { s._say = null; s._sayOut = null; });
     RT.dirty = true;
     if (RT.onChange) RT.onChange();
   };
@@ -797,28 +852,28 @@
 
       case 'looks_say': case 'looks_think': {
         const txt = fmt(A('MESSAGE'));
-        t._say = txt === '' ? null : { text: txt, think: b.op === 'looks_think' };
+        setSay(t, txt === '' ? null : { text: txt, think: b.op === 'looks_think' });
         if (txt) speakBubble(txt, t);
-        RT.dirty = true; break;
+        break;
       }
       case 'looks_sayforsecs': case 'looks_thinkforsecs': {
         const txt = fmt(A('MESSAGE'));
         const bub = txt === '' ? null : { text: txt, think: b.op === 'looks_thinkforsecs' };
-        t._say = bub; RT.dirty = true;
+        setSay(t, bub);
         const sp = txt ? speakBubble(txt, t) : { done: true };
         yield* waitSecs(th, N('SECS'));
         while (!sp.done && !th.dead) yield;
-        if (t._say === bub) { t._say = null; RT.dirty = true; }
+        if (t._say === bub) setSay(t, null);
         break;
       }
-      case 'looks_switchcostumeto': { const i = findIdx(t.costumes, String(f.COSTUME)); if (i >= 0) t.current = i; RT.dirty = true; break; }
-      case 'looks_nextcostume': t.current = (t.current + 1) % t.costumes.length; RT.dirty = true; break;
-      case 'looks_switchbackdropto': { const st = RT.project.stage, i = findIdx(st.costumes, String(f.BACKDROP)); if (i >= 0) st.current = i; RT.dirty = true; RT.bgHat(); break; }
-      case 'looks_nextbackdrop': { const st = RT.project.stage; st.current = (st.current + 1) % st.costumes.length; RT.dirty = true; RT.bgHat(); break; }
+      case 'looks_switchcostumeto': { const i = findIdx(t.costumes, String(f.COSTUME)); if (i >= 0) setCostume(t, i); RT.dirty = true; break; }
+      case 'looks_nextcostume': setCostume(t, (t.current + 1) % t.costumes.length); RT.dirty = true; break;
+      case 'looks_switchbackdropto': { const st = RT.project.stage, i = findIdx(st.costumes, String(f.BACKDROP)); if (i >= 0) setCostume(st, i); RT.dirty = true; RT.bgHat(); break; }
+      case 'looks_nextbackdrop': { const st = RT.project.stage; setCostume(st, (st.current + 1) % st.costumes.length); RT.dirty = true; RT.bgHat(); break; }
       case 'looks_changesizeby': setSize(t, t.size + N('CHANGE')); break;
       case 'looks_setsizeto': setSize(t, N('SIZE')); break;
       case 'looks_show': t.visible = true; RT.dirty = true; break;
-      case 'looks_hide': t.visible = false; t._say = null; RT.dirty = true; break;
+      case 'looks_hide': t.visible = false; t._say = null; t._sayOut = null; t._fx = null; RT.dirty = true; break;
 
       case 'sound_play': case 'sound_playuntildone': {
         const i = findIdx(t.sounds, String(f.SOUND_MENU));
@@ -837,11 +892,11 @@
         if (!words) break;
         /* con voz no hace falta bocadillo (como en Scratch); solo se muestra si el dispositivo no puede hablar */
         const bub = (t.isStage || (PQ.tts ? PQ.tts.canSpeak(words, t._voice || defaultVoice(t)) : (g.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined'))) ? null : { text: words, think: false };
-        if (bub) { t._say = bub; RT.dirty = true; }
+        if (bub) setSay(t, bub);
         const h = utter(words, t._voice || defaultVoice(t));
         yield;
         while (!h.done && !th.dead) yield;
-        if (bub && t._say === bub) { t._say = null; RT.dirty = true; }
+        if (bub && t._say === bub) setSay(t, null);
         break;
       }
 

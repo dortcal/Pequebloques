@@ -164,8 +164,51 @@
     mark();
     ui.pipo(msg, { cls: 'warn', onClose: () => $$('#wsin .block.failed').forEach((el) => el.classList.remove('failed')) });
   };
+  /* Sonidos breves de la interfaz (sintetizados, sin archivos). Respetan Ajustes, el modo tranquilo y el volumen de voz. */
+  PQ.uiSound = function (kind) {
+    if (!PQ.uiSoundOK()) return;
+    const ctx = PQ.audioCtx && PQ.audioCtx(); if (!ctx) return;
+    const vol = 0.5 * (PQ.voiceCfg ? PQ.voiceCfg.volume : 1); if (vol <= 0) return;
+    const tone = (f, at, dur, v, type) => {
+      const o = ctx.createOscillator(), gn = ctx.createGain(), t0 = ctx.currentTime + at;
+      o.type = type || 'sine'; o.frequency.value = f;
+      gn.gain.setValueAtTime(0.0001, t0); gn.gain.exponentialRampToValueAtTime(v * vol, t0 + 0.012); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(gn); gn.connect(ctx.destination); o.start(t0); o.stop(t0 + dur + 0.02);
+    };
+    try {
+      if (kind === 'snap') { tone(520, 0, 0.07, 0.25, 'triangle'); tone(780, 0.035, 0.08, 0.2, 'triangle'); }
+      else if (kind === 'win') { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.28, 0.32, 'triangle')); tone(1319, 0.5, 0.5, 0.26, 'sine'); }
+    } catch (e) { /* sin audio */ }
+  };
+  /* Celebración: confeti (si se permite el movimiento), sonido y un gesto de Pipo */
+  ui.celebrate = function (msg, o) {
+    o = o || {};
+    confetti();
+    PQ.uiSound('win');
+    if (msg) ui.pipo(msg, { cls: 'win', button: '¡Bien!', ms: 9000 });
+    setTimeout(() => $$('#pipo .mascot, #guide .mascot').forEach((m) => { m.classList.remove('cheer'); void m.getBoundingClientRect(); m.classList.add('cheer'); }), 30);
+  };
+  /* Retos: cuando el reto tiene una comprobación (ex.done) y se cumple tras probar el programa, se celebra una vez */
+  let reto = null;
+  PQ.setReto = function (ex) { reto = ex && ex.done ? { ex, ok: false, flag0: 0, run0: 0, at: 0, won: false } : null; };
+  PQ.retoState = () => reto;
+  function retoCheck() {
+    if (!reto || reto.won || !S.project) return;
+    let ok = false;
+    try { ok = !!reto.ex.done(S.project, RT); } catch (e) { ok = false; }
+    if (!ok) { reto.ok = false; return; }
+    if (!reto.ok) { reto.ok = true; reto.flag0 = RT.flagCount; reto.run0 = RT.runCount; reto.at = 0; return; }
+    const tried = RT.flagCount > reto.flag0 || (reto.ex.anyRun && RT.runCount > reto.run0);
+    if (!tried) return;
+    if (!reto.at) reto.at = Date.now();
+    if (RT.running() && Date.now() - reto.at < 7000) return;        // se espera a que termine (o un rato, si no termina)
+    reto.won = true;
+    const b = $('#banner'); if (b && !b.hidden) b.classList.add('done');
+    ui.celebrate(reto.ex.win || '¡Reto conseguido! ¡Qué bien lo has hecho!');
+  }
+  setInterval(retoCheck, 600);
   function confetti() {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!PQ.motionOK()) return;
     const cols = ['#FFBF00', '#4C97FF', '#9966FF', '#59D98E', '#FF6FA8', '#FF8A4D'];
     for (let i = 0; i < 60; i++) {
       const c = h('div', 'confetti');
@@ -242,6 +285,7 @@
     $('#title').value = p.title || 'Mi proyecto';
     hideBanner();
     if (PQ.Tut) PQ.Tut.stop(true);
+    PQ.setReto(null); $('#banner').classList.remove('done');
     if (opts.banner) showBanner(opts.banner);
     updateLevelBtn();
     renderAll();
@@ -981,6 +1025,7 @@
     p.title = ex.title;
     p.noPad = !!ex.nopad;
     loadProject(p, { banner: ex.challenge });
+    PQ.setReto(ex);
     startHint(); if (!ex.voices) PQ.say(ex.challenge);
     PQ._log = []; PQ.voiceNatural = !!ex.natural; if (ex.pc) addReadIcon();
     if (ex.openSprite) { const s = p.sprites.find((x) => x.name === ex.openSprite); if (s) { S.target = s; renderAll(); } }

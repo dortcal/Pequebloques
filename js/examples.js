@@ -110,6 +110,16 @@
   const F = D.flag, S = D;
   S.or = (a, b) => { const x = mk('operator_or'); x.in = { OPERAND1: a, OPERAND2: b }; return x; };
   S.yy = () => mk('motion_yposition');
+  /* ayudas para comprobar si un reto está conseguido (se leen los bloques del proyecto, sin ejecutarlos) */
+  const RQ = {
+    sp: (p, name) => p.sprites.find((x) => x.name === name) || null,
+    hat: (t, op, pred) => (t ? t.scripts.filter((s) => s.blocks[0] && s.blocks[0].op === op && (!pred || pred(s.blocks[0]))) : []),
+    flag: (t) => RQ.hat(t, 'event_whenflagclicked')[0] || null,
+    walk: (s, fn) => { (function w(a) { (a || []).forEach((b) => { fn(b); w(b.sub); w(b.sub2); }); })(s ? s.blocks.slice(1) : []); },
+    ops: (s, op) => { const out = []; RQ.walk(s, (b) => { if (b.op === op) out.push(b); }); return out; },
+    count: (s) => { let n = 0; RQ.walk(s, () => n++); return n; },
+    sig: (s) => { const o = []; RQ.walk(s, (b) => o.push(b.op)); return o.join(','); }
+  };
   PQ.EXH = { mk, R, S, F, make };
 
   PQ.EX = [
@@ -199,6 +209,9 @@
       id: 'cuenta-atras', title: 'Cuenta atrás y despegue', kind: 'reto', stars: 1, bg: 'espacio', sprite: 'cohete',
       desc: '3, 2, 1… ¡despegue! Un cohete listo para viajar a las estrellas.',
       challenge: 'Cambia la cuenta atrás para que empiece en 5. ¿Puedes hacer que el cohete se haga más pequeño al subir?',
+      /* conseguido: la cuenta atrás del cohete empieza en 5 */
+      done: (p) => { const s = RQ.flag(RQ.sp(p, 'Cohete')); const says = RQ.ops(s, 'looks_sayforsecs').map((b) => String(b.f.MESSAGE).trim()); return says[0] === '5' && says.indexOf('1') > 0; },
+      win: '¡Reto conseguido! Tu cuenta atrás empieza en 5. ¡Buen despegue!',
       openSprite: 'Cohete',
       build() {
         return make({
@@ -243,6 +256,9 @@
       id: 'baile-robot', nopad: true, title: 'El baile del robot', kind: 'reto', stars: 2, bg: 'noche', sprite: 'robot',
       desc: 'Un robot baila con giros y cambios de disfraz. ¡Invéntate tu coreografía!',
       challenge: 'Pulsa la bandera, toca al robot o pulsa la tecla espacio. Crea un baile nuevo con tus propios pasos.',
+      /* conseguido: el baile de la bandera ha cambiado y tiene más pasos que el original */
+      done: (p) => { const s = RQ.flag(RQ.sp(p, 'Robot')); return RQ.count(s) >= 8 && RQ.sig(s) !== 'control_repeat,motion_turnright,looks_nextcostume,control_wait,motion_pointindirection'; },
+      win: '¡Reto conseguido! Has inventado tu propio baile.',
       openSprite: 'Robot',
       build() {
         return make({
@@ -264,6 +280,9 @@
       id: 'guagua-isla', title: 'La guagua por la isla', kind: 'reto', stars: 2, bg: 'pueblo', sprite: 'guagua',
       desc: 'Conduce la guagua con las flechas (o el mando de la pantalla). ¡Pita con la barra espaciadora o tocando la guagua!',
       challenge: 'Añade las teclas para ir hacia arriba y hacia abajo. ¿Y si cambias el fondo al llegar al borde?',
+      /* conseguido: hay programas para las flechas arriba y abajo que mueven la guagua */
+      done: (p) => { const t = RQ.sp(p, 'Guagua'); return ['up arrow', 'down arrow'].every((k) => RQ.hat(t, 'event_whenkeypressed', (h) => h.f.KEY_OPTION === k).some((s) => RQ.ops(s, 'motion_changeyby').length || RQ.ops(s, 'motion_movesteps').length || RQ.ops(s, 'motion_sety').length)); },
+      anyRun: true, win: '¡Reto conseguido! La guagua ya sube y baja.',
       openSprite: 'Guagua',
       build() {
         return make({
@@ -285,6 +304,9 @@
       id: 'arregla-cuento', title: '¡Arregla el cuento!', kind: 'reto', stars: 3, bg: 'campo', sprite: 'perro',
       desc: 'Hay errores escondidos en este cuento. Encuéntralos y arréglalos.',
       challenge: 'El perro quiere ir hacia la estrella (a la derecha) pero algo falla. Mira los bloques: ¿qué número está mal? ¿Y por qué habla tan deprisa?',
+      /* conseguido: el perro avanza hacia la derecha y su primera frase dura al menos un segundo */
+      done: (p) => { const s = RQ.flag(RQ.sp(p, 'Perro')); const mv = RQ.ops(s, 'motion_movesteps'), say = RQ.ops(s, 'looks_sayforsecs'); return mv.length > 0 && mv.every((b) => parseFloat(b.f.STEPS) > 0) && say.length > 0 && parseFloat(say[0].f.SECS) >= 1; },
+      win: '¡Reto conseguido! Has encontrado los dos errores. ¡Eso es depurar!',
       openSprite: 'Perro',
       build() {
         return make({

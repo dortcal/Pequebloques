@@ -704,6 +704,13 @@
       S.target.scripts.push({ x: p.x, y: p.y, blocks: d.dragged });
     }
     ED.renderWorkspace();
+    /* al encajar: rebote breve de lo que se ha soltado y un «clic» suave */
+    if (d.snap && !cancelled && !d.overPal) {
+      const set = new Set(d.dragged);
+      document.querySelectorAll('#wsin .block').forEach((el) => { if (set.has(el._b)) el.classList.add('snapped'); });
+      setTimeout(() => document.querySelectorAll('#wsin .block.snapped').forEach((el) => el.classList.remove('snapped')), 320);
+      if (PQ.uiSound) PQ.uiSound('snap');
+    }
     if (changed) ED.changed();
   }
 

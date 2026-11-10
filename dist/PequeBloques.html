@@ -5830,10 +5830,10 @@ PQ.defer('examples', function (g) {
             },
             {
               id: 'yeray', x: -60, y: -70, scripts: [
-                [F(), S.voice('SQUEAK'), S.xy(-60, -70)],
-                [S.recv('yeray'), S.voice('SQUEAK')].concat(L('¡Qué grande es! ¿Será simpática?'), [S.send('ballena')]),
-                [S.recv('final'), S.voice('SQUEAK'), S.rep(3, [S.dy(12), S.wait(0.1), S.dy(-12), S.wait(0.1)])].concat(L('¡Qué día más bonito!'), L('Ser amable nos regala nuevos amigos, aunque sean muy diferentes a nosotros.')),
-                [S.click(), S.voice('SQUEAK')].concat(L('¡Qué grande es! ¿Será simpática?'))
+                [F(), S.voice('ALTO'), S.xy(-60, -70)],
+                [S.recv('yeray'), S.voice('ALTO')].concat(L('¡Qué grande es! ¿Será simpática?'), [S.send('ballena')]),
+                [S.recv('final'), S.voice('ALTO'), S.rep(3, [S.dy(12), S.wait(0.1), S.dy(-12), S.wait(0.1)])].concat(L('¡Qué día más bonito!'), L('Ser amable nos regala nuevos amigos, aunque sean muy diferentes a nosotros.')),
+                [S.click(), S.voice('ALTO')].concat(L('¡Qué grande es! ¿Será simpática?'))
               ]
             },
             {
@@ -5923,18 +5923,18 @@ PQ.defer('examples', function (g) {
             },
             {
               id: 'yeray', x: 80, y: -60, scripts: [
-                [F(), S.voice('SQUEAK'), S.show(), S.xy(80, -60)],
-                [S.recv('m1'), S.voice('SQUEAK')].concat(L('¡Un tesoro! Dice el mapa que está dentro del volcán.'), [S.send('m2')]),
+                [F(), S.voice('ALTO'), S.show(), S.xy(80, -60)],
+                [S.recv('m1'), S.voice('ALTO')].concat(L('¡Un tesoro! Dice el mapa que está dentro del volcán.'), [S.send('m2')]),
                 [S.click(), S.ifelse(paso(1), [S.setv('paso', 2), S.send('bosque')], [S.sound('Pop'), S.dy(15), S.wait(0.15), S.dy(-15)])],
                 [S.recv('bosque'), S.xy(-60, -70)],
                 [S.recv('teide'), S.xy(-70, -80)],
-                [S.recv('t2'), S.voice('SQUEAK')].concat(L('¡Brrr, qué frío hace aquí arriba! Mira, ¡hay una cueva!'), [S.send('t3')]),
+                [S.recv('t2'), S.voice('ALTO')].concat(L('¡Brrr, qué frío hace aquí arriba! Mira, ¡hay una cueva!'), [S.send('t3')]),
                 [S.recv('cueva'), S.xy(-70, -90)],
                 [S.click(), entrar()],
-                [S.recv('c2'), S.voice('SQUEAK')].concat(L('¡Un cofre! Está cerrado. ¡Toca el cofre para abrirlo!'), [S.setv('paso', 7)]),
-                [S.recv('a2'), S.voice('SQUEAK')].concat(L('La nota dice: el mayor tesoro es viajar con los amigos.'), [S.send('final')]),
+                [S.recv('c2'), S.voice('ALTO')].concat(L('¡Un cofre! Está cerrado. ¡Toca el cofre para abrirlo!'), [S.setv('paso', 7)]),
+                [S.recv('a2'), S.voice('ALTO')].concat(L('La nota dice: el mayor tesoro es viajar con los amigos.'), [S.send('final')]),
                 [S.recv('final'), S.xy(-30, -100)],
-                [S.recv('adios'), S.voice('SQUEAK'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('Lo que más vale no es el oro: es compartir con los amigos. ¡Fin del cuento!'))
+                [S.recv('adios'), S.voice('ALTO'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('Lo que más vale no es el oro: es compartir con los amigos. ¡Fin del cuento!'))
               ]
             },
             {
@@ -6009,13 +6009,13 @@ PQ.defer('examples', function (g) {
             },
             {
               id: 'yeray', x: -40, y: -80, scripts: [
-                [F(), S.voice('SQUEAK'), S.show(), S.xy(-40, -80)],
-                [S.recv('m1'), S.voice('SQUEAK')].concat(L('¡Yo quiero ir a la Luna! ¿Y tú, robot?'), [S.send('m2')]),
+                [F(), S.voice('ALTO'), S.show(), S.xy(-40, -80)],
+                [S.recv('m1'), S.voice('ALTO')].concat(L('¡Yo quiero ir a la Luna! ¿Y tú, robot?'), [S.send('m2')]),
                 [S.recv('noche'), S.xy(-110, -100)],
                 [S.recv('despegue'), S.hide()],
                 [S.recv('luna'), S.wait(2.2), S.xy(65, -115), S.show()],
-                [S.recv('l2'), S.voice('SQUEAK'), S.rep(3, [S.dy(30), S.wait(0.15), S.dy(-30), S.wait(0.15)])].concat(L('¡Casi no peso nada! Mira cómo salto.'), [S.send('l3')]),
-                [S.click(), S.voice('SQUEAK')].concat(L('¡Yo quiero ir a la Luna!'))
+                [S.recv('l2'), S.voice('ALTO'), S.rep(3, [S.dy(30), S.wait(0.15), S.dy(-30), S.wait(0.15)])].concat(L('¡Casi no peso nada! Mira cómo salto.'), [S.send('l3')]),
+                [S.click(), S.voice('ALTO')].concat(L('¡Yo quiero ir a la Luna!'))
               ]
             },
             {
@@ -6257,11 +6257,11 @@ PQ.defer('examples', function (g) {
             },
             {
               id: 'yeray', x: -50, y: -100, size: 85, scripts: [
-                [F(), S.voice('SQUEAK'), S.show(), S.xy(-50, -100)],
-                [S.recv('m1'), S.voice('SQUEAK')].concat(L('El plástico ensucia el mar y hace daño a los animales. ¡Vamos a limpiarlo!'), [S.send('m2')]),
+                [F(), S.voice('ALTO'), S.show(), S.xy(-50, -100)],
+                [S.recv('m1'), S.voice('ALTO')].concat(L('El plástico ensucia el mar y hace daño a los animales. ¡Vamos a limpiarlo!'), [S.send('m2')]),
                 [S.recv('mar'), S.xy(-100, 60)],
                 [S.recv('final'), S.xy(-30, -100)],
-                [S.recv('adios'), S.voice('SQUEAK'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Fin del cuento! ¡Hasta pronto!'))
+                [S.recv('adios'), S.voice('ALTO'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Fin del cuento! ¡Hasta pronto!'))
               ]
             },
             {
@@ -6330,9 +6330,9 @@ PQ.defer('examples', function (g) {
             },
             {
               id: 'yeray', x: 150, y: -20, size: 85, hidden: true, scripts: [
-                [F(), S.hide(), S.voice('SQUEAK'), S.xy(150, -20)],
+                [F(), S.hide(), S.voice('ALTO'), S.xy(150, -20)],
                 [S.recv('cosecha'), S.xy(40, -140), S.show()],
-                [S.recv('fin'), S.voice('SQUEAK'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Qué rica! La zanahoria es buena para la vista.'), L('Con paciencia y cuidado, todo crece. ¡Fin del cuento!'))
+                [S.recv('fin'), S.voice('ALTO'), S.rep(2, [S.dy(14), S.wait(0.1), S.dy(-14), S.wait(0.1)])].concat(L('¡Qué rica! La zanahoria es buena para la vista.'), L('Con paciencia y cuidado, todo crece. ¡Fin del cuento!'))
               ]
             },
             {
@@ -6488,11 +6488,11 @@ PQ.defer('examples', function (g) {
             },
             {
               id: 'yeray', x: -70, y: -75, sounds: ['Pop'], scripts: [
-                [F(), S.voice('SQUEAK'), S.show(), S.xy(-70, -75)],
-                [S.recv('m1'), S.voice('SQUEAK')].concat(L('¡Qué verde está todo! Aquí hay mucha niebla, y los árboles beben el agua de las nubes.'), [S.send('m2')]),
-                [S.recv('basura'), S.voice('SQUEAK'), S.wait(1.2)].concat(L('¡Oh, no! Alguien ha dejado una botella en el suelo.'), [S.send('b2')]),
-                [S.recv('t2'), S.voice('SQUEAK')].concat(L('¡Yo siempre tiraré la basura en su contenedor!'), [S.send('t3')]),
-                [S.click(), S.voice('SQUEAK'), S.iff(libre(), L('¡Me encanta este bosque!'))]
+                [F(), S.voice('ALTO'), S.show(), S.xy(-70, -75)],
+                [S.recv('m1'), S.voice('ALTO')].concat(L('¡Qué verde está todo! Aquí hay mucha niebla, y los árboles beben el agua de las nubes.'), [S.send('m2')]),
+                [S.recv('basura'), S.voice('ALTO'), S.wait(1.2)].concat(L('¡Oh, no! Alguien ha dejado una botella en el suelo.'), [S.send('b2')]),
+                [S.recv('t2'), S.voice('ALTO')].concat(L('¡Yo siempre tiraré la basura en su contenedor!'), [S.send('t3')]),
+                [S.click(), S.voice('ALTO'), S.iff(libre(), L('¡Me encanta este bosque!'))]
               ]
             },
             animal('paloma', 'Paloma', 'ALTO', 0.2, 'hPaloma', 'Arrurrú. Soy la paloma rabiche. Vivo en lo alto de los árboles del bosque.', [

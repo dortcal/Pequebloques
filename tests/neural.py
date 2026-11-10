@@ -119,7 +119,7 @@ async def main():
         pg3, e3 = await page(b)
         await pg3.click('#btnVoiceSet'); await pg3.wait_for_timeout(300)
         ck('se abre', await pg3.locator('.vset').count() == 1)
-        txt = await pg3.inner_text('.vstate'); ck('muestra idioma es-ES y estado', 'es-ES' in txt and 'neuronales' in txt, txt.replace('\n', ' | '))
+        txt = await pg3.inner_text('.vstate'); ck('muestra idioma es-ES y estado', 'es-ES' in txt and 'grabadas' in txt, txt.replace('\n', ' | '))
         await pg3.evaluate("window.__au=[]")
         await pg3.click('.vset .vseg.wrap .btn:has-text("Animal grande")'); await pg3.wait_for_timeout(600)
         ck('muestra de voz «animal grande» suena (neuronal)', await pg3.evaluate("window.__au.length") == 1 and await pg3.evaluate("PQ._lastUtter.key")=='GIANT')

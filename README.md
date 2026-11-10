@@ -21,6 +21,18 @@ Editor de programación por bloques para el alumnado de **Infantil y primer cicl
 - Editor de disfraces (pintar, subir imagen), grabación de voz, 16 personajes, 12 fondos y 62 sonidos originales en 6 categorías (animales, efectos, música, naturaleza, transporte y casa; se escuchan antes de añadirlos; tests/sounds.py y tests/soundui.py).
 - Copia automática en el navegador (botón «Último») y descarga como .sb3.
 
+## Fluidez, accesibilidad y modo tranquilo
+
+- **Movimiento fluido**: la lógica va a 30 pasos por segundo (como Scratch, para que los proyectos se comporten igual) y el dibujo interpola entre pasos a la frecuencia de la pantalla.
+- **Colisiones rápidas**: cada disfraz guarda su máscara de opacidad y su caja ajustada; «¿tocando…?» descarta pares que no se solapan y recuerda la respuesta mientras ninguno de los dos cambie.
+- **Si un bloque falla**, ese programa se detiene solo, el resto sigue y Pipo avisa con el nombre del bloque.
+- **Animaciones**: fundido corto al cambiar de disfraz o de fondo, bocadillos que entran y salen con suavidad, rebote al encajar un bloque y celebración (confeti, melodía y gesto de Pipo) al conseguir un reto o terminar un tutorial.
+- **Ajustes** (botón de los deslizadores): **modo tranquilo** (sin animaciones ni sonidos de la interfaz), fundido de disfraz, sonidos de la interfaz y voz. También se respeta «reducir movimiento» del sistema.
+- **Pantallas táctiles**: con dedo o lápiz (tabletas y pizarras digitales) los botones principales y la zona de toque de los bloques de la paleta miden al menos 56 px.
+- **Teclado en el área de programación**: se llega con el tabulador; flechas para ir de un bloque a otro, Intro para coger un bloque y moverlo con las flechas, Suprimir para borrarlo y Escape para salir. Cada paso se anuncia (aria-live).
+- **Voz predecible**: Ajustes muestra qué voz se usa de verdad. Si no están las voces grabadas (carpeta `audio/`), se usa la del dispositivo y se avisa.
+- **Arranque más ligero**: los cuentos, retos, juegos y tutoriales se cargan la primera vez que se abren.
+
 ## Usarlo
 
 - **En local**: abre `index.html` en Chrome, Edge o Firefox.

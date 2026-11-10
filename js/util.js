@@ -25,6 +25,38 @@
   };
   PQ.applyPrefs();
 
+  /* ---------- carga diferida de módulos ----------
+   * Los cuentos, retos y juegos (examples.js, pc.js y sus dibujos de libpc.js) y los tutoriales (tutorials.js)
+   * no se ejecutan al arrancar: se registran con PQ.defer() y se ejecutan con PQ.need() la primera vez que se usan.
+   * PQ.EX y PQ.TUT se cargan solos al consultarlos, así que el resto del código no cambia. */
+  const deferred = {}, loadedMods = {};
+  const GROUPS = { stories: ['libpc', 'examples', 'pc'], lib: ['libpc'] };
+  PQ.defer = function (name, fn) { deferred[name] = fn; };
+  PQ.need = function (name) {
+    (GROUPS[name] || [name]).forEach((n) => {
+      if (loadedMods[n] || !deferred[n]) return;
+      loadedMods[n] = true;
+      const fn = deferred[n]; deferred[n] = null;
+      fn(g);
+    });
+  };
+  PQ.loadedModules = () => Object.keys(loadedMods);
+  let _EX, _TUT;
+  Object.defineProperty(PQ, 'EX', { configurable: true, enumerable: true, get() { PQ.need('stories'); return _EX; }, set(v) { _EX = v; } });
+  Object.defineProperty(PQ, 'TUT', { configurable: true, enumerable: true, get() { PQ.need('tutorials'); return _TUT; }, set(v) { _TUT = v; } });
+  /* sustituto ligero de los tutoriales hasta que se abre el primero */
+  PQ.Tut = {
+    _stub: true, active: () => false, rerender() {}, currentStep: () => null, stop() {}, check() {},
+    start(id) { PQ.need('tutorials'); if (!PQ.Tut._stub) PQ.Tut.start(id); },
+    welcome(hasAuto, recover) {
+      PQ.ui.toast('¡Hola! ¿Quieres un tutorial?', {
+        ms: 7000,
+        actions: [{ label: 'Sí, empezar', cls: 'yel', onClick: () => PQ.Tut.start('primer-paso') }].concat(
+          hasAuto ? [{ label: 'Recuperar último', cls: '', onClick: recover }] : [])
+      });
+    }
+  };
+
   let _n = 0;
   PQ.uid = (p) => (p || 'id') + (++_n) + Math.random().toString(36).slice(2, 6);
   PQ.clone = (o) => JSON.parse(JSON.stringify(o));

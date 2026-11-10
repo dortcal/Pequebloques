@@ -75,13 +75,14 @@
       <div id="pal" aria-label="Bloques"></div>
       <div id="wscol">
         <div id="banner" hidden></div>
-        <div id="ws" tabindex="-1">
+        <div id="ws" tabindex="0" role="application" aria-label="Área de programación. Flechas: ir de un bloque a otro. Intro: coger un bloque y moverlo con las flechas. Suprimir: borrar. Escape: salir.">
           <div id="wsin"></div>
           <div id="wshint" hidden>
             <svg viewBox="0 0 200 120" aria-hidden="true"><path d="M20 90c40-70 110-80 150-30" fill="none" stroke="#9aa9d6" stroke-width="5" stroke-dasharray="3 12" stroke-linecap="round"/><path d="M160 40l14 22-26 2z" fill="#9aa9d6"/></svg>
             <p>Arrastra aquí los bloques</p>
           </div>
         </div>
+        <div id="wslive" aria-live="polite" role="status"></div>
         <div id="wstools">
           <button id="btnUndo" class="rb" type="button" title="Deshacer" aria-label="Deshacer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7L4 12l5 5M4 12h10a6 6 0 0 1 0 12"/></svg></button>
           <button id="btnRedo" class="rb" type="button" title="Rehacer" aria-label="Rehacer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7l5 5-5 5M20 12H10a6 6 0 0 0 0 12"/></svg></button>

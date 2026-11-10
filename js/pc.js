@@ -3,7 +3,8 @@
  * Centros de interés: reciclaje, energías limpias y universo.
  * Todo se maneja tocando la pantalla y se explica con voz: no hace falta saber leer.
  */
-(function (g) {
+/* carga diferida: este módulo no se ejecuta al arrancar, sino la primera vez que hace falta (ver PQ.defer en util.js) */
+PQ.defer('pc', function (g) {
   'use strict';
   const PQ = g.PQ;
   const { mk, R, S, F, make } = PQ.EXH;
@@ -1327,4 +1328,4 @@
       return pr;
     };
   });;
-})(typeof window !== 'undefined' ? window : globalThis);
+});

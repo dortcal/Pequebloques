@@ -737,6 +737,154 @@
     ED.renderWorkspace(); ED.changed();
   }
 
+  /* ---------- área de programación con teclado ----------
+   * Se activa al llegar con el tabulador (no al hacer clic, para que las flechas sigan moviendo a los personajes).
+   *   ↑ ↓  bloque anterior / siguiente      ← →  conjunto anterior / siguiente      Inicio / Fin  primero / último
+   *   Intro (o M)  coger el bloque para moverlo; ↑ ↓ lo cambian de sitio; Intro lo suelta; Escape lo deja donde estaba
+   *   Suprimir  borra el bloque              Escape  salir del área
+   * Cada paso se anuncia en #wslive (aria-live), que además se ve en pantalla mientras se usa el teclado. */
+  function initKeyboardNav(ws) {
+    const live = $('#wslive');
+    let nav = false, lastKeyTab = false, grab = null;   // grab = { snap, idx } mientras se mueve un bloque
+    const kindOf = (b) => B[b.op].kind;
+    const say = (t) => { if (!live) return; live.textContent = ''; setTimeout(() => { live.textContent = t; }, 30); };
+    const scriptsInOrder = () => S.target.scripts.slice().sort((a, b) => (a.y - b.y) || (a.x - b.x));
+    /* todos los bloques en orden de lectura, con su bloque «padre» */
+    function flat() {
+      const out = [];
+      const inBlock = (b, parent, script) => {
+        out.push({ b, parent, script });
+        if (b.cond) inBlock(b.cond, b, script);
+        Object.keys(b.in || {}).forEach((n) => { if (b.in[n]) inBlock(b.in[n], b, script); });
+        (b.sub || []).forEach((c) => inBlock(c, b, script));
+        (b.sub2 || []).forEach((c) => inBlock(c, b, script));
+      };
+      scriptsInOrder().forEach((s) => s.blocks.forEach((b) => inBlock(b, null, s)));
+      return out;
+    }
+    const text = (b) => { try { return PQ.blockText(b); } catch (e) { return B[b.op].label.replace(/%\w+/g, ''); } };
+    function show(b) {
+      selB = b; markSel();
+      const el = Array.from(document.querySelectorAll('#wsin .block')).find((x) => x._b === b);
+      if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      document.querySelectorAll('#wsin .block.kbgrab').forEach((x) => x.classList.remove('kbgrab'));
+      if (grab && el) el.classList.add('kbgrab');
+    }
+    function describe(list, i) {
+      const it = list[i];
+      return text(it.b) + '. Bloque ' + (i + 1) + ' de ' + list.length + (it.parent ? ', dentro de «' + text(it.parent) + '»' : '') + '.';
+    }
+    function go(i) {
+      const list = flat();
+      if (!list.length) { say('No hay bloques todavía.'); return; }
+      i = Math.max(0, Math.min(list.length - 1, i));
+      show(list[i].b); say(describe(list, i));
+    }
+    const curIdx = () => flat().findIndex((x) => x.b === selB);
+    /* sitios donde puede ir un bloque de pila: [lista, posición, descripción] en orden de lectura */
+    function slots(moving) {
+      const out = [], capM = kindOf(moving) === 'cap' || B[moving.op].noNext;
+      const walk = (arr, owner, script, label) => {
+        for (let i = 0; i <= arr.length; i++) {
+          const prev = arr[i - 1];
+          const okStart = !(i === 0 && !owner && arr[0] && kindOf(arr[0]) === 'hat');
+          const okPrev = !(prev && (kindOf(prev) === 'cap' || B[prev.op].noNext));
+          const okCap = !capM || i === arr.length;
+          if (okStart && okPrev && okCap) out.push({ arr, idx: i, script, where: prev ? 'después de «' + text(prev) + '»' : owner ? 'lo primero dentro de «' + text(owner) + '»' + (label || '') : 'el primero del conjunto' });
+          const b = arr[i];
+          if (b && b.sub) walk(b.sub, b, script, '');
+          if (b && b.sub2) walk(b.sub2, b, script, ', en «si no»');
+        }
+      };
+      scriptsInOrder().forEach((s) => walk(s.blocks, null, s, ''));
+      return out;
+    }
+    function startGrab() {
+      const loc = selB && findLoc(selB);
+      if (!loc) return;
+      const k = kindOf(selB);
+      if (k === 'hat') { say('Este bloque va siempre el primero. No se puede mover de sitio.'); return; }
+      if (loc.type !== 'stack') { say('Este bloque va dentro de otro. Para cambiarlo, bórralo y pon otro.'); return; }
+      grab = { snap: JSON.stringify(S.target.scripts), idx: curIdx() };
+      show(selB);
+      say('Has cogido «' + text(selB) + '». Flechas arriba y abajo para moverlo. Intro para soltarlo. Escape para dejarlo donde estaba.');
+    }
+    function moveGrab(dir) {
+      const b = selB, loc = findLoc(b);
+      if (!loc || loc.type !== 'stack') return;
+      loc.arr.splice(loc.idx, 1);                               // se saca y se busca el sitio siguiente o anterior
+      const list = slots(b);
+      let at = list.findIndex((s) => s.arr === loc.arr && s.idx === loc.idx);
+      if (at < 0) at = list.findIndex((s) => s.arr === loc.arr && s.idx > loc.idx) - (dir > 0 ? 1 : 0);
+      let to = list[at + dir];
+      if (!to) { loc.arr.splice(loc.idx, 0, b); say(dir > 0 ? 'Ya está al final.' : 'Ya está al principio.'); return; }
+      to.arr.splice(to.idx, 0, b);
+      /* un conjunto que se queda vacío desaparece */
+      S.target.scripts = S.target.scripts.filter((s) => s.blocks.length > 0);
+      ED.renderWorkspace(); show(b);
+      say('Ahora va ' + to.where + '.');
+    }
+    function endGrab(keep) {
+      if (!grab) return;
+      const g0 = grab; grab = null;
+      if (keep) {
+        const changed = JSON.stringify(S.target.scripts) !== g0.snap;
+        if (changed) { (S.target._undo = S.target._undo || []).push(g0.snap); if (S.target._undo.length > 40) S.target._undo.shift(); S.target._redo = []; }
+        show(selB); say('Soltado. ' + (selB ? text(selB) : ''));
+        if (changed) { if (PQ.uiSound) PQ.uiSound('snap'); ED.changed(); }
+      } else {
+        S.target.scripts = JSON.parse(g0.snap);
+        ED.renderWorkspace();
+        const list = flat(); if (list[g0.idx]) show(list[g0.idx].b);
+        say('Lo dejo donde estaba.');
+      }
+    }
+    document.addEventListener('keydown', (e) => { lastKeyTab = e.key === 'Tab'; }, true);
+    document.addEventListener('pointerdown', () => { lastKeyTab = false; if (nav) { if (grab) endGrab(true); nav = false; ws.classList.remove('kbnav'); } }, true);
+    ws.addEventListener('focus', () => {
+      if (!lastKeyTab) return;
+      nav = true; ws.classList.add('kbnav');
+      const list = flat();
+      if (!list.length) { say('Área de programación. No hay bloques todavía. Arrastra bloques aquí desde la lista de la izquierda.'); return; }
+      let i = list.findIndex((x) => x.b === selB); if (i < 0) i = 0;
+      show(list[i].b);
+      say('Área de programación. Flechas para ir de un bloque a otro. Intro para coger un bloque y moverlo. ' + describe(list, i));
+    });
+    ws.addEventListener('blur', () => { if (grab) endGrab(true); nav = false; ws.classList.remove('kbnav'); });
+    ws.addEventListener('keydown', (e) => {
+      if (!nav || e.target !== ws || e.ctrlKey || e.metaKey || e.altKey) return;
+      const k = e.key;
+      const handled = () => { e.preventDefault(); e.stopPropagation(); };
+      if (grab) {
+        if (k === 'ArrowDown' || k === 'ArrowRight') { handled(); moveGrab(1); }
+        else if (k === 'ArrowUp' || k === 'ArrowLeft') { handled(); moveGrab(-1); }
+        else if (k === 'Enter' || k === ' ' || k.toLowerCase() === 'm') { handled(); endGrab(true); }
+        else if (k === 'Escape') { handled(); endGrab(false); }
+        return;
+      }
+      if (k === 'ArrowDown') { handled(); go(curIdx() + 1); }
+      else if (k === 'ArrowUp') { handled(); go(Math.max(0, curIdx() - 1)); }
+      else if (k === 'ArrowRight' || k === 'ArrowLeft') {
+        handled();
+        const list = flat(), cur = list[curIdx()], ss = scriptsInOrder();
+        if (!cur) { go(0); return; }
+        const si = ss.indexOf(cur.script) + (k === 'ArrowRight' ? 1 : -1);
+        if (!ss[si]) { say(k === 'ArrowRight' ? 'No hay más conjuntos de bloques.' : 'Este es el primer conjunto de bloques.'); return; }
+        go(list.findIndex((x) => x.script === ss[si]));
+      }
+      else if (k === 'Home') { handled(); go(0); }
+      else if (k === 'End') { handled(); go(1e9); }
+      else if (k === 'Enter' || k.toLowerCase() === 'm') { handled(); startGrab(); }
+      else if (k === ' ') { handled(); if (selB) say(describe(flat(), Math.max(0, curIdx()))); }
+      else if (k === 'Delete' || k === 'Backspace') {
+        handled();
+        const i = curIdx(), name = selB ? text(selB) : '';
+        if (deleteSelected(false)) { const list = flat(); if (list.length) show(list[Math.min(i, list.length - 1)].b); say('Borrado «' + name + '».' + (list.length ? '' : ' Ya no quedan bloques.')); }
+      }
+      else if (k === 'Escape') { handled(); ws.blur(); say(''); }
+    });
+  }
+
   ED.init = function () {
     const ws = $('#ws'), pal = $('#pal');
     ws.addEventListener('pointerdown', (e) => { if (!e.target.closest('.block')) { selB = null; markSel(); } onDown(e, false); });
@@ -770,6 +918,7 @@
         showCtx(e.clientX, e.clientY, [['Ordenar los bloques', ED.cleanUp], ['Deshacer', ED.undo]]);
       }
     });
+    initKeyboardNav(ws);
     document.addEventListener('keydown', (e) => {
       if ((e.key === 'Delete' || e.key === 'Backspace') && selB && !kp && !e.target.closest('input,textarea,select,[contenteditable]') && !document.querySelector('.modal-back,.modal')) {
         if (deleteSelected(e.shiftKey || e.ctrlKey || e.metaKey)) e.preventDefault();

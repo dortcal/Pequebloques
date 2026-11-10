@@ -533,6 +533,7 @@
   /* ============================ bibliotecas ============================ */
   let sndPrev = null;
   function openLibrary(kind) {
+    PQ.need('lib');
     const body = h('div');
     const gridEl = h('div', 'grid'); body.appendChild(gridEl);
     let title = '', m;
@@ -916,6 +917,7 @@
 
   /* ============================ cuentos y retos ============================ */
   function openStories(filter) {
+    PQ.need('stories');
     filter = filter || 'all';
     const body = h('div');
     const tabs = h('div', 'tabsm');
@@ -1019,6 +1021,7 @@
   }
 
   function openExample(id) {
+    PQ.need('stories');
     const ex = PQ.EX.find((x) => x.id === id);
     if (!ex) return;
     const p = ex.build();
@@ -1223,7 +1226,7 @@
       { label: 'Elegir un personaje', icon: ICO.list, onClick: () => openLibrary('sprite') },
       { label: 'Pintar uno nuevo', icon: ICO.brush, onClick: openPaintNewSprite },
       { label: 'Subir una imagen', icon: ICO.up, onClick: () => pickImage((c) => newSpriteFromCostume(c)) },
-      { label: 'Sorpresa', icon: ICO.dice, onClick: () => { const it = PQ.SPRITE_LIB[Math.floor(Math.random() * PQ.SPRITE_LIB.length)]; addSprite(PQ.makeSprite(it.id, S.project)); } }
+      { label: 'Sorpresa', icon: ICO.dice, onClick: () => { PQ.need('lib'); const it = PQ.SPRITE_LIB[Math.floor(Math.random() * PQ.SPRITE_LIB.length)]; addSprite(PQ.makeSprite(it.id, S.project)); } }
     ]));
     $('#btnAddBackdrop').addEventListener('click', (e) => popupMenu(e.currentTarget, [
       { label: 'Elegir un fondo', icon: ICO.list, onClick: () => openLibrary('backdrop') },

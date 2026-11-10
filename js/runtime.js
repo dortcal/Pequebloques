@@ -244,8 +244,11 @@
     Q.cur = job;
     if (job.clips) {                                       // voz neuronal pregrabada (tts.js)
       job.timer = setTimeout(() => jobEnd(job), 120000);
-      PQ.tts.play(job, () => jobEnd(job), () => {          // si el audio no se puede reproducir: respaldo con la voz del dispositivo
+      PQ.tts.play(job, () => jobEnd(job), (reason) => {    // si el audio no se puede reproducir: respaldo con la voz del dispositivo
         if (job.over || job.dead) return;
+        if (PQ.tts.clipsFailed) PQ.tts.clipsFailed(reason);
+        if (PQ._lastUtter) PQ._lastUtter.engine = PQ.tts.deviceOK() ? 'device' : 'none';
+        if (PQ.tts.used) PQ.tts.used(PQ._lastUtter ? PQ._lastUtter.engine : 'device');
         clearTimeout(job.timer); job.clips = null; job.stop = null;
         if (!PQ.tts.deviceOK()) { jobEnd(job); return; }
         const vf = voiceFor(job.key, job.text);              // respaldo: se construye el plan de la voz del dispositivo
@@ -310,6 +313,8 @@
     const synth = g.speechSynthesis;
     const devOK = !!synth && typeof SpeechSynthesisUtterance !== 'undefined' && (!PQ.tts || PQ.tts.deviceOK());
     if (!neural && !devOK) {                              // nadie puede hablar: se espera lo que tardaría y se sigue (el bocadillo ya muestra el texto)
+      PQ._lastUtter = { text, key, engine: 'none' };
+      if (PQ.tts && PQ.tts.used) PQ.tts.used('none');
       setTimeout(() => { h.done = true; }, Math.min(8000, 400 + text.length * 70));
       return h;
     }
@@ -325,6 +330,7 @@
         if (!units.length) { h.done = true; return h; }
         job = { h, units, base, over: false, dead: false, timer: 0, natural: isNat() };
         PQ._lastUtter = { text, key, engine: 'device', voice: vf.voice && vf.voice.name, pitch: vf.pitch, units };
+        if (PQ.tts && PQ.tts.used && (!opt || opt.engine !== 'device')) PQ.tts.used('device');
       }
       if (Q.cur && Q.wait.length >= 1) {                    // evita colas largas de voces atrasadas
         const old = Q.wait.splice(0); old.forEach((j) => { j.over = true; j.h.done = true; });

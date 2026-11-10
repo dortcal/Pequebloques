@@ -1,7 +1,8 @@
 /* PequeBloques — diseñado por David OZC
  * tutorials.js: tutoriales guiados con la mascota Pipo
  */
-(function (g) {
+/* carga diferida: este módulo no se ejecuta al arrancar, sino la primera vez que hace falta (ver PQ.defer en util.js) */
+PQ.defer('tutorials', function (g) {
   'use strict';
   const PQ = g.PQ;
   const $ = (s) => document.querySelector(s);
@@ -302,4 +303,4 @@
     }
   };
   setInterval(() => { if (cur) PQ.Tut.check(); }, 700);
-})(typeof window !== 'undefined' ? window : globalThis);
+});

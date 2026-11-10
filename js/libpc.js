@@ -2,7 +2,8 @@
  * libpc.js: dibujos ORIGINALES para los cuentos de «Pensamiento computacional»
  * (reciclaje, energías limpias y universo). Se añaden a la biblioteca de lib.js.
  */
-(function (g) {
+/* carga diferida: este módulo no se ejecuta al arrancar, sino la primera vez que hace falta (ver PQ.defer en util.js) */
+PQ.defer('libpc', function (g) {
   'use strict';
   const PQ = g.PQ;
   const O = '#3a2c4f';
@@ -290,4 +291,4 @@
     <rect width="480" height="360" fill="url(#c)"/><rect y="150" width="480" height="210" fill="#B9C1CC"/>
     ${grid('#D5DAE2', '#C6CCD6', '#6B7482')}${panelBg}`);
   PQ.PC_READY = true;
-})(typeof window !== 'undefined' ? window : globalThis);
+});

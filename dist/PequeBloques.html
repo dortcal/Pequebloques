@@ -89,8 +89,11 @@ svg{flex:none}
 #ws{flex:1;min-height:0;overflow:auto;position:relative;background-color:#F6F9FF;
   background-image:radial-gradient(#c7d3ee 1.6px,transparent 1.7px);background-size:26px 26px}
 #wsin{position:relative;width:3200px;height:2400px}
-.script{position:absolute;isolation:isolate;border-radius:10px;transition:filter .2s}
-.script.running{filter:drop-shadow(0 0 7px #FFE066) drop-shadow(0 0 3px #FFD43B)}
+.script{position:absolute;isolation:isolate;border-radius:10px}
+/* programa en marcha: halo dibujado una sola vez (box-shadow en un pseudo-elemento) y animado solo con la opacidad */
+.script.running::after{content:'';position:absolute;inset:-5px;border-radius:14px;z-index:-1;pointer-events:none;
+  box-shadow:0 0 0 3px #FFD43B,0 0 12px 5px rgba(255,224,102,.75);animation:runhalo .9s ease-in-out infinite alternate;will-change:opacity}
+@keyframes runhalo{from{opacity:.45}to{opacity:1}}
 #wshint{position:absolute;left:30px;top:24px;pointer-events:none;color:#8a98c4;font-size:20px;font-weight:800;display:flex;align-items:center;gap:6px;flex-direction:column;opacity:.95}
 #wshint[hidden]{display:none}
 #wshint svg{width:200px;height:120px}
@@ -154,7 +157,11 @@ input.fld:focus{background:#FFF9D6;box-shadow:0 0 0 3px rgba(255,255,255,.7)}
 @keyframes pulse{0%,100%{filter:drop-shadow(0 0 0 #fff)}50%{filter:drop-shadow(0 0 9px #fff) drop-shadow(0 0 5px #FFD43B)}}
 .block.clicked{filter:brightness(1.25)}
 .dragstack{position:fixed;z-index:2000;pointer-events:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.28));transform:rotate(-1.2deg)}
-.snapline{position:fixed;z-index:1999;height:8px;border-radius:5px;background:#fff;box-shadow:0 0 0 2px #FFD43B,0 0 12px 3px rgba(255,255,255,.9);pointer-events:none}
+.snapline{position:fixed;z-index:1999;height:10px;border-radius:6px;background:#FFD43B;box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(60,40,140,.55),0 0 14px 5px rgba(255,212,59,.8);pointer-events:none;animation:snappulse .7s ease-in-out infinite alternate}
+.snapline::before{content:'';position:absolute;left:-13px;top:50%;margin-top:-9px;border:9px solid transparent;border-left-color:#FFD43B;filter:drop-shadow(0 0 2px rgba(60,40,140,.7))}
+@keyframes snappulse{from{opacity:.75}to{opacity:1}}
+.block.snapped{animation:snapbounce .3s cubic-bezier(.3,1.6,.5,1)}
+@keyframes snapbounce{0%{transform:translateY(-7px) scale(1.04)}55%{transform:translateY(2px) scale(.985)}100%{transform:none}}
 body.dragging{cursor:grabbing}
 body.dragging *{cursor:grabbing!important}
 
@@ -359,6 +366,8 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
+/* «modo tranquilo» (Ajustes): lo mismo que pide el sistema con «reducir movimiento», pero elegido en la aplicación */
+.calm *,.calm *::before,.calm *::after{animation:none!important;transition:none!important}
 
 /* ---------- reporteros, huecos, variables ---------- */
 .block.k-rep{display:inline-flex;vertical-align:middle;background:var(--b);border-radius:999px;padding:1.5px}
@@ -567,6 +576,66 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 .sndadd{display:block;width:100%;margin-top:10px;min-height:52px;font-size:17px}
 .sndadd:disabled{opacity:.5}
 
+/* ---------- globo de Pipo (avisos amables) ---------- */
+#pipo{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:min(520px,calc(100vw - 24px));background:#fff;border:4px solid #8B5CF6;border-radius:22px;box-shadow:0 10px 30px rgba(40,30,120,.35);padding:10px 12px;display:flex;gap:10px;align-items:center;z-index:60;animation:pipoin .22s cubic-bezier(.2,1.3,.4,1)}
+#pipo.warn{border-color:#FF8A4D}
+#pipo.out{opacity:0;transition:opacity .16s}
+#pipo .mascot{width:64px;height:64px;flex:none}
+#pipo .pt{flex:1;min-width:0}
+#pipo p{margin:0 0 8px;font-size:16px;line-height:1.35;font-weight:700;color:var(--ink)}
+#pipo .btn{min-height:44px;padding:7px 16px;font-size:15px}
+@keyframes pipoin{from{opacity:0;transform:translateX(-50%) translateY(14px) scale(.94)}to{opacity:1;transform:translateX(-50%)}}
+.block.failed{outline:3px dashed #E5484D;outline-offset:2px;border-radius:6px}
+
+/* ---------- celebración ---------- */
+#pipo.win{border-color:#3FBF67}
+#pipo .mascot.cheer,#guide .mascot.cheer{animation:cheer 1.1s cubic-bezier(.3,1.5,.5,1) 2;transform-origin:50% 90%}
+@keyframes cheer{0%{transform:none}25%{transform:translateY(-16px) rotate(-10deg) scale(1.08)}50%{transform:translateY(0) rotate(0) scale(.96,1.04)}75%{transform:translateY(-12px) rotate(10deg) scale(1.08)}100%{transform:none}}
+#banner.done{background:#DDF7E6;border-color:#3FBF67}
+
+/* ---------- interruptores de Ajustes ---------- */
+.vsw{display:flex;flex-direction:column;gap:8px}
+.vswitch{display:flex;align-items:center;gap:12px;text-align:left;border:2px solid #cfd6f5;background:#fff;border-radius:16px;padding:8px 12px;min-height:56px;font:inherit;color:var(--ink);cursor:pointer}
+.vswitch .knob{flex:none;width:52px;height:30px;border-radius:15px;background:#C5CBE0;position:relative;transition:background .15s}
+.vswitch .knob::after{content:'';position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+.vswitch[aria-checked="true"] .knob{background:#3FBF67}
+.vswitch[aria-checked="true"] .knob::after{transform:translateX(22px)}
+.vswitch .st{display:flex;flex-direction:column;gap:1px}
+.vswitch .st b{font-size:15.5px}
+.vswitch .st small{font-size:13px;color:#5f5a86;line-height:1.3}
+.vswitch:focus-visible{outline:3px solid #3b3170;outline-offset:2px}
+
+/* ---------- objetivos táctiles de 56 px (dedos pequeños, tabletas y pizarras digitales) ----------
+ * Solo con puntero grueso y con sitio suficiente; en móviles apaisados se mantiene el diseño compacto. */
+@media (pointer:coarse) and (min-width:700px) and (min-height:600px){
+  .mbtn,.mbtn.sq{min-height:56px;min-width:56px;justify-content:center}
+  .mbtn{padding:8px 14px}
+  .tab{min-height:56px}
+  .sbtn{width:56px;height:56px}
+  .sbtn.flag{width:64px}
+  .sbtn.help{height:56px}
+  #stagebar{flex-wrap:wrap}
+  #wstools button{width:56px;height:56px}
+  .addbtn,.addbtn.small{width:56px;height:56px;flex:none}
+  #btnShow,#btnHide{min-width:56px;min-height:56px}
+  .cat{min-height:60px}
+  .mkvar{min-height:56px}
+  /* paleta: el bloque se ve igual, pero su zona de toque mide 56 px de alto y no se pisa con la del vecino */
+  #pal .palitem{margin:18px 0 18px 4px}
+  #pal .palitem>.block::before{content:'';position:absolute;left:-4px;right:-4px;top:-9px;bottom:-9px}
+  #pal .palitem>.block{min-height:38px}
+}
+
+.vstate .vnow{font-size:15px;margin-bottom:4px}
+
+/* ---------- área de programación con teclado ---------- */
+#ws.kbnav{outline:4px solid #5b3bd0;outline-offset:-4px}
+#ws:focus-visible{outline:4px solid #5b3bd0;outline-offset:-4px}
+#wslive{position:absolute;left:12px;right:216px;bottom:12px;z-index:6;pointer-events:none;background:#2b2350;color:#fff;border-radius:14px;padding:9px 14px;font-size:15px;font-weight:700;line-height:1.3;box-shadow:0 6px 18px rgba(0,0,0,.3);
+  clip-path:inset(50%);width:1px;height:1px;overflow:hidden;white-space:nowrap}
+#ws.kbnav ~ #wslive:not(:empty){clip-path:none;width:auto;height:auto;overflow:visible;white-space:normal}
+.block.kbgrab{outline:4px dashed #E5484D;outline-offset:3px;border-radius:10px}
+
 </style>
 </head>
 <body>
@@ -607,7 +676,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   <div class="menuright">
     <button id="btnLevel" class="mbtn tgl" type="button" aria-pressed="false" title="Mostrar más bloques"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/></svg><span id="levelLabel">Pocos bloques</span></button>
     <button id="btnVoice" class="mbtn tgl" type="button" aria-pressed="false" title="Leer en voz alta lo que dicen los personajes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg><span>Voz</span></button>
-    <button id="btnVoiceSet" class="mbtn sq" type="button" title="Ajustes de voz: velocidad, volumen y voces" aria-label="Ajustes de voz"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
+    <button id="btnVoiceSet" class="mbtn sq" type="button" title="Ajustes: modo tranquilo, animaciones y voz" aria-label="Ajustes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
     <button id="btnZoomOut" class="mbtn sq" type="button" title="Bloques más pequeños" aria-label="Bloques más pequeños"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M16.5 16.5L21 21"/></svg></button>
     <button id="btnZoomIn" class="mbtn sq" type="button" title="Bloques más grandes" aria-label="Bloques más grandes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M16.5 16.5L21 21"/></svg></button>
     <button id="btnAbout" class="mbtn sq" type="button" title="Ayuda y créditos" aria-label="Ayuda y créditos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.6 2.6 0 1 1 3.6 2.4c-.8.4-1.1.9-1.1 1.8M12 17v.3"/></svg></button>
@@ -627,13 +696,14 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       <div id="pal" aria-label="Bloques"></div>
       <div id="wscol">
         <div id="banner" hidden></div>
-        <div id="ws" tabindex="-1">
+        <div id="ws" tabindex="0" role="application" aria-label="Área de programación. Flechas: ir de un bloque a otro. Intro: coger un bloque y moverlo con las flechas. Suprimir: borrar. Escape: salir.">
           <div id="wsin"></div>
           <div id="wshint" hidden>
             <svg viewBox="0 0 200 120" aria-hidden="true"><path d="M20 90c40-70 110-80 150-30" fill="none" stroke="#9aa9d6" stroke-width="5" stroke-dasharray="3 12" stroke-linecap="round"/><path d="M160 40l14 22-26 2z" fill="#9aa9d6"/></svg>
             <p>Arrastra aquí los bloques</p>
           </div>
         </div>
+        <div id="wslive" aria-live="polite" role="status"></div>
         <div id="wstools">
           <button id="btnUndo" class="rb" type="button" title="Deshacer" aria-label="Deshacer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7L4 12l5 5M4 12h10a6 6 0 0 1 0 12"/></svg></button>
           <button id="btnRedo" class="rb" type="button" title="Rehacer" aria-label="Rehacer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7l5 5-5 5M20 12H10a6 6 0 0 0 0 12"/></svg></button>
@@ -717,6 +787,58 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 (function (g) {
   'use strict';
   const PQ = g.PQ = g.PQ || {};
+
+  /* ---------- preferencias de la interfaz (se guardan en el navegador) ----------
+   *   fade: fundido corto al cambiar de disfraz · calm: «modo tranquilo» (sin animaciones ni sonidos de la interfaz)
+   *   uiSound: sonidos de la interfaz (encajar un bloque, celebración) */
+  const PREFS = 'pequebloques.ajustes';
+  PQ.prefs = { fade: true, calm: false, uiSound: true };
+  try { Object.assign(PQ.prefs, JSON.parse(localStorage.getItem(PREFS) || '{}')); } catch (e) { /* sin almacenamiento */ }
+  PQ.savePrefs = function () {
+    try { localStorage.setItem(PREFS, JSON.stringify(PQ.prefs)); } catch (e) { /* nada */ }
+    PQ.applyPrefs();
+  };
+  const RM = (function () { try { return g.matchMedia ? g.matchMedia('(prefers-reduced-motion: reduce)') : null; } catch (e) { return null; } })();
+  /* ¿se pueden usar animaciones? No, si el sistema pide menos movimiento o está el modo tranquilo */
+  PQ.motionOK = () => !PQ.prefs.calm && !(RM && RM.matches);
+  PQ.uiSoundOK = () => PQ.prefs.uiSound && !PQ.prefs.calm;
+  PQ.applyPrefs = function () {
+    try { document.documentElement.classList.toggle('calm', !!PQ.prefs.calm); } catch (e) { /* sin documento */ }
+    if (PQ.RT) PQ.RT.dirty = true;
+  };
+  PQ.applyPrefs();
+
+  /* ---------- carga diferida de módulos ----------
+   * Los cuentos, retos y juegos (examples.js, pc.js y sus dibujos de libpc.js) y los tutoriales (tutorials.js)
+   * no se ejecutan al arrancar: se registran con PQ.defer() y se ejecutan con PQ.need() la primera vez que se usan.
+   * PQ.EX y PQ.TUT se cargan solos al consultarlos, así que el resto del código no cambia. */
+  const deferred = {}, loadedMods = {};
+  const GROUPS = { stories: ['libpc', 'examples', 'pc'], lib: ['libpc'] };
+  PQ.defer = function (name, fn) { deferred[name] = fn; };
+  PQ.need = function (name) {
+    (GROUPS[name] || [name]).forEach((n) => {
+      if (loadedMods[n] || !deferred[n]) return;
+      loadedMods[n] = true;
+      const fn = deferred[n]; deferred[n] = null;
+      fn(g);
+    });
+  };
+  PQ.loadedModules = () => Object.keys(loadedMods);
+  let _EX, _TUT;
+  Object.defineProperty(PQ, 'EX', { configurable: true, enumerable: true, get() { PQ.need('stories'); return _EX; }, set(v) { _EX = v; } });
+  Object.defineProperty(PQ, 'TUT', { configurable: true, enumerable: true, get() { PQ.need('tutorials'); return _TUT; }, set(v) { _TUT = v; } });
+  /* sustituto ligero de los tutoriales hasta que se abre el primero */
+  PQ.Tut = {
+    _stub: true, active: () => false, rerender() {}, currentStep: () => null, stop() {}, check() {},
+    start(id) { PQ.need('tutorials'); if (!PQ.Tut._stub) PQ.Tut.start(id); },
+    welcome(hasAuto, recover) {
+      PQ.ui.toast('¡Hola! ¿Quieres un tutorial?', {
+        ms: 7000,
+        actions: [{ label: 'Sí, empezar', cls: 'yel', onClick: () => PQ.Tut.start('primer-paso') }].concat(
+          hasAuto ? [{ label: 'Recuperar último', cls: '', onClick: recover }] : [])
+      });
+    }
+  };
 
   let _n = 0;
   PQ.uid = (p) => (p || 'id') + (++_n) + Math.random().toString(36).slice(2, 6);
@@ -2439,7 +2561,8 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
  * libpc.js: dibujos ORIGINALES para los cuentos de «Pensamiento computacional»
  * (reciclaje, energías limpias y universo). Se añaden a la biblioteca de lib.js.
  */
-(function (g) {
+/* carga diferida: este módulo no se ejecuta al arrancar, sino la primera vez que hace falta (ver PQ.defer en util.js) */
+PQ.defer('libpc', function (g) {
   'use strict';
   const PQ = g.PQ;
   const O = '#3a2c4f';
@@ -2727,7 +2850,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     <rect width="480" height="360" fill="url(#c)"/><rect y="150" width="480" height="210" fill="#B9C1CC"/>
     ${grid('#D5DAE2', '#C6CCD6', '#6B7482')}${panelBg}`);
   PQ.PC_READY = true;
-})(typeof window !== 'undefined' ? window : globalThis);
+});
 
 </script>
 <script>
@@ -2966,11 +3089,15 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   const hex8 = (n) => ('00000000' + n.toString(16)).slice(-8);
   const clean = (t) => String(t).replace(/[«»]/g, '').replace(/\s+/g, ' ').trim();
   function clipKey(voice, text) { const s = voice + '|' + clean(text); return hex8(h32(s, 0x811c9dc5)) + hex8(h32(s, 0x9747b28c)); }
+  /* Las voces grabadas viven en una carpeta externa (audio/). Si no está —por ejemplo, al publicar solo el HTML— o si
+   * sus archivos no se pueden reproducir, se deja de intentar y se usa siempre la voz del dispositivo (ver status()). */
+  let clipsBroken = false;
+  const audioPresent = () => !!(PQ.AUDIO && PQ.AUDIO.k) && !clipsBroken && typeof Audio !== 'undefined';
   const has = (k) => !!(PQ.AUDIO && PQ.AUDIO.k && PQ.AUDIO.k[k]);
   const voiceId = (voice) => (voice === 'PIPO' && cfg.pipo === 'm') ? 'PIPOM' : voice;
   /* Motor «automático»: si el dispositivo tiene una voz española NATURAL utilizable (Microsoft «Natural», Google, Siri, mejoradas…),
    * se usa esa para todo —suena mejor que las voces pregrabadas—; si no, las grabadas (Kokoro). «clips» fuerza las grabadas. */
-  const neuralReady = () => !!(PQ.AUDIO && PQ.AUDIO.k && (typeof Audio !== 'undefined') && (cfg.engine === 'clips' || (cfg.engine === 'auto' && !naturalDevice())));
+  const neuralReady = () => audioPresent() && (cfg.engine === 'clips' || (cfg.engine === 'auto' && !naturalDevice()));
 
   /* ¿Se puede decir este texto con la voz neuronal? Devuelve la lista de claves (con pausas) o null. */
   function plan(text, voice) {
@@ -3016,9 +3143,10 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       let moved = false;
       const nx = () => { if (moved || dead) return; moved = true; pool.delete(c.k); tm = setTimeout(step, (c.gap || 0) * 1000 / cfg.rate); };
       a.onended = nx;
-      a.onerror = () => { if (dead) return; if (played === 0) { dead = true; onFail(); } else nx(); };
+      a.onerror = () => { if (dead) return; if (played === 0) { dead = true; onFail('error'); } else nx(); };
       const p = a.play();
-      if (p && p.then) p.then(() => { played++; }, () => { if (dead) return; if (played === 0) { dead = true; onFail(); } else nx(); });
+      /* NotAllowedError = el navegador aún no deja sonar (falta un toque del usuario): no significa que falten los archivos */
+      if (p && p.then) p.then(() => { played++; }, (err) => { if (dead) return; if (played === 0) { dead = true; onFail(err && err.name === 'NotAllowedError' ? 'blocked' : 'error'); } else nx(); });
     };
     step();
   }
@@ -3049,9 +3177,36 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   /* ¿puede el dispositivo hablar en español? (si aún no ha cargado ninguna voz se intenta igualmente con lang = es-ES) */
   const deviceOK = () => !!g.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined' && (vlist.length > 0 || (vlist._all || 0) === 0);
 
+  /* ---------- qué voz se está usando de verdad, y aviso si no es la esperada ---------- */
+  function status() {
+    if (neuralReady()) return { engine: 'neural', why: 'ok', label: 'voces grabadas' };
+    if (!deviceOK()) return { engine: 'none', why: clipsBroken ? 'broken' : (PQ.AUDIO && PQ.AUDIO.k ? 'nodevice' : 'missing'), label: 'sin voz en este dispositivo' };
+    const nat = naturalDevice(), dv = nat || (vlist[0] && vlist[0].v);
+    const why = clipsBroken ? 'broken' : !(PQ.AUDIO && PQ.AUDIO.k) ? 'missing' : cfg.engine === 'device' ? 'chosen' : 'natural';
+    return { engine: 'device', why, natural: !!nat, voice: dv ? dv.name : '', label: 'voz de este dispositivo' + (dv ? ' (' + dv.name + ')' : '') };
+  }
+  const told = {};
+  function tell(key, msg) {
+    if (told[key]) return; told[key] = true;
+    const b = document.getElementById('btnVoice'); if (b) b.title = 'Voz: ' + status().label;
+    const go = () => { if (PQ.ui && PQ.ui.toast) PQ.ui.toast(msg, { ms: 6500 }); else setTimeout(go, 400); };
+    go();
+  }
+  /* se llama cada vez que se va a decir algo, con el motor que se usa realmente */
+  function used(engine) {
+    const st = status();
+    if (engine === 'none') tell('none', 'Este dispositivo no tiene voz en español. Los textos se ven en la pantalla.');
+    else if (engine === 'device' && st.why === 'missing') tell('missing', 'Aquí no están las voces grabadas. Uso la voz de este dispositivo.');
+    else if (engine === 'device' && st.why === 'broken') tell('broken', 'No puedo abrir las voces grabadas. Uso la voz de este dispositivo.');
+  }
+  function clipsFailed(reason) {
+    if (reason === 'blocked') return;                     // solo falta un toque del usuario
+    clipsBroken = true; pool.clear();
+  }
+
   /* ---------- API ---------- */
   PQ.tts = {
-    clipKey, plan, play, cfg, save,
+    clipKey, plan, play, cfg, save, status, used, clipsFailed,
     neuralReady, naturalDevice,
     usingNatural: () => !!naturalDevice(),
     deviceVoices: () => vlist.map((x) => x.v),
@@ -3073,20 +3228,34 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     const body = el('div', 'vset');
     const state = el('div', 'vstate'); body.appendChild(state);
     const paintState = () => {
-      const neu = PQ.AUDIO && PQ.AUDIO.k ? 'Voces neuronales: disponibles (' + (PQ.AUDIO.n || '') + ' frases)' : 'Voces neuronales: no se encuentra la carpeta «audio»';
+      const neu = clipsBroken ? 'Voces grabadas: no se pueden abrir los archivos de la carpeta «audio»' : PQ.AUDIO && PQ.AUDIO.k ? 'Voces grabadas: disponibles (' + (PQ.AUDIO.n || '') + ' frases)' : 'Voces grabadas: no están (falta la carpeta «audio»)';
       const dv = vlist[0];
       const dev = deviceOK() ? (dv ? 'Voz del dispositivo: ' + dv.name + ' (' + dv.lang + ')' + (dv.spain ? '' : ' · no es de España') : 'Voz del dispositivo: la predeterminada (es-ES)') : 'Voz del dispositivo: no hay ninguna voz en español';
-      state.innerHTML = '<div><b>Idioma:</b> español de España (es-ES)</div><div>' + neu + '</div><div>' + dev + '</div>';
+      state.innerHTML = '<div class="vnow"><b>Ahora se usa:</b> <span></span></div><div><b>Idioma:</b> español de España (es-ES)</div><div>' + neu + '</div><div>' + dev + '</div>';
+      state.querySelector('.vnow span').textContent = status().label;
     };
     paintState();
     const row = (label, ctl) => { const r = el('div', 'vrow'); r.appendChild(el('label', '', label)); r.appendChild(ctl); body.appendChild(r); return r; };
+
+    /* animaciones y modo tranquilo */
+    const sw = (key, text, help) => {
+      const b = el('button', 'vswitch'); b.type = 'button'; b.setAttribute('role', 'switch');
+      const paint = () => { b.setAttribute('aria-checked', String(!!PQ.prefs[key])); b.innerHTML = '<span class="knob" aria-hidden="true"></span><span class="st"><b></b><small></small></span>'; b.querySelector('b').textContent = text; b.querySelector('small').textContent = help; };
+      b.onclick = () => { PQ.prefs[key] = !PQ.prefs[key]; PQ.savePrefs(); paint(); };
+      paint(); return b;
+    };
+    const anim = el('div', 'vsw');
+    anim.appendChild(sw('calm', 'Modo tranquilo', 'Sin animaciones ni sonidos de la interfaz. Los programas funcionan igual.'));
+    anim.appendChild(sw('fade', 'Fundido al cambiar de disfraz', 'Los cambios de disfraz y de fondo se ven más suaves.'));
+    anim.appendChild(sw('uiSound', 'Sonidos de la interfaz', 'Un «clic» al encajar un bloque y una melodía al conseguir un reto.'));
+    row('Animaciones y sonidos', anim);
 
     /* motor */
     const eng = el('div', 'vseg');
     const ENG = [['auto', 'Automática (recomendada)'], ['clips', 'Grabadas'], ['device', 'Solo la del dispositivo']];
     ENG.forEach(([v, t]) => {
       const b = el('button', 'btn ' + (cfg.engine === v ? 'ok' : ''), t); b.type = 'button'; b.setAttribute('aria-pressed', String(cfg.engine === v));
-      b.onclick = () => { cfg.engine = v; save(); [...eng.children].forEach((c, k) => { const on = ENG[k][0] === v; c.classList.toggle('ok', on); c.setAttribute('aria-pressed', String(on)); }); };
+      b.onclick = () => { cfg.engine = v; save(); [...eng.children].forEach((c, k) => { const on = ENG[k][0] === v; c.classList.toggle('ok', on); c.setAttribute('aria-pressed', String(on)); }); paintState(); };
       eng.appendChild(b);
     });
     row('Motor de voz', eng);
@@ -3129,7 +3298,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       row('Voz del dispositivo (respaldo)', w);
     }
     body.appendChild(el('p', 'vnote', 'Automática: si tu dispositivo tiene una voz española «natural» (Microsoft Natural, Google, Siri…) se usa para todo, porque suele sonar mejor; si no, se usan las voces grabadas. «Grabadas» fuerza las voces neuronales incluidas. Lo que escribe el alumnado en «decir en voz alta» siempre se lee con la voz del dispositivo.'));
-    PQ.ui.modal({ title: 'Voz', size: 'lg', body, buttons: [{ label: 'Listo', cls: 'ok' }] });
+    PQ.ui.modal({ title: 'Ajustes', size: 'lg', body, buttons: [{ label: 'Listo', cls: 'ok' }] });
   };
   const gear = document.getElementById('btnVoiceSet');
   if (gear) gear.addEventListener('click', () => PQ.openVoiceSettings());
@@ -3181,7 +3350,13 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
       const cx = cv.getContext('2d', { willReadFrequently: true });
       cx.drawImage(c._img, 0, 0, d.w, d.h);
-      c._ad = { w: cw, h: ch, data: cx.getImageData(0, 0, cw, ch).data };
+      /* máscara de 1 byte por píxel (opaco o no) y caja ajustada a lo que se ve: se calculan una sola vez por disfraz */
+      const data = cx.getImageData(0, 0, cw, ch).data, a = new Uint8Array(cw * ch);
+      let x0 = cw, y0 = ch, x1 = -1, y1 = -1;
+      for (let y = 0, i = 0; y < ch; y++) for (let x = 0; x < cw; x++, i++) {
+        if (data[i * 4 + 3] > 24) { a[i] = 1; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      }
+      c._ad = { w: cw, h: ch, a, x0, y0, x1: x1 + 1, y1: y1 + 1, empty: x1 < 0 };
     } catch (e) { c._ad = null; }
     return c._ad;
   }
@@ -3199,17 +3374,28 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     const flip = t.rotationStyle === 'left-right' && t.direction < 0 ? -1 : 1;
     return { t, c, d, s, rot, flip, cos: Math.cos(rot), sin: Math.sin(rot), ad: null };
   }
+  /* caja en el escenario del rectángulo (u0,v0)-(u1,v1) del disfraz, ya girado y escalado */
+  function boxOf(p, u0, v0, u1, v1) {
+    const t = p.t;
+    let l = 1e9, r = -1e9, tp = -1e9, bt = 1e9;
+    for (let k = 0; k < 4; k++) {
+      const x = ((k === 1 || k === 2 ? u1 : u0) - p.d.rcx) * p.s * p.flip, y = ((k > 1 ? v1 : v0) - p.d.rcy) * p.s;
+      const X = t.x + x * p.cos - y * p.sin, Y = t.y - (x * p.sin + y * p.cos);
+      if (X < l) l = X; if (X > r) r = X; if (Y > tp) tp = Y; if (Y < bt) bt = Y;
+    }
+    return { left: l, right: r, top: tp, bottom: bt };
+  }
   function bounds(t) {
     const p = prep(t);
-    const pts = [[-p.d.rcx, -p.d.rcy], [p.d.w - p.d.rcx, -p.d.rcy], [p.d.w - p.d.rcx, p.d.h - p.d.rcy], [-p.d.rcx, p.d.h - p.d.rcy]];
-    let l = 1e9, r = -1e9, tp = -1e9, bt = 1e9;
-    pts.forEach((q) => {
-      const x = q[0] * p.s * p.flip, y = q[1] * p.s;
-      const sx = x * p.cos - y * p.sin, sy = x * p.sin + y * p.cos;
-      const X = t.x + sx, Y = t.y - sy;
-      l = Math.min(l, X); r = Math.max(r, X); tp = Math.max(tp, Y); bt = Math.min(bt, Y);
-    });
-    return { left: l, right: r, top: tp, bottom: bt };
+    return boxOf(p, 0, 0, p.d.w, p.d.h);
+  }
+  /* caja ajustada a los píxeles visibles (para descartar pares que solo se solapan por sus márgenes transparentes) */
+  function tightBox(p) {
+    if (!p.ad && p.ad !== false) p.ad = alphaData(p.c) || false;
+    const ad = p.ad;
+    if (!ad) return boxOf(p, 0, 0, p.d.w, p.d.h);
+    if (ad.empty) return null;
+    return boxOf(p, ad.x0, ad.y0, Math.min(p.d.w, ad.x1), Math.min(p.d.h, ad.y1));
   }
   function hit(p, sx, sy) {
     if (!p.ad && p.ad !== false) p.ad = alphaData(p.c) || false;
@@ -3220,7 +3406,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     if (u < 0 || v < 0 || u >= p.d.w || v >= p.d.h) return false;
     if (!p.ad) return true;
     const iu = Math.min(p.ad.w - 1, Math.floor(u)), iv = Math.min(p.ad.h - 1, Math.floor(v));
-    return p.ad.data[(iv * p.ad.w + iu) * 4 + 3] > 24;
+    return p.ad.a[iv * p.ad.w + iu] === 1;
   }
   function fence(t) {
     const b = bounds(t);
@@ -3366,8 +3552,11 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     Q.cur = job;
     if (job.clips) {                                       // voz neuronal pregrabada (tts.js)
       job.timer = setTimeout(() => jobEnd(job), 120000);
-      PQ.tts.play(job, () => jobEnd(job), () => {          // si el audio no se puede reproducir: respaldo con la voz del dispositivo
+      PQ.tts.play(job, () => jobEnd(job), (reason) => {    // si el audio no se puede reproducir: respaldo con la voz del dispositivo
         if (job.over || job.dead) return;
+        if (PQ.tts.clipsFailed) PQ.tts.clipsFailed(reason);
+        if (PQ._lastUtter) PQ._lastUtter.engine = PQ.tts.deviceOK() ? 'device' : 'none';
+        if (PQ.tts.used) PQ.tts.used(PQ._lastUtter ? PQ._lastUtter.engine : 'device');
         clearTimeout(job.timer); job.clips = null; job.stop = null;
         if (!PQ.tts.deviceOK()) { jobEnd(job); return; }
         const vf = voiceFor(job.key, job.text);              // respaldo: se construye el plan de la voz del dispositivo
@@ -3432,6 +3621,8 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     const synth = g.speechSynthesis;
     const devOK = !!synth && typeof SpeechSynthesisUtterance !== 'undefined' && (!PQ.tts || PQ.tts.deviceOK());
     if (!neural && !devOK) {                              // nadie puede hablar: se espera lo que tardaría y se sigue (el bocadillo ya muestra el texto)
+      PQ._lastUtter = { text, key, engine: 'none' };
+      if (PQ.tts && PQ.tts.used) PQ.tts.used('none');
       setTimeout(() => { h.done = true; }, Math.min(8000, 400 + text.length * 70));
       return h;
     }
@@ -3447,6 +3638,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
         if (!units.length) { h.done = true; return h; }
         job = { h, units, base, over: false, dead: false, timer: 0, natural: isNat() };
         PQ._lastUtter = { text, key, engine: 'device', voice: vf.voice && vf.voice.name, pitch: vf.pitch, units };
+        if (PQ.tts && PQ.tts.used && (!opt || opt.engine !== 'device')) PQ.tts.used('device');
       }
       if (Q.cur && Q.wait.length >= 1) {                    // evita colas largas de voces atrasadas
         const old = Q.wait.splice(0); old.forEach((j) => { j.over = true; j.h.done = true; });
@@ -3474,9 +3666,10 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   const RT = PQ.RT = {
     project: null, canvas: null, ctx: null, threads: [], keys: {}, mouse: { x: 0, y: 0, down: false },
     dirty: true, flagCount: 0, runCount: 0, grid: false, last: 0, acc: 0, onChange: null, overlay: null,
-    answer: '', timerStart: 0, pen: null
+    answer: '', timerStart: 0, pen: null, alpha: 1, smooth: true, fxUntil: 0, stats: { sampled: 0 }
   };
 
+  const TICK = 1000 / 30;
   RT.init = function (canvas) {
     RT.canvas = canvas; RT.ctx = canvas.getContext('2d');
     canvas.width = W * 2; canvas.height = H * 2;
@@ -3485,9 +3678,11 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       if (!RT.last) RT.last = ts;
       RT.acc += Math.min(200, ts - RT.last); RT.last = ts;
       let n = 0;
-      while (RT.acc >= 1000 / 30 && n < 4) { RT.step(); RT.acc -= 1000 / 30; n++; }
+      while (RT.acc >= TICK && n < 4) { RT.step(); RT.acc -= TICK; n++; }
       if (RT.acc > 200) RT.acc = 0;
-      if (RT.dirty || RT.threads.length) { RT.render(); RT.dirty = false; }
+      /* fracción del paso lógico ya transcurrida: el dibujo va de la posición anterior a la actual */
+      RT.alpha = RT.threads.length && RT.smooth ? Math.min(1, RT.acc / TICK) : 1;
+      if (RT.dirty || RT.threads.length || RT.now() < RT.fxUntil) { RT.render(); RT.dirty = false; }
     };
     requestAnimationFrame(loop);
   };
@@ -3517,13 +3712,50 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     const img = costumeImg(c);
     if (!c._ready || c._broken) return;
     const p = prep(t);
+    /* fundido corto entre el disfraz anterior y el nuevo: primero aparece el nuevo encima y después se va el anterior */
+    const fx = t._fx;
+    let k = 1, old = null;
+    if (fx) {
+      k = (RT.now() - fx.t0) / FADE;
+      old = fx.from;
+      if (k >= 1 || !old || !old._ready || old._broken || old === c) { t._fx = null; k = 1; old = null; }
+    }
     ctx.save();
     ctx.translate(W / 2 + t.x, H / 2 - t.y);
     ctx.rotate(p.rot);
     ctx.scale(p.s * p.flip, p.s);
+    if (old) {
+      const od = dims(old);
+      ctx.globalAlpha = Math.min(1, 2 * (1 - k));
+      ctx.drawImage(old._img, -od.rcx, -od.rcy, od.w, od.h);
+      ctx.globalAlpha = Math.min(1, 2 * k);
+    }
     ctx.drawImage(img, -p.d.rcx, -p.d.rcy, p.d.w, p.d.h);
     ctx.restore();
   }
+  /* cambio de disfraz (o de fondo) con fundido. No se aplica en animaciones rápidas (cambios seguidos),
+   * ni con el fundido desactivado en Ajustes, ni si el sistema o el «modo tranquilo» piden menos animación. */
+  const FADE = 170;
+  function setCostume(t, i) {
+    if (i === t.current) return;
+    const now = RT.now(), from = t.costumes[t.current];
+    const quick = t._cAt && now - t._cAt < 260;
+    t._cAt = now;
+    t._fx = (PQ.prefs && PQ.prefs.fade && PQ.motionOK() && !quick && from && (t.isStage || t.visible)) ? { from, t0: now } : null;
+    if (t._fx) RT.fxUntil = Math.max(RT.fxUntil, now + FADE + 40);
+    t.current = i; RT.dirty = true;
+  }
+  RT.setCostume = setCostume;
+  /* bocadillos: entran y salen con una escala suave */
+  const BUB_IN = 170, BUB_OUT = 110;
+  function setSay(t, bub) {
+    const now = RT.now(), prev = t._say;
+    if (bub) { bub.t0 = now; bub.swap = !!prev; t._sayOut = null; }
+    else if (prev && t.visible && PQ.motionOK()) { t._sayOut = { b: prev, t0: now }; RT.fxUntil = Math.max(RT.fxUntil, now + BUB_OUT + 40); }
+    if (bub && PQ.motionOK()) RT.fxUntil = Math.max(RT.fxUntil, now + BUB_IN + 40);
+    t._say = bub; RT.dirty = true;
+  }
+  RT.setSay = setSay;
   function wrapText(ctx, text, maxW) {
     const words = String(text).split(/\s+/), lines = [];
     let cur = '';
@@ -3535,8 +3767,22 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     return lines.slice(0, 6);
   }
   function drawBubble(ctx, t) {
-    const s = t._say;
-    if (!s || !t.visible) return;
+    let s = t._say, k = 1, fade = 1;
+    if (!t.visible) return;
+    const anim = PQ.motionOK(), now = RT.now();
+    if (s) {
+      if (anim && s.t0) {
+        const q = Math.min(1, (now - s.t0) / BUB_IN);
+        const e = 1 + 1.6 * Math.pow(q - 1, 3) + 0.6 * Math.pow(q - 1, 2);     // llega un poco más allá y vuelve
+        const k0 = s.swap ? 0.9 : 0.55;                                        // si solo cambia el texto, el gesto es menor
+        k = k0 + (1 - k0) * e; fade = s.swap ? 1 : Math.min(1, q * 2.5);
+      }
+    } else if (t._sayOut) {
+      const q = (now - t._sayOut.t0) / BUB_OUT;
+      if (q >= 1 || !anim) { t._sayOut = null; return; }
+      s = t._sayOut.b; k = 1 - 0.35 * q; fade = 1 - q;
+    }
+    if (!s) return;
     ctx.save();
     ctx.font = '700 15px "Trebuchet MS", "Segoe UI", Arial, sans-serif';
     const lines = wrapText(ctx, s.text, 150);
@@ -3548,6 +3794,10 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     let bx = W / 2 + b.right - 8, by = H / 2 - b.top - bh - 14;
     if (bx + bw > W - 4) { bx = W / 2 + b.left + 8 - bw; left = false; }
     bx = PQ.clamp(bx, 4, W - bw - 4); by = PQ.clamp(by, 4, H - bh - 24);
+    if (k !== 1 || fade !== 1) {                         // la escala nace en la punta del bocadillo
+      const ox = left ? bx + 10 : bx + bw - 10, oy = by + bh + 14;
+      ctx.translate(ox, oy); ctx.scale(k, k); ctx.translate(-ox, -oy); ctx.globalAlpha = Math.max(0, fade);
+    }
     ctx.fillStyle = '#fff'; ctx.strokeStyle = '#B9C0CF'; ctx.lineWidth = 2.5;
     ctx.beginPath();
     const r = 12;
@@ -3593,6 +3843,21 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
     drawTarget(ctx, p.stage);
     if (RT.pen) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(RT.pen, 0, 0); ctx.restore(); }
+    /* movimiento fluido: entre dos pasos lógicos se dibuja la posición intermedia (los saltos grandes no se interpolan) */
+    let moved = null;
+    if (RT.alpha < 1) {
+      const k = RT.alpha;
+      p.sprites.forEach((s) => {
+        if (s._px === undefined) return;
+        const dx = s.x - s._px, dy = s.y - s._py;
+        let dd = s.direction - s._pd; if (dd > 180) dd -= 360; else if (dd < -180) dd += 360;
+        const mv = (dx || dy) && dx * dx + dy * dy <= 80 * 80, tn = dd && Math.abs(dd) <= 60 && s.rotationStyle === 'all around';
+        if (!mv && !tn) return;
+        (moved || (moved = [])).push([s, s.x, s.y, s.direction]);
+        if (mv) { s.x = s._px + dx * k; s.y = s._py + dy * k; }
+        if (tn) s.direction = s._pd + dd * k;
+      });
+    }
     p.sprites.forEach((s) => { if (s.visible) drawTarget(ctx, s); });
     if (RT.grid) {
       ctx.save();
@@ -3603,7 +3868,8 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       ctx.beginPath(); ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke();
       ctx.restore();
     }
-    p.sprites.forEach((s) => drawBubble(ctx, s));
+    p.sprites.forEach((s) => { if (s._say || s._sayOut) drawBubble(ctx, s); });
+    if (moved) moved.forEach((m) => { m[0].x = m[1]; m[0].y = m[2]; m[0].direction = m[3]; });
     drawMonitors(ctx, p);
     if (RT.overlay) RT.overlay(ctx);
   };
@@ -3634,11 +3900,44 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     if (what === '_mouse_') return hit(prep(t), RT.mouse.x, RT.mouse.y);
     const o = RT.project.sprites.find((s) => s.name === what);
     if (!o || o === t || !o.visible) return false;
-    const a = bounds(t), b = bounds(o);
+    /* 1) si ninguno de los dos ha cambiado desde la última consulta, vale la respuesta guardada */
+    const ca = t.costumes[t.current] || t.costumes[0], cb = o.costumes[o.current] || o.costumes[0];
+    const memo = t._tm || (t._tm = new Map());
+    let m = memo.get(o);
+    if (m && m.ax === t.x && m.ay === t.y && m.ad === t.direction && m.as === t.size && m.ac === ca && m.ar === t.rotationStyle &&
+        m.bx === o.x && m.by === o.y && m.bd === o.direction && m.bs === o.size && m.bc === cb && m.br === o.rotationStyle &&
+        m.rd === (ca._ready && cb._ready)) return m.val;
+    if (!m) { m = {}; memo.set(o, m); }
+    m.ax = t.x; m.ay = t.y; m.ad = t.direction; m.as = t.size; m.ac = ca; m.ar = t.rotationStyle;
+    m.bx = o.x; m.by = o.y; m.bd = o.direction; m.bs = o.size; m.bc = cb; m.br = o.rotationStyle; m.rd = !!(ca._ready && cb._ready);
+    m.val = touchingPair(t, o);
+    return m.val;
+  }
+  /* 2) descarte por cajas ajustadas a lo visible y 3) muestreo sobre las máscaras cacheadas, sin crear objetos */
+  function touchingPair(t, o) {
+    const pa = prep(t), pb = prep(o);
+    const a = tightBox(pa), b = tightBox(pb);
+    if (!a || !b) return false;
     const l = Math.max(a.left, b.left), r = Math.min(a.right, b.right), bt = Math.max(a.bottom, b.bottom), tp = Math.min(a.top, b.top);
     if (l > r || bt > tp) return false;
-    const pa = prep(t), pb = prep(o);
-    for (let y = bt; y <= tp; y += 2) for (let x = l; x <= r; x += 2) if (hit(pa, x, y) && hit(pb, x, y)) return true;
+    RT.stats.sampled++;
+    const A = pa.ad, B = pb.ad;
+    const ax = t.x, ay = t.y, acs = pa.cos / pa.s, asn = pa.sin / pa.s, af = pa.flip, arx = pa.d.rcx, ary = pa.d.rcy, aw = pa.d.w, ah = pa.d.h;
+    const bx = o.x, by = o.y, bcs = pb.cos / pb.s, bsn = pb.sin / pb.s, bf = pb.flip, brx = pb.d.rcx, bry = pb.d.rcy, bw = pb.d.w, bh = pb.d.h;
+    for (let y = bt; y <= tp; y += 2) {
+      const pya = -(y - ay), pyb = -(y - by);
+      for (let x = l; x <= r; x += 2) {
+        let px = x - ax;
+        let u = (px * acs + pya * asn) * af + arx, v = -px * asn + pya * acs + ary;
+        if (u < 0 || v < 0 || u >= aw || v >= ah) continue;
+        if (A && A.a[Math.min(A.h - 1, v | 0) * A.w + Math.min(A.w - 1, u | 0)] !== 1) continue;
+        px = x - bx;
+        u = (px * bcs + pyb * bsn) * bf + brx; v = -px * bsn + pyb * bcs + bry;
+        if (u < 0 || v < 0 || u >= bw || v >= bh) continue;
+        if (B && B.a[Math.min(B.h - 1, v | 0) * B.w + Math.min(B.w - 1, u | 0)] !== 1) continue;
+        return true;
+      }
+    }
     return false;
   }
   RT.touching = touching;
@@ -3680,7 +3979,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     RT.threads = [];
     stopSounds();
     try { if (PQ.stopVoice) PQ.stopVoice(); else if (g.speechSynthesis) g.speechSynthesis.cancel(); } catch (e) { /* nada */ }
-    if (RT.project && !keepBubbles) RT.project.sprites.forEach((s) => { s._say = null; });
+    if (RT.project && !keepBubbles) RT.project.sprites.forEach((s) => { s._say = null; s._sayOut = null; });
     RT.dirty = true;
     if (RT.onChange) RT.onChange();
   };
@@ -3710,11 +4009,18 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   };
   RT.step = function () {
     if (!RT.threads.length) return;
+    const sp = RT.project.sprites;
+    for (let i = 0; i < sp.length; i++) { const s = sp[i]; s._px = s.x; s._py = s.y; s._pd = s.direction; }
     const list = RT.threads.slice();
     list.forEach((th) => {
       if (th.dead) return;
       let r;
-      try { r = th.gen.next(); } catch (e) { th.dead = true; if (g.console) console.error(e); r = { done: true }; }
+      try { r = th.gen.next(); } catch (e) {
+        /* un hilo que falla se detiene solo; los demás siguen. Se avisa con un mensaje amable (ver app.js) */
+        th.dead = true; r = { done: true };
+        if (g.console) console.error(e);
+        if (PQ.onThreadError) { try { PQ.onThreadError({ error: e, block: th.cur || null, target: th.target, script: th.script }); } catch (e2) { /* el aviso no debe romper nada */ } }
+      }
       if (r.done) th.dead = true;
     });
     const before = RT.threads.length;
@@ -3799,6 +4105,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   RT.exec = function* (arr, th) {
     for (let i = 0; i < arr.length; i++) {
       if (th.dead) return;
+      th.cur = arr[i];
       yield* RT.block(arr[i], th);
     }
   };
@@ -3859,28 +4166,28 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 
       case 'looks_say': case 'looks_think': {
         const txt = fmt(A('MESSAGE'));
-        t._say = txt === '' ? null : { text: txt, think: b.op === 'looks_think' };
+        setSay(t, txt === '' ? null : { text: txt, think: b.op === 'looks_think' });
         if (txt) speakBubble(txt, t);
-        RT.dirty = true; break;
+        break;
       }
       case 'looks_sayforsecs': case 'looks_thinkforsecs': {
         const txt = fmt(A('MESSAGE'));
         const bub = txt === '' ? null : { text: txt, think: b.op === 'looks_thinkforsecs' };
-        t._say = bub; RT.dirty = true;
+        setSay(t, bub);
         const sp = txt ? speakBubble(txt, t) : { done: true };
         yield* waitSecs(th, N('SECS'));
         while (!sp.done && !th.dead) yield;
-        if (t._say === bub) { t._say = null; RT.dirty = true; }
+        if (t._say === bub) setSay(t, null);
         break;
       }
-      case 'looks_switchcostumeto': { const i = findIdx(t.costumes, String(f.COSTUME)); if (i >= 0) t.current = i; RT.dirty = true; break; }
-      case 'looks_nextcostume': t.current = (t.current + 1) % t.costumes.length; RT.dirty = true; break;
-      case 'looks_switchbackdropto': { const st = RT.project.stage, i = findIdx(st.costumes, String(f.BACKDROP)); if (i >= 0) st.current = i; RT.dirty = true; RT.bgHat(); break; }
-      case 'looks_nextbackdrop': { const st = RT.project.stage; st.current = (st.current + 1) % st.costumes.length; RT.dirty = true; RT.bgHat(); break; }
+      case 'looks_switchcostumeto': { const i = findIdx(t.costumes, String(f.COSTUME)); if (i >= 0) setCostume(t, i); RT.dirty = true; break; }
+      case 'looks_nextcostume': setCostume(t, (t.current + 1) % t.costumes.length); RT.dirty = true; break;
+      case 'looks_switchbackdropto': { const st = RT.project.stage, i = findIdx(st.costumes, String(f.BACKDROP)); if (i >= 0) setCostume(st, i); RT.dirty = true; RT.bgHat(); break; }
+      case 'looks_nextbackdrop': { const st = RT.project.stage; setCostume(st, (st.current + 1) % st.costumes.length); RT.dirty = true; RT.bgHat(); break; }
       case 'looks_changesizeby': setSize(t, t.size + N('CHANGE')); break;
       case 'looks_setsizeto': setSize(t, N('SIZE')); break;
       case 'looks_show': t.visible = true; RT.dirty = true; break;
-      case 'looks_hide': t.visible = false; t._say = null; RT.dirty = true; break;
+      case 'looks_hide': t.visible = false; t._say = null; t._sayOut = null; t._fx = null; RT.dirty = true; break;
 
       case 'sound_play': case 'sound_playuntildone': {
         const i = findIdx(t.sounds, String(f.SOUND_MENU));
@@ -3899,11 +4206,11 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
         if (!words) break;
         /* con voz no hace falta bocadillo (como en Scratch); solo se muestra si el dispositivo no puede hablar */
         const bub = (t.isStage || (PQ.tts ? PQ.tts.canSpeak(words, t._voice || defaultVoice(t)) : (g.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined'))) ? null : { text: words, think: false };
-        if (bub) { t._say = bub; RT.dirty = true; }
+        if (bub) setSay(t, bub);
         const h = utter(words, t._voice || defaultVoice(t));
         yield;
         while (!h.done && !th.dead) yield;
-        if (bub && t._say === bub) { t._say = null; RT.dirty = true; }
+        if (bub && t._say === bub) setSay(t, null);
         break;
       }
 
@@ -4669,6 +4976,13 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       S.target.scripts.push({ x: p.x, y: p.y, blocks: d.dragged });
     }
     ED.renderWorkspace();
+    /* al encajar: rebote breve de lo que se ha soltado y un «clic» suave */
+    if (d.snap && !cancelled && !d.overPal) {
+      const set = new Set(d.dragged);
+      document.querySelectorAll('#wsin .block').forEach((el) => { if (set.has(el._b)) el.classList.add('snapped'); });
+      setTimeout(() => document.querySelectorAll('#wsin .block.snapped').forEach((el) => el.classList.remove('snapped')), 320);
+      if (PQ.uiSound) PQ.uiSound('snap');
+    }
     if (changed) ED.changed();
   }
 
@@ -4693,6 +5007,154 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     const copy = PQ.clone(arr.slice(idx));
     S.target.scripts.push({ x: (script ? script.x : 40) + 36, y: (script ? script.y : 40) + 36, blocks: copy });
     ED.renderWorkspace(); ED.changed();
+  }
+
+  /* ---------- área de programación con teclado ----------
+   * Se activa al llegar con el tabulador (no al hacer clic, para que las flechas sigan moviendo a los personajes).
+   *   ↑ ↓  bloque anterior / siguiente      ← →  conjunto anterior / siguiente      Inicio / Fin  primero / último
+   *   Intro (o M)  coger el bloque para moverlo; ↑ ↓ lo cambian de sitio; Intro lo suelta; Escape lo deja donde estaba
+   *   Suprimir  borra el bloque              Escape  salir del área
+   * Cada paso se anuncia en #wslive (aria-live), que además se ve en pantalla mientras se usa el teclado. */
+  function initKeyboardNav(ws) {
+    const live = $('#wslive');
+    let nav = false, lastKeyTab = false, grab = null;   // grab = { snap, idx } mientras se mueve un bloque
+    const kindOf = (b) => B[b.op].kind;
+    const say = (t) => { if (!live) return; live.textContent = ''; setTimeout(() => { live.textContent = t; }, 30); };
+    const scriptsInOrder = () => S.target.scripts.slice().sort((a, b) => (a.y - b.y) || (a.x - b.x));
+    /* todos los bloques en orden de lectura, con su bloque «padre» */
+    function flat() {
+      const out = [];
+      const inBlock = (b, parent, script) => {
+        out.push({ b, parent, script });
+        if (b.cond) inBlock(b.cond, b, script);
+        Object.keys(b.in || {}).forEach((n) => { if (b.in[n]) inBlock(b.in[n], b, script); });
+        (b.sub || []).forEach((c) => inBlock(c, b, script));
+        (b.sub2 || []).forEach((c) => inBlock(c, b, script));
+      };
+      scriptsInOrder().forEach((s) => s.blocks.forEach((b) => inBlock(b, null, s)));
+      return out;
+    }
+    const text = (b) => { try { return PQ.blockText(b); } catch (e) { return B[b.op].label.replace(/%\w+/g, ''); } };
+    function show(b) {
+      selB = b; markSel();
+      const el = Array.from(document.querySelectorAll('#wsin .block')).find((x) => x._b === b);
+      if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      document.querySelectorAll('#wsin .block.kbgrab').forEach((x) => x.classList.remove('kbgrab'));
+      if (grab && el) el.classList.add('kbgrab');
+    }
+    function describe(list, i) {
+      const it = list[i];
+      return text(it.b) + '. Bloque ' + (i + 1) + ' de ' + list.length + (it.parent ? ', dentro de «' + text(it.parent) + '»' : '') + '.';
+    }
+    function go(i) {
+      const list = flat();
+      if (!list.length) { say('No hay bloques todavía.'); return; }
+      i = Math.max(0, Math.min(list.length - 1, i));
+      show(list[i].b); say(describe(list, i));
+    }
+    const curIdx = () => flat().findIndex((x) => x.b === selB);
+    /* sitios donde puede ir un bloque de pila: [lista, posición, descripción] en orden de lectura */
+    function slots(moving) {
+      const out = [], capM = kindOf(moving) === 'cap' || B[moving.op].noNext;
+      const walk = (arr, owner, script, label) => {
+        for (let i = 0; i <= arr.length; i++) {
+          const prev = arr[i - 1];
+          const okStart = !(i === 0 && !owner && arr[0] && kindOf(arr[0]) === 'hat');
+          const okPrev = !(prev && (kindOf(prev) === 'cap' || B[prev.op].noNext));
+          const okCap = !capM || i === arr.length;
+          if (okStart && okPrev && okCap) out.push({ arr, idx: i, script, where: prev ? 'después de «' + text(prev) + '»' : owner ? 'lo primero dentro de «' + text(owner) + '»' + (label || '') : 'el primero del conjunto' });
+          const b = arr[i];
+          if (b && b.sub) walk(b.sub, b, script, '');
+          if (b && b.sub2) walk(b.sub2, b, script, ', en «si no»');
+        }
+      };
+      scriptsInOrder().forEach((s) => walk(s.blocks, null, s, ''));
+      return out;
+    }
+    function startGrab() {
+      const loc = selB && findLoc(selB);
+      if (!loc) return;
+      const k = kindOf(selB);
+      if (k === 'hat') { say('Este bloque va siempre el primero. No se puede mover de sitio.'); return; }
+      if (loc.type !== 'stack') { say('Este bloque va dentro de otro. Para cambiarlo, bórralo y pon otro.'); return; }
+      grab = { snap: JSON.stringify(S.target.scripts), idx: curIdx() };
+      show(selB);
+      say('Has cogido «' + text(selB) + '». Flechas arriba y abajo para moverlo. Intro para soltarlo. Escape para dejarlo donde estaba.');
+    }
+    function moveGrab(dir) {
+      const b = selB, loc = findLoc(b);
+      if (!loc || loc.type !== 'stack') return;
+      loc.arr.splice(loc.idx, 1);                               // se saca y se busca el sitio siguiente o anterior
+      const list = slots(b);
+      let at = list.findIndex((s) => s.arr === loc.arr && s.idx === loc.idx);
+      if (at < 0) at = list.findIndex((s) => s.arr === loc.arr && s.idx > loc.idx) - (dir > 0 ? 1 : 0);
+      let to = list[at + dir];
+      if (!to) { loc.arr.splice(loc.idx, 0, b); say(dir > 0 ? 'Ya está al final.' : 'Ya está al principio.'); return; }
+      to.arr.splice(to.idx, 0, b);
+      /* un conjunto que se queda vacío desaparece */
+      S.target.scripts = S.target.scripts.filter((s) => s.blocks.length > 0);
+      ED.renderWorkspace(); show(b);
+      say('Ahora va ' + to.where + '.');
+    }
+    function endGrab(keep) {
+      if (!grab) return;
+      const g0 = grab; grab = null;
+      if (keep) {
+        const changed = JSON.stringify(S.target.scripts) !== g0.snap;
+        if (changed) { (S.target._undo = S.target._undo || []).push(g0.snap); if (S.target._undo.length > 40) S.target._undo.shift(); S.target._redo = []; }
+        show(selB); say('Soltado. ' + (selB ? text(selB) : ''));
+        if (changed) { if (PQ.uiSound) PQ.uiSound('snap'); ED.changed(); }
+      } else {
+        S.target.scripts = JSON.parse(g0.snap);
+        ED.renderWorkspace();
+        const list = flat(); if (list[g0.idx]) show(list[g0.idx].b);
+        say('Lo dejo donde estaba.');
+      }
+    }
+    document.addEventListener('keydown', (e) => { lastKeyTab = e.key === 'Tab'; }, true);
+    document.addEventListener('pointerdown', () => { lastKeyTab = false; if (nav) { if (grab) endGrab(true); nav = false; ws.classList.remove('kbnav'); } }, true);
+    ws.addEventListener('focus', () => {
+      if (!lastKeyTab) return;
+      nav = true; ws.classList.add('kbnav');
+      const list = flat();
+      if (!list.length) { say('Área de programación. No hay bloques todavía. Arrastra bloques aquí desde la lista de la izquierda.'); return; }
+      let i = list.findIndex((x) => x.b === selB); if (i < 0) i = 0;
+      show(list[i].b);
+      say('Área de programación. Flechas para ir de un bloque a otro. Intro para coger un bloque y moverlo. ' + describe(list, i));
+    });
+    ws.addEventListener('blur', () => { if (grab) endGrab(true); nav = false; ws.classList.remove('kbnav'); });
+    ws.addEventListener('keydown', (e) => {
+      if (!nav || e.target !== ws || e.ctrlKey || e.metaKey || e.altKey) return;
+      const k = e.key;
+      const handled = () => { e.preventDefault(); e.stopPropagation(); };
+      if (grab) {
+        if (k === 'ArrowDown' || k === 'ArrowRight') { handled(); moveGrab(1); }
+        else if (k === 'ArrowUp' || k === 'ArrowLeft') { handled(); moveGrab(-1); }
+        else if (k === 'Enter' || k === ' ' || k.toLowerCase() === 'm') { handled(); endGrab(true); }
+        else if (k === 'Escape') { handled(); endGrab(false); }
+        return;
+      }
+      if (k === 'ArrowDown') { handled(); go(curIdx() + 1); }
+      else if (k === 'ArrowUp') { handled(); go(Math.max(0, curIdx() - 1)); }
+      else if (k === 'ArrowRight' || k === 'ArrowLeft') {
+        handled();
+        const list = flat(), cur = list[curIdx()], ss = scriptsInOrder();
+        if (!cur) { go(0); return; }
+        const si = ss.indexOf(cur.script) + (k === 'ArrowRight' ? 1 : -1);
+        if (!ss[si]) { say(k === 'ArrowRight' ? 'No hay más conjuntos de bloques.' : 'Este es el primer conjunto de bloques.'); return; }
+        go(list.findIndex((x) => x.script === ss[si]));
+      }
+      else if (k === 'Home') { handled(); go(0); }
+      else if (k === 'End') { handled(); go(1e9); }
+      else if (k === 'Enter' || k.toLowerCase() === 'm') { handled(); startGrab(); }
+      else if (k === ' ') { handled(); if (selB) say(describe(flat(), Math.max(0, curIdx()))); }
+      else if (k === 'Delete' || k === 'Backspace') {
+        handled();
+        const i = curIdx(), name = selB ? text(selB) : '';
+        if (deleteSelected(false)) { const list = flat(); if (list.length) show(list[Math.min(i, list.length - 1)].b); say('Borrado «' + name + '».' + (list.length ? '' : ' Ya no quedan bloques.')); }
+      }
+      else if (k === 'Escape') { handled(); ws.blur(); say(''); }
+    });
   }
 
   ED.init = function () {
@@ -4728,6 +5190,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
         showCtx(e.clientX, e.clientY, [['Ordenar los bloques', ED.cleanUp], ['Deshacer', ED.undo]]);
       }
     });
+    initKeyboardNav(ws);
     document.addEventListener('keydown', (e) => {
       if ((e.key === 'Delete' || e.key === 'Backspace') && selB && !kp && !e.target.closest('input,textarea,select,[contenteditable]') && !document.querySelector('.modal-back,.modal')) {
         if (deleteSelected(e.shiftKey || e.ctrlKey || e.metaKey)) e.preventDefault();
@@ -4953,7 +5416,8 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 /* PequeBloques — diseñado por David OZC
  * examples.js: cuentos interactivos y retos ya preparados
  */
-(function (g) {
+/* carga diferida: este módulo no se ejecuta al arrancar, sino la primera vez que hace falta (ver PQ.defer en util.js) */
+PQ.defer('examples', function (g) {
   'use strict';
   const PQ = g.PQ;
 
@@ -5062,6 +5526,16 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   const F = D.flag, S = D;
   S.or = (a, b) => { const x = mk('operator_or'); x.in = { OPERAND1: a, OPERAND2: b }; return x; };
   S.yy = () => mk('motion_yposition');
+  /* ayudas para comprobar si un reto está conseguido (se leen los bloques del proyecto, sin ejecutarlos) */
+  const RQ = {
+    sp: (p, name) => p.sprites.find((x) => x.name === name) || null,
+    hat: (t, op, pred) => (t ? t.scripts.filter((s) => s.blocks[0] && s.blocks[0].op === op && (!pred || pred(s.blocks[0]))) : []),
+    flag: (t) => RQ.hat(t, 'event_whenflagclicked')[0] || null,
+    walk: (s, fn) => { (function w(a) { (a || []).forEach((b) => { fn(b); w(b.sub); w(b.sub2); }); })(s ? s.blocks.slice(1) : []); },
+    ops: (s, op) => { const out = []; RQ.walk(s, (b) => { if (b.op === op) out.push(b); }); return out; },
+    count: (s) => { let n = 0; RQ.walk(s, () => n++); return n; },
+    sig: (s) => { const o = []; RQ.walk(s, (b) => o.push(b.op)); return o.join(','); }
+  };
   PQ.EXH = { mk, R, S, F, make };
 
   PQ.EX = [
@@ -5151,6 +5625,9 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       id: 'cuenta-atras', title: 'Cuenta atrás y despegue', kind: 'reto', stars: 1, bg: 'espacio', sprite: 'cohete',
       desc: '3, 2, 1… ¡despegue! Un cohete listo para viajar a las estrellas.',
       challenge: 'Cambia la cuenta atrás para que empiece en 5. ¿Puedes hacer que el cohete se haga más pequeño al subir?',
+      /* conseguido: la cuenta atrás del cohete empieza en 5 */
+      done: (p) => { const s = RQ.flag(RQ.sp(p, 'Cohete')); const says = RQ.ops(s, 'looks_sayforsecs').map((b) => String(b.f.MESSAGE).trim()); return says[0] === '5' && says.indexOf('1') > 0; },
+      win: '¡Reto conseguido! Tu cuenta atrás empieza en 5. ¡Buen despegue!',
       openSprite: 'Cohete',
       build() {
         return make({
@@ -5195,6 +5672,9 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       id: 'baile-robot', nopad: true, title: 'El baile del robot', kind: 'reto', stars: 2, bg: 'noche', sprite: 'robot',
       desc: 'Un robot baila con giros y cambios de disfraz. ¡Invéntate tu coreografía!',
       challenge: 'Pulsa la bandera, toca al robot o pulsa la tecla espacio. Crea un baile nuevo con tus propios pasos.',
+      /* conseguido: el baile de la bandera ha cambiado y tiene más pasos que el original */
+      done: (p) => { const s = RQ.flag(RQ.sp(p, 'Robot')); return RQ.count(s) >= 8 && RQ.sig(s) !== 'control_repeat,motion_turnright,looks_nextcostume,control_wait,motion_pointindirection'; },
+      win: '¡Reto conseguido! Has inventado tu propio baile.',
       openSprite: 'Robot',
       build() {
         return make({
@@ -5216,6 +5696,9 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       id: 'guagua-isla', title: 'La guagua por la isla', kind: 'reto', stars: 2, bg: 'pueblo', sprite: 'guagua',
       desc: 'Conduce la guagua con las flechas (o el mando de la pantalla). ¡Pita con la barra espaciadora o tocando la guagua!',
       challenge: 'Añade las teclas para ir hacia arriba y hacia abajo. ¿Y si cambias el fondo al llegar al borde?',
+      /* conseguido: hay programas para las flechas arriba y abajo que mueven la guagua */
+      done: (p) => { const t = RQ.sp(p, 'Guagua'); return ['up arrow', 'down arrow'].every((k) => RQ.hat(t, 'event_whenkeypressed', (h) => h.f.KEY_OPTION === k).some((s) => RQ.ops(s, 'motion_changeyby').length || RQ.ops(s, 'motion_movesteps').length || RQ.ops(s, 'motion_sety').length)); },
+      anyRun: true, win: '¡Reto conseguido! La guagua ya sube y baja.',
       openSprite: 'Guagua',
       build() {
         return make({
@@ -5237,6 +5720,9 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       id: 'arregla-cuento', title: '¡Arregla el cuento!', kind: 'reto', stars: 3, bg: 'campo', sprite: 'perro',
       desc: 'Hay errores escondidos en este cuento. Encuéntralos y arréglalos.',
       challenge: 'El perro quiere ir hacia la estrella (a la derecha) pero algo falla. Mira los bloques: ¿qué número está mal? ¿Y por qué habla tan deprisa?',
+      /* conseguido: el perro avanza hacia la derecha y su primera frase dura al menos un segundo */
+      done: (p) => { const s = RQ.flag(RQ.sp(p, 'Perro')); const mv = RQ.ops(s, 'motion_movesteps'), say = RQ.ops(s, 'looks_sayforsecs'); return mv.length > 0 && mv.every((b) => parseFloat(b.f.STEPS) > 0) && say.length > 0 && parseFloat(say[0].f.SECS) >= 1; },
+      win: '¡Reto conseguido! Has encontrado los dos errores. ¡Eso es depurar!',
       openSprite: 'Perro',
       build() {
         return make({
@@ -6150,7 +6636,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     }
 
   ];
-})(typeof window !== 'undefined' ? window : globalThis);
+});
 
 </script>
 <script>
@@ -6159,7 +6645,8 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
  * Centros de interés: reciclaje, energías limpias y universo.
  * Todo se maneja tocando la pantalla y se explica con voz: no hace falta saber leer.
  */
-(function (g) {
+/* carga diferida: este módulo no se ejecuta al arrancar, sino la primera vez que hace falta (ver PQ.defer en util.js) */
+PQ.defer('pc', function (g) {
   'use strict';
   const PQ = g.PQ;
   const { mk, R, S, F, make } = PQ.EXH;
@@ -7483,14 +7970,15 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       return pr;
     };
   });;
-})(typeof window !== 'undefined' ? window : globalThis);
+});
 
 </script>
 <script>
 /* PequeBloques — diseñado por David OZC
  * tutorials.js: tutoriales guiados con la mascota Pipo
  */
-(function (g) {
+/* carga diferida: este módulo no se ejecuta al arrancar, sino la primera vez que hace falta (ver PQ.defer en util.js) */
+PQ.defer('tutorials', function (g) {
   'use strict';
   const PQ = g.PQ;
   const $ = (s) => document.querySelector(s);
@@ -7779,7 +8267,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       }
       if (adv) {
         render();
-        if (cur.i >= cur.t.steps.length) PQ.ui.confetti();
+        if (cur.i >= cur.t.steps.length) PQ.ui.celebrate();
       }
     },
     welcome(hasAuto, recover) {
@@ -7791,7 +8279,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     }
   };
   setInterval(() => { if (cur) PQ.Tut.check(); }, 700);
-})(typeof window !== 'undefined' ? window : globalThis);
+});
 
 </script>
 <script>
@@ -7928,8 +8416,84 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     const off = (e) => { if (!m.contains(e.target)) { m.remove(); document.removeEventListener('pointerdown', off, true); } };
     setTimeout(() => document.addEventListener('pointerdown', off, true), 0);
   }
+  /* Globo de Pipo: avisos amables que no interrumpen (por ejemplo, cuando un bloque falla) */
+  let pipoTimer = 0;
+  ui.pipo = function (msg, o) {
+    o = o || {};
+    let box = $('#pipo');
+    if (!box) { box = h('div', ''); box.id = 'pipo'; box.setAttribute('role', 'alert'); document.body.appendChild(box); }
+    box.className = o.cls || '';
+    box.innerHTML = PQ.PIPO + '<div class="pt"><p></p><div class="pb"></div></div>';
+    $('p', box).textContent = msg;
+    const close = () => { clearTimeout(pipoTimer); box.classList.add('out'); setTimeout(() => { if (box.classList.contains('out')) box.remove(); }, 180); if (o.onClose) o.onClose(); };
+    const b = h('button', 'btn pri'); b.type = 'button'; b.textContent = o.button || 'Vale'; b.addEventListener('click', close);
+    $('.pb', box).appendChild(b);
+    clearTimeout(pipoTimer); pipoTimer = setTimeout(close, o.ms || 12000);
+    if (PQ.say && o.speak !== false) PQ.say(msg);
+    return { close };
+  };
+  /* Un bloque ha fallado al ejecutarse: el hilo se para solo y el resto del programa sigue */
+  let lastErrAt = 0;
+  PQ.onThreadError = function (info) {
+    const now = Date.now();
+    if (now - lastErrAt < 2500) return;                    // un bucle roto no debe llenar la pantalla de avisos
+    lastErrAt = now;
+    let name = '';
+    try { name = info.block ? PQ.blockText(info.block) : ''; } catch (e) { name = ''; }
+    if (!name && info.block && PQ.BLOCKS[info.block.op]) name = PQ.BLOCKS[info.block.op].label.replace(/%\w+/g, '…');
+    const who = info.target && !info.target.isStage ? ' de ' + info.target.name : '';
+    const msg = name ? '¡Uy! El bloque «' + name + '»' + who + ' no ha podido funcionar. Lo he parado. Lo demás sigue en marcha.'
+      : '¡Uy! Un bloque' + who + ' no ha podido funcionar. Lo he parado. Lo demás sigue en marcha.';
+    /* se señala el bloque en el área de programación, si está a la vista */
+    const mark = () => $$('#wsin .block').forEach((el) => el.classList.toggle('failed', !!info.block && el._b === info.block));
+    mark();
+    ui.pipo(msg, { cls: 'warn', onClose: () => $$('#wsin .block.failed').forEach((el) => el.classList.remove('failed')) });
+  };
+  /* Sonidos breves de la interfaz (sintetizados, sin archivos). Respetan Ajustes, el modo tranquilo y el volumen de voz. */
+  PQ.uiSound = function (kind) {
+    if (!PQ.uiSoundOK()) return;
+    const ctx = PQ.audioCtx && PQ.audioCtx(); if (!ctx) return;
+    const vol = 0.5 * (PQ.voiceCfg ? PQ.voiceCfg.volume : 1); if (vol <= 0) return;
+    const tone = (f, at, dur, v, type) => {
+      const o = ctx.createOscillator(), gn = ctx.createGain(), t0 = ctx.currentTime + at;
+      o.type = type || 'sine'; o.frequency.value = f;
+      gn.gain.setValueAtTime(0.0001, t0); gn.gain.exponentialRampToValueAtTime(v * vol, t0 + 0.012); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(gn); gn.connect(ctx.destination); o.start(t0); o.stop(t0 + dur + 0.02);
+    };
+    try {
+      if (kind === 'snap') { tone(520, 0, 0.07, 0.25, 'triangle'); tone(780, 0.035, 0.08, 0.2, 'triangle'); }
+      else if (kind === 'win') { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.28, 0.32, 'triangle')); tone(1319, 0.5, 0.5, 0.26, 'sine'); }
+    } catch (e) { /* sin audio */ }
+  };
+  /* Celebración: confeti (si se permite el movimiento), sonido y un gesto de Pipo */
+  ui.celebrate = function (msg, o) {
+    o = o || {};
+    confetti();
+    PQ.uiSound('win');
+    if (msg) ui.pipo(msg, { cls: 'win', button: '¡Bien!', ms: 9000 });
+    setTimeout(() => $$('#pipo .mascot, #guide .mascot').forEach((m) => { m.classList.remove('cheer'); void m.getBoundingClientRect(); m.classList.add('cheer'); }), 30);
+  };
+  /* Retos: cuando el reto tiene una comprobación (ex.done) y se cumple tras probar el programa, se celebra una vez */
+  let reto = null;
+  PQ.setReto = function (ex) { reto = ex && ex.done ? { ex, ok: false, flag0: 0, run0: 0, at: 0, won: false } : null; };
+  PQ.retoState = () => reto;
+  function retoCheck() {
+    if (!reto || reto.won || !S.project) return;
+    let ok = false;
+    try { ok = !!reto.ex.done(S.project, RT); } catch (e) { ok = false; }
+    if (!ok) { reto.ok = false; return; }
+    if (!reto.ok) { reto.ok = true; reto.flag0 = RT.flagCount; reto.run0 = RT.runCount; reto.at = 0; return; }
+    const tried = RT.flagCount > reto.flag0 || (reto.ex.anyRun && RT.runCount > reto.run0);
+    if (!tried) return;
+    if (!reto.at) reto.at = Date.now();
+    if (RT.running() && Date.now() - reto.at < 7000) return;        // se espera a que termine (o un rato, si no termina)
+    reto.won = true;
+    const b = $('#banner'); if (b && !b.hidden) b.classList.add('done');
+    ui.celebrate(reto.ex.win || '¡Reto conseguido! ¡Qué bien lo has hecho!');
+  }
+  setInterval(retoCheck, 600);
   function confetti() {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!PQ.motionOK()) return;
     const cols = ['#FFBF00', '#4C97FF', '#9966FF', '#59D98E', '#FF6FA8', '#FF8A4D'];
     for (let i = 0; i < 60; i++) {
       const c = h('div', 'confetti');
@@ -8006,6 +8570,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
     $('#title').value = p.title || 'Mi proyecto';
     hideBanner();
     if (PQ.Tut) PQ.Tut.stop(true);
+    PQ.setReto(null); $('#banner').classList.remove('done');
     if (opts.banner) showBanner(opts.banner);
     updateLevelBtn();
     renderAll();
@@ -8253,6 +8818,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   /* ============================ bibliotecas ============================ */
   let sndPrev = null;
   function openLibrary(kind) {
+    PQ.need('lib');
     const body = h('div');
     const gridEl = h('div', 'grid'); body.appendChild(gridEl);
     let title = '', m;
@@ -8636,6 +9202,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
 
   /* ============================ cuentos y retos ============================ */
   function openStories(filter) {
+    PQ.need('stories');
     filter = filter || 'all';
     const body = h('div');
     const tabs = h('div', 'tabsm');
@@ -8739,12 +9306,14 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   }
 
   function openExample(id) {
+    PQ.need('stories');
     const ex = PQ.EX.find((x) => x.id === id);
     if (!ex) return;
     const p = ex.build();
     p.title = ex.title;
     p.noPad = !!ex.nopad;
     loadProject(p, { banner: ex.challenge });
+    PQ.setReto(ex);
     startHint(); if (!ex.voices) PQ.say(ex.challenge);
     PQ._log = []; PQ.voiceNatural = !!ex.natural; if (ex.pc) addReadIcon();
     if (ex.openSprite) { const s = p.sprites.find((x) => x.name === ex.openSprite); if (s) { S.target = s; renderAll(); } }
@@ -8942,7 +9511,7 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
       { label: 'Elegir un personaje', icon: ICO.list, onClick: () => openLibrary('sprite') },
       { label: 'Pintar uno nuevo', icon: ICO.brush, onClick: openPaintNewSprite },
       { label: 'Subir una imagen', icon: ICO.up, onClick: () => pickImage((c) => newSpriteFromCostume(c)) },
-      { label: 'Sorpresa', icon: ICO.dice, onClick: () => { const it = PQ.SPRITE_LIB[Math.floor(Math.random() * PQ.SPRITE_LIB.length)]; addSprite(PQ.makeSprite(it.id, S.project)); } }
+      { label: 'Sorpresa', icon: ICO.dice, onClick: () => { PQ.need('lib'); const it = PQ.SPRITE_LIB[Math.floor(Math.random() * PQ.SPRITE_LIB.length)]; addSprite(PQ.makeSprite(it.id, S.project)); } }
     ]));
     $('#btnAddBackdrop').addEventListener('click', (e) => popupMenu(e.currentTarget, [
       { label: 'Elegir un fondo', icon: ICO.list, onClick: () => openLibrary('backdrop') },

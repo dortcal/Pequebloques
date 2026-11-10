@@ -1,7 +1,8 @@
 /* PequeBloques — diseñado por David OZC
  * examples.js: cuentos interactivos y retos ya preparados
  */
-(function (g) {
+/* carga diferida: este módulo no se ejecuta al arrancar, sino la primera vez que hace falta (ver PQ.defer en util.js) */
+PQ.defer('examples', function (g) {
   'use strict';
   const PQ = g.PQ;
 
@@ -1220,4 +1221,4 @@
     }
 
   ];
-})(typeof window !== 'undefined' ? window : globalThis);
+});

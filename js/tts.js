@@ -34,11 +34,15 @@
   const hex8 = (n) => ('00000000' + n.toString(16)).slice(-8);
   const clean = (t) => String(t).replace(/[«»]/g, '').replace(/\s+/g, ' ').trim();
   function clipKey(voice, text) { const s = voice + '|' + clean(text); return hex8(h32(s, 0x811c9dc5)) + hex8(h32(s, 0x9747b28c)); }
+  /* Las voces grabadas viven en una carpeta externa (audio/). Si no está —por ejemplo, al publicar solo el HTML— o si
+   * sus archivos no se pueden reproducir, se deja de intentar y se usa siempre la voz del dispositivo (ver status()). */
+  let clipsBroken = false;
+  const audioPresent = () => !!(PQ.AUDIO && PQ.AUDIO.k) && !clipsBroken && typeof Audio !== 'undefined';
   const has = (k) => !!(PQ.AUDIO && PQ.AUDIO.k && PQ.AUDIO.k[k]);
   const voiceId = (voice) => (voice === 'PIPO' && cfg.pipo === 'm') ? 'PIPOM' : voice;
   /* Motor «automático»: si el dispositivo tiene una voz española NATURAL utilizable (Microsoft «Natural», Google, Siri, mejoradas…),
    * se usa esa para todo —suena mejor que las voces pregrabadas—; si no, las grabadas (Kokoro). «clips» fuerza las grabadas. */
-  const neuralReady = () => !!(PQ.AUDIO && PQ.AUDIO.k && (typeof Audio !== 'undefined') && (cfg.engine === 'clips' || (cfg.engine === 'auto' && !naturalDevice())));
+  const neuralReady = () => audioPresent() && (cfg.engine === 'clips' || (cfg.engine === 'auto' && !naturalDevice()));
 
   /* ¿Se puede decir este texto con la voz neuronal? Devuelve la lista de claves (con pausas) o null. */
   function plan(text, voice) {
@@ -84,9 +88,10 @@
       let moved = false;
       const nx = () => { if (moved || dead) return; moved = true; pool.delete(c.k); tm = setTimeout(step, (c.gap || 0) * 1000 / cfg.rate); };
       a.onended = nx;
-      a.onerror = () => { if (dead) return; if (played === 0) { dead = true; onFail(); } else nx(); };
+      a.onerror = () => { if (dead) return; if (played === 0) { dead = true; onFail('error'); } else nx(); };
       const p = a.play();
-      if (p && p.then) p.then(() => { played++; }, () => { if (dead) return; if (played === 0) { dead = true; onFail(); } else nx(); });
+      /* NotAllowedError = el navegador aún no deja sonar (falta un toque del usuario): no significa que falten los archivos */
+      if (p && p.then) p.then(() => { played++; }, (err) => { if (dead) return; if (played === 0) { dead = true; onFail(err && err.name === 'NotAllowedError' ? 'blocked' : 'error'); } else nx(); });
     };
     step();
   }
@@ -117,9 +122,36 @@
   /* ¿puede el dispositivo hablar en español? (si aún no ha cargado ninguna voz se intenta igualmente con lang = es-ES) */
   const deviceOK = () => !!g.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined' && (vlist.length > 0 || (vlist._all || 0) === 0);
 
+  /* ---------- qué voz se está usando de verdad, y aviso si no es la esperada ---------- */
+  function status() {
+    if (neuralReady()) return { engine: 'neural', why: 'ok', label: 'voces grabadas' };
+    if (!deviceOK()) return { engine: 'none', why: clipsBroken ? 'broken' : (PQ.AUDIO && PQ.AUDIO.k ? 'nodevice' : 'missing'), label: 'sin voz en este dispositivo' };
+    const nat = naturalDevice(), dv = nat || (vlist[0] && vlist[0].v);
+    const why = clipsBroken ? 'broken' : !(PQ.AUDIO && PQ.AUDIO.k) ? 'missing' : cfg.engine === 'device' ? 'chosen' : 'natural';
+    return { engine: 'device', why, natural: !!nat, voice: dv ? dv.name : '', label: 'voz de este dispositivo' + (dv ? ' (' + dv.name + ')' : '') };
+  }
+  const told = {};
+  function tell(key, msg) {
+    if (told[key]) return; told[key] = true;
+    const b = document.getElementById('btnVoice'); if (b) b.title = 'Voz: ' + status().label;
+    const go = () => { if (PQ.ui && PQ.ui.toast) PQ.ui.toast(msg, { ms: 6500 }); else setTimeout(go, 400); };
+    go();
+  }
+  /* se llama cada vez que se va a decir algo, con el motor que se usa realmente */
+  function used(engine) {
+    const st = status();
+    if (engine === 'none') tell('none', 'Este dispositivo no tiene voz en español. Los textos se ven en la pantalla.');
+    else if (engine === 'device' && st.why === 'missing') tell('missing', 'Aquí no están las voces grabadas. Uso la voz de este dispositivo.');
+    else if (engine === 'device' && st.why === 'broken') tell('broken', 'No puedo abrir las voces grabadas. Uso la voz de este dispositivo.');
+  }
+  function clipsFailed(reason) {
+    if (reason === 'blocked') return;                     // solo falta un toque del usuario
+    clipsBroken = true; pool.clear();
+  }
+
   /* ---------- API ---------- */
   PQ.tts = {
-    clipKey, plan, play, cfg, save,
+    clipKey, plan, play, cfg, save, status, used, clipsFailed,
     neuralReady, naturalDevice,
     usingNatural: () => !!naturalDevice(),
     deviceVoices: () => vlist.map((x) => x.v),
@@ -141,10 +173,11 @@
     const body = el('div', 'vset');
     const state = el('div', 'vstate'); body.appendChild(state);
     const paintState = () => {
-      const neu = PQ.AUDIO && PQ.AUDIO.k ? 'Voces neuronales: disponibles (' + (PQ.AUDIO.n || '') + ' frases)' : 'Voces neuronales: no se encuentra la carpeta «audio»';
+      const neu = clipsBroken ? 'Voces grabadas: no se pueden abrir los archivos de la carpeta «audio»' : PQ.AUDIO && PQ.AUDIO.k ? 'Voces grabadas: disponibles (' + (PQ.AUDIO.n || '') + ' frases)' : 'Voces grabadas: no están (falta la carpeta «audio»)';
       const dv = vlist[0];
       const dev = deviceOK() ? (dv ? 'Voz del dispositivo: ' + dv.name + ' (' + dv.lang + ')' + (dv.spain ? '' : ' · no es de España') : 'Voz del dispositivo: la predeterminada (es-ES)') : 'Voz del dispositivo: no hay ninguna voz en español';
-      state.innerHTML = '<div><b>Idioma:</b> español de España (es-ES)</div><div>' + neu + '</div><div>' + dev + '</div>';
+      state.innerHTML = '<div class="vnow"><b>Ahora se usa:</b> <span></span></div><div><b>Idioma:</b> español de España (es-ES)</div><div>' + neu + '</div><div>' + dev + '</div>';
+      state.querySelector('.vnow span').textContent = status().label;
     };
     paintState();
     const row = (label, ctl) => { const r = el('div', 'vrow'); r.appendChild(el('label', '', label)); r.appendChild(ctl); body.appendChild(r); return r; };
@@ -167,7 +200,7 @@
     const ENG = [['auto', 'Automática (recomendada)'], ['clips', 'Grabadas'], ['device', 'Solo la del dispositivo']];
     ENG.forEach(([v, t]) => {
       const b = el('button', 'btn ' + (cfg.engine === v ? 'ok' : ''), t); b.type = 'button'; b.setAttribute('aria-pressed', String(cfg.engine === v));
-      b.onclick = () => { cfg.engine = v; save(); [...eng.children].forEach((c, k) => { const on = ENG[k][0] === v; c.classList.toggle('ok', on); c.setAttribute('aria-pressed', String(on)); }); };
+      b.onclick = () => { cfg.engine = v; save(); [...eng.children].forEach((c, k) => { const on = ENG[k][0] === v; c.classList.toggle('ok', on); c.setAttribute('aria-pressed', String(on)); }); paintState(); };
       eng.appendChild(b);
     });
     row('Motor de voz', eng);

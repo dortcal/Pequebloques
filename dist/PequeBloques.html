@@ -335,7 +335,7 @@ kbd{background:#EEF1FB;border-radius:6px;padding:1px 6px;border:1px solid #cfd6e
 .progress{display:flex;gap:4px;margin:2px 0 4px}
 .progress i{width:18px;height:7px;border-radius:4px;background:#E1E8F6}
 .progress i.on{background:#8B5CF6}.progress i.ok{background:#3FBF67}
-#toasts{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:5000;align-items:center;pointer-events:none;width:min(560px,94vw)}
+#toasts{position:fixed;left:50%;bottom:46px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:5000;align-items:center;pointer-events:none;width:min(560px,94vw)}
 .toast{background:#2b2350;color:#fff;border-radius:16px;padding:12px 18px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:auto;display:flex;gap:12px;align-items:center;animation:pop .25s;font-size:15px;line-height:1.3}
 .toast.good{background:#1d8059}
 .toast .btn{min-height:36px;padding:6px 12px;font-size:14px}
@@ -2535,9 +2535,23 @@ body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust
   PQ.SOUND_CATS = ['Todos', 'Animales', 'Efectos', 'Música', 'Naturaleza', 'Transporte', 'Casa'];
   PQ.SOUND_LIB = SOUNDS.map((s) => ({ name: s[0], make: s[1], cat: s[2] || CAT[s[0]] || 'Efectos' }));
 
+  /* iguala el volumen percibido (RMS ≈ −16 dBFS) y limita los picos con suavidad:
+     así «Reloj» y «Alarma» suenan a un nivel parecido */
+  function nivelar(a) {
+    let ss = 0; for (let i = 0; i < a.length; i++) ss += a[i] * a[i];
+    const rms = Math.sqrt(ss / (a.length || 1));
+    if (rms < 1e-6) return a;
+    const g = 0.158 / rms, K = 0.7;
+    for (let i = 0; i < a.length; i++) {
+      const x = a[i] * g, ax = Math.abs(x);
+      a[i] = ax <= K ? x : Math.sign(x) * (K + 0.25 * Math.tanh((ax - K) / 0.25));
+    }
+    return a;
+  }
+
   PQ.makeSound = function (libName) {
     const s = SOUNDS.find((x) => x[0] === libName) || SOUNDS[0];
-    const samples = s[1]();
+    const samples = nivelar(s[1]());
     return { name: s[0], fmt: 'wav', bytes: PQ.makeWav(samples, RATE), rate: RATE, count: samples.length };
   };
 
@@ -8556,15 +8570,22 @@ PQ.defer('tutorials', function (g) {
   }
   PQ.markDirty = markDirty;
   const AUTOKEY = 'pequebloques.auto';
+  let autoWarned = false;
+  function autoFail() {
+    if (autoWarned) return;
+    autoWarned = true;
+    try { ui.toast('No he podido hacer la copia automática (el proyecto es grande o el navegador no deja guardar). Usa «Guardar» para no perder tu trabajo.'); } catch (e) { /* nada */ }
+  }
   function autosave() {
     try {
       if (!S.project) return;
       const bytes = PQ.exportSb3(S.project);
       const data = PQ.b64(bytes);
-      if (data.length > 4200000) return;
+      if (data.length > 4200000) { autoFail(); return; }
       localStorage.setItem(AUTOKEY, JSON.stringify({ title: S.project.title, ts: Date.now(), data }));
+      autoWarned = false;
       $('#btnLast').hidden = false;
-    } catch (e) { /* almacenamiento lleno o bloqueado */ }
+    } catch (e) { autoFail(); /* almacenamiento lleno o bloqueado */ }
   }
   function readAuto() {
     try { const r = localStorage.getItem(AUTOKEY); return r ? JSON.parse(r) : null; } catch (e) { return null; }

@@ -243,15 +243,22 @@
   }
   PQ.markDirty = markDirty;
   const AUTOKEY = 'pequebloques.auto';
+  let autoWarned = false;
+  function autoFail() {
+    if (autoWarned) return;
+    autoWarned = true;
+    try { ui.toast('No he podido hacer la copia automática (el proyecto es grande o el navegador no deja guardar). Usa «Guardar» para no perder tu trabajo.'); } catch (e) { /* nada */ }
+  }
   function autosave() {
     try {
       if (!S.project) return;
       const bytes = PQ.exportSb3(S.project);
       const data = PQ.b64(bytes);
-      if (data.length > 4200000) return;
+      if (data.length > 4200000) { autoFail(); return; }
       localStorage.setItem(AUTOKEY, JSON.stringify({ title: S.project.title, ts: Date.now(), data }));
+      autoWarned = false;
       $('#btnLast').hidden = false;
-    } catch (e) { /* almacenamiento lleno o bloqueado */ }
+    } catch (e) { autoFail(); /* almacenamiento lleno o bloqueado */ }
   }
   function readAuto() {
     try { const r = localStorage.getItem(AUTOKEY); return r ? JSON.parse(r) : null; } catch (e) { return null; }

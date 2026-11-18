@@ -754,9 +754,23 @@
   PQ.SOUND_CATS = ['Todos', 'Animales', 'Efectos', 'Música', 'Naturaleza', 'Transporte', 'Casa'];
   PQ.SOUND_LIB = SOUNDS.map((s) => ({ name: s[0], make: s[1], cat: s[2] || CAT[s[0]] || 'Efectos' }));
 
+  /* iguala el volumen percibido (RMS ≈ −16 dBFS) y limita los picos con suavidad:
+     así «Reloj» y «Alarma» suenan a un nivel parecido */
+  function nivelar(a) {
+    let ss = 0; for (let i = 0; i < a.length; i++) ss += a[i] * a[i];
+    const rms = Math.sqrt(ss / (a.length || 1));
+    if (rms < 1e-6) return a;
+    const g = 0.158 / rms, K = 0.7;
+    for (let i = 0; i < a.length; i++) {
+      const x = a[i] * g, ax = Math.abs(x);
+      a[i] = ax <= K ? x : Math.sign(x) * (K + 0.25 * Math.tanh((ax - K) / 0.25));
+    }
+    return a;
+  }
+
   PQ.makeSound = function (libName) {
     const s = SOUNDS.find((x) => x[0] === libName) || SOUNDS[0];
-    const samples = s[1]();
+    const samples = nivelar(s[1]());
     return { name: s[0], fmt: 'wav', bytes: PQ.makeWav(samples, RATE), rate: RATE, count: samples.length };
   };
 

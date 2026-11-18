@@ -59,6 +59,7 @@
     back.addEventListener('pointerdown', (e) => { if (e.target === back && !o.sticky) api.close(); });
     $('#modalroot').appendChild(back);
     modalStack.push(api);
+    if (PQ.uiSound) PQ.uiSound('open');
     setTimeout(() => {
       const f = o.focus ? $(o.focus, m) : (m.querySelector('input.big') || m.querySelector('.mf .btn.pri,.mf .btn.ok') || cl);
       if (f && f.focus) f.focus();
@@ -138,6 +139,7 @@
     let box = $('#pipo');
     if (!box) { box = h('div', ''); box.id = 'pipo'; box.setAttribute('role', 'alert'); document.body.appendChild(box); }
     box.className = o.cls || '';
+    if (o.cls === 'warn' && PQ.uiSound) PQ.uiSound('oops');
     box.innerHTML = PQ.PIPO + '<div class="pt"><p></p><div class="pb"></div></div>';
     $('p', box).textContent = msg;
     const close = () => { clearTimeout(pipoTimer); box.classList.add('out'); setTimeout(() => { if (box.classList.contains('out')) box.remove(); }, 180); if (o.onClose) o.onClose(); };
@@ -177,6 +179,9 @@
     };
     try {
       if (kind === 'snap') { tone(520, 0, 0.07, 0.25, 'triangle'); tone(780, 0.035, 0.08, 0.2, 'triangle'); }
+      else if (kind === 'tap') { tone(660, 0, 0.05, 0.1, 'sine'); }
+      else if (kind === 'open') { tone(440, 0, 0.07, 0.13, 'triangle'); tone(660, 0.05, 0.09, 0.12, 'triangle'); }
+      else if (kind === 'oops') { tone(392, 0, 0.12, 0.16, 'triangle'); tone(311, 0.1, 0.18, 0.14, 'triangle'); }
       else if (kind === 'win') { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.28, 0.32, 'triangle')); tone(1319, 0.5, 0.5, 0.26, 'sine'); }
     } catch (e) { /* sin audio */ }
   };
@@ -1188,6 +1193,11 @@
 
   /* ============================ conexión de botones ============================ */
   function wire() {
+    /* sonido suave al pulsar botones de la interfaz (no bloques ni escenario) */
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest && e.target.closest('button');
+      if (b && !b.disabled && !b.closest('.block,#stagewrap') && PQ.uiSound) PQ.uiSound('tap');
+    }, true);
     $('#btnStories').addEventListener('click', () => openStories());
     $('#btnNew').addEventListener('click', newProject);
     $('#btnOpen').addEventListener('click', () => { $('#fileOpen').value = ''; $('#fileOpen').click(); });
